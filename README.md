@@ -24,7 +24,7 @@ Built for **Hacktoberfest Hack Day x AI for Vizag** (Nov 1, 2026).
   (`OPEN_RECHECK_MODEL`): it has its own quota, and a second opinion on the edited photo is a better check than the same
   model grading its own edits.
 - **Report language.** The exposure report can be written in English, Telugu or Hindi (a dropdown on the page, `/lang` in the
-  bot). Only the prose changes: clue labels and the edits stay the same.
+  bot). Only the prose changes: clue labels and the edits stay the same. The Telugu and Hindi reports have been tested and work.
 - **A Telegram bot** that takes a photo and sends back the cleaned copy (see below).
 - **A rendered Indian benchmark** ([bench/india](bench/india), [bench/indiabench.py](bench/indiabench.py)), a new look,
   and a new logo.
@@ -40,8 +40,60 @@ Built for **Hacktoberfest Hack Day x AI for Vizag** (Nov 1, 2026).
 4. **Re-attack:** the edited photo is attacked again, and anything still exposed goes through another round, up to four
    attacks. The download is a PNG with no EXIF or GPS data.
 
+What happens to one photo:
+
+```mermaid
+flowchart TD
+  A["Upload a photo and, optionally, a caption"] --> B["Decode: upright, at most 2048 px, read the EXIF"]
+  B --> C1["1. Attack<br/>the model returns an exposure graph"]
+  B --> C2["Text check<br/>transcribe the photo, count IDs with regular expressions"]
+  C1 --> D{"Report rates details lower<br/>than the regex counts?"}
+  C2 --> D
+  D -->|"yes"| E["One retry, told the counts and never the values"]
+  D -->|"no"| F
+  E --> F["2. Plan<br/>cheapest clues to remove, a minimum-cost hitting set"]
+  F --> G["3. Edit<br/>pixelate or inpaint inside each snapped box"]
+  G --> H["4. Re-attack the edited photo"]
+  H --> I{"Anything still above the limits,<br/>and fewer than 4 attacks so far?"}
+  I -->|"yes"| F
+  I -->|"no"| J["Done: PNG with no EXIF or GPS,<br/>what was hidden, exposure before and after"]
+```
+
 A deterministic text check runs beside the first attack. It counts emails, phone numbers, IDs and addresses with
 regular expressions, so text written in a photo cannot talk the model out of a report.
+
+### Architecture
+
+```mermaid
+flowchart LR
+  subgraph clients["Clients"]
+    W["Web page<br/>static/index.html"]
+    T["Telegram bot<br/>app/telegram_bot.py<br/>(separate process)"]
+  end
+  subgraph server["FastAPI server, Docker on Render"]
+    API["API<br/>app/main.py<br/>/api/run, /api/sample, /api/samples, /api/status"]
+    AG["Agent loop<br/>app/agent.py"]
+    MD["Model calls, pacing, checks<br/>app/meta.py"]
+    PL["Image pipeline<br/>app/pipeline.py"]
+    RG["Region packs<br/>app/regions"]
+    SM[("Recorded samples<br/>static/samples")]
+  end
+  GM[("Vision model<br/>Gemini 3 Flash or Gemma 4<br/>Google AI Studio")]
+  TG[("Telegram Bot API")]
+
+  W -->|"photos, caption, language, access code"| API
+  API --> AG
+  T --> AG
+  T <-->|"messages, photos"| TG
+  AG --> MD
+  AG --> PL
+  MD --> RG
+  MD -->|"photo and prompt"| GM
+  GM -->|"exposure graph as JSON"| MD
+  API -.->|"replay, no model call"| SM
+```
+
+More diagrams (a live check step by step, the exposure graph, region packs, the benchmark and deployment) are in [docs/architecture.md](docs/architecture.md).
 
 ## Which model
 
@@ -130,7 +182,7 @@ the safe default for a public page. This has not been test-deployed yet.
 - [The Indian benchmark](docs/benchmark.md): method, commands and results (some tables are waiting for runs)
 - [Deploy and configure](docs/deploy.md): Render steps, every setting, and the Telegram bot
 - [Adding a country](docs/adding-a-country.md): a region pack is one file
-- [Demo script](docs/demo-script.md) and [submission text](docs/submission.md), with placeholders for the results
+- [Demo script](docs/demo-script.md) and [write-up text](docs/write-up.md), with placeholders for the results
 
 ## Layout
 

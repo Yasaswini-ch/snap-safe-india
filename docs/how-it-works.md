@@ -68,8 +68,8 @@ editing, not proof. In our runs it was right when we read the cleaned photo back
 ## Region packs and language
 
 India is one **region pack**; a small US pack ships too. A pack adds ID patterns, address formats and prompt notes
-without touching the rest. The report's prose can be English, Telugu or Hindi; clue labels stay English because edits
-and matching use them.
+without touching the rest. The report's prose can be English, Telugu or Hindi (tested, and it works); clue labels stay English because edits
+and matching use them. The diagrams are in [architecture.md](architecture.md).
 
 ## What the output is
 
