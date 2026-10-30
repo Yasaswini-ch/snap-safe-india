@@ -40,8 +40,8 @@ The boxes decide how much of the photo is edited and whether a secret survives, 
 
 | Setting | Effect | Measured |
 |---|---|---|
-| `BOX_SNAP=1` (default) | Shrinks each box to the ink inside it | On the recorded ID card, edited area 22.8% to 16.4%; no change on the parcel label (43%), whose whole label is text |
-| `BOX_FOCUS=detail` (default) | Asks for a box around the line or number, not the object | _To add: edited share and readable secrets, object wording against detail wording, from the Gemma test_ |
+| `BOX_SNAP=1` (default) | Shrinks each box to the ink inside it | Recorded Gemini boxes, first round of edits, read back with Gemma. ID card: edited 22.8% to 16.4%. Courier label: 43.2% to 43.1%, because the whole label is text. Telugu sign: 20.2% to 18.6%. Snapping left nothing new readable in any of the three: the ID card and label came out clean both ways, and the shop name on the sign stayed readable both ways (the full run hides it in a later round). Three scenes, one run each |
+| `BOX_FOCUS=detail` (off by default) | Asks for a box around the line or number, not the object | Gemma, first round of edits only, one run per scene. Courier label: 20.8% edited and nothing readable with the object wording, 9.7% edited but the surname "Reddy" readable with the detail wording. ID card: 6.8% against 8.5%, and the name and date of birth stayed readable either way. Telugu sign: 17.3% against 18.7%, nothing readable. Mixed, so it stays off |
 
 ## Results to add
 

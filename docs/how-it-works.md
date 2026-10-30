@@ -36,8 +36,9 @@ Boxes from a model are rarely tight, so two steps tighten them:
 
 - **Snapping** (`BOX_SNAP`, on by default) shrinks a box to the ink inside it: text, a barcode, a plate's characters. It
   ignores a card's border, and takes the nearest ink if the model's box missed.
-- **Asking for the detail** (`BOX_FOCUS=detail`, the default) tells the model to box the specific line, number or mark,
-  not the whole card, label or sign. `BOX_FOCUS=object` restores the original wording.
+- **Asking for the detail** (`BOX_FOCUS=detail`, off by default) tells the model to box the specific line, number or mark,
+  not the whole card, label or sign. In one Gemma test it halved the edit on a courier label but left a surname readable, so
+  the original wording (`BOX_FOCUS=object`) stays the default. A privacy tool should over-edit before it misses.
 
 Small boxes (under 1% of the frame) are first widened to three times their size, because a weaker model's box can sit a
 box-height off. With snapping, that wider window is searched for ink near the model's own box.

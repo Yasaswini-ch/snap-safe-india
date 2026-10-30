@@ -37,7 +37,7 @@ Environment tab; Render redeploys.
 | `LIVE_CODE` | When set, live runs need this code. The samples never do. | empty (open) |
 | `RUNS_PER_HOUR`, `RUNS_PER_DAY` | Live runs allowed per visitor and per site | 2 and 6 in `render.yaml` |
 | `REGION` | Country packs to load: `in`, `us`, comma separated, or `global` for none | `in` |
-| `BOX_SNAP`, `BOX_FOCUS` | Box tightening, see [how-it-works.md](how-it-works.md) | on, `detail` |
+| `BOX_SNAP`, `BOX_FOCUS` | Box tightening, see [how-it-works.md](how-it-works.md) | on, `object` |
 | `TELEGRAM_BOT_TOKEN`, `BOT_RUNS_PER_HOUR` | For the Telegram bot | none, 3 |
 
 ## Quotas

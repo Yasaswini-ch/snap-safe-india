@@ -133,8 +133,9 @@ Rules:
 - If nothing is exposed, return empty lists."""
 
 # Without SAM outlines the edit is the box itself, so ask for a box around the detail (a line, a number), not the whole
-# card or label it sits on. BOX_FOCUS=object restores the original wording.
-BOX_FOCUS = os.environ.get("BOX_FOCUS", "detail")
+# card or label it sits on. Off by default: in one Gemma test it halved the edit on a courier label but left a surname
+# readable. BOX_FOCUS=detail turns it on.
+BOX_FOCUS = os.environ.get("BOX_FOCUS", "object")
 OBJECT_BOX = "tight around the whole object\n     that carries the detail"
 DETAIL_BOX = ("tight around the detail itself:\n     the specific line of text, number or mark that gives it away, "
               "not the whole card, label or sign it is on")
