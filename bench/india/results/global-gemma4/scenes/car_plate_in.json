@@ -1,0 +1,27 @@
+{
+ "id": "car_plate_in",
+ "kind": "leak",
+ "secrets": [
+  "AP 31 AB 1234"
+ ],
+ "expect": [
+  "vehicle plate"
+ ],
+ "verified": [
+  "AP 31 AB 1234"
+ ],
+ "seconds": 62.6,
+ "exposure_before": {
+  "financial_or_id": 4
+ },
+ "exposure_after": {},
+ "safe": true,
+ "attacks": 2,
+ "textcheck_found": [],
+ "edits": [
+  "pixelate:license plate:box"
+ ],
+ "values_printed": [],
+ "survived": [],
+ "changed": 0.0152
+}

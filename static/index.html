@@ -1,0 +1,1514 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Snap Safe India</title>
+<meta name="description" content="A photo privacy agent for India: it finds what a stranger could use in your photo (Aadhaar, number plates, UPI IDs, addresses), hides only that, and checks again.">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/favicon.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#070412" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#070412" media="(prefers-color-scheme: dark)">
+<style>
+  /* One dark theme, like the React Bits backgrounds it uses: near-black violet, an Aurora glow, violet and mint accents.
+     --saffron is now the second accent (mint); the name is kept so the rules that use it still work. */
+  :root { color-scheme: dark; --bg: #070412; --fg: #ece8ff; --muted: #a8a2c8; --card: #110b26; --line: #2c2350; --accent: #9b82ff; --saffron: #5eead4; --warn: #fb923c; --ok: #7cff67;
+          --on-ok: #04210f; --on-level: #111; --l1: #94a3b8; --l2: #facc15; --l3: #fb923c; --l4: #f87171; --scan-rgb: 155, 130, 255; --pixel: #070412;
+          --saf-rgb: 94, 234, 212; --ok-rgb: 124, 255, 103; --dots: rgba(190, 175, 255, .10); }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 16px; }
+  h1, h2, h3 { margin: 0; line-height: 1.2; }
+  h2 { font-size: 1.35rem; margin-bottom: 4px; }
+  a { color: var(--accent); }
+  p { margin: 0; }
+  .muted { color: var(--muted); }
+  .small { font-size: 14px; }
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+  .l1 { --c: var(--l1); } .l2 { --c: var(--l2); } .l3 { --c: var(--l3); } .l4 { --c: var(--l4); }
+  section { padding: 40px 0 8px; }
+  .lede { margin-top: 4px; color: var(--muted); max-width: 64ch; }
+  button, .btn { font: inherit; padding: 11px 18px; border-radius: 10px; border: 1px solid var(--line); background: var(--card); color: var(--fg);
+                 cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: transform .15s, border-color .15s; }
+  button:hover, .btn:hover { border-color: var(--accent); }
+  button:active, .btn:active { transform: scale(.98); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+  button:disabled { opacity: .5; cursor: wait; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* Hero: Scanner background, Decrypted Text headline, before/after compare, the loop, Count Up proof */
+  .hero { position: relative; overflow: hidden; border-bottom: 1px solid var(--line); }
+  .hero canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none;
+                 -webkit-mask-image: radial-gradient(ellipse 70% 80% at 65% 35%, #000 20%, transparent 75%);
+                 mask-image: radial-gradient(ellipse 70% 80% at 65% 35%, #000 20%, transparent 75%); }
+  .hero .wrap { position: relative; padding-top: 40px; padding-bottom: 32px; }
+  .hero-grid { display: grid; gap: 28px; align-items: center; }
+  @media (min-width: 900px) { .hero-grid { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); } }
+  .eyebrow { font: 600 12px/1.4 ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+  .hero h1 { margin-top: 10px; font-size: clamp(2rem, 4.4vw, 3.2rem); letter-spacing: -.02em; }
+  .hero .lede { margin-top: 14px; font-size: 1.08rem; }
+  .cta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+  .pill { display: inline-block; margin-top: 16px; padding: 4px 12px; border: 1px solid var(--ok); border-radius: 999px; color: var(--ok); font-size: 14px; font-weight: 600; }
+  .compare { position: relative; aspect-ratio: 3 / 2; border-radius: 14px; overflow: hidden; border: 1px solid var(--line); background: var(--card); --pos: 50%; }
+  .compare img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .compare .before { clip-path: inset(0 calc(100% - var(--pos)) 0 0); }
+  .compare .handle { position: absolute; top: 0; bottom: 0; left: var(--pos); width: 2px; margin-left: -1px; background: #fff; box-shadow: 0 0 14px 2px rgba(var(--scan-rgb), .9); }
+  .compare .handle::after { content: "⟷"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 34px; height: 34px; border-radius: 50%;
+                            display: grid; place-items: center; background: #fff; color: #111; font-size: 16px; }
+  .compare .lbl { position: absolute; bottom: 10px; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; color: #fff; background: rgba(0, 0, 0, .65); }
+  .compare .lbl.l { left: 10px; } .compare .lbl.r { right: 10px; }
+  .compare input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: ew-resize; }
+  .loop { list-style: none; margin: 30px 0 0; padding: 0; display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); counter-reset: step; }
+  .loop li { position: relative; padding: 14px 14px 14px 52px; background: color-mix(in srgb, var(--card) 85%, transparent); border: 1px solid var(--line); border-radius: 12px; counter-increment: step; }
+  .loop li::before { content: counter(step); position: absolute; left: 14px; top: 14px; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center;
+                     background: var(--accent); color: #fff; font-weight: 700; font-size: 14px; }
+  .loop b { display: block; }
+  .loop code { font: 12px ui-monospace, Consolas, monospace; color: var(--accent); }
+  .proof { display: grid; gap: 10px; margin-top: 12px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+  .proof div { padding: 12px 14px; }
+  .proof strong { display: block; font-size: 2rem; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+  .proof a { font-size: 14px; }
+
+  /* Samples: Spotlight Card */
+  .samples { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(220px, 40vw), 1fr)); gap: 12px; margin-top: 16px; }
+  .samples button { padding: 0; overflow: hidden; text-align: left; display: block; border-radius: 12px; }
+  .samples .thumbs { display: grid; grid-template-columns: 2fr 1fr; grid-template-rows: 1fr 1fr; gap: 2px; aspect-ratio: 3 / 2; }
+  .samples img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .samples .thumbs img:first-child:not(:only-child) { grid-row: span 2; }
+  .samples .thumbs img:only-child { grid-area: 1 / 1 / 3 / 3; }
+  .samples .meta { display: block; padding: 8px 10px 10px; }
+  .samples .meta b { display: block; font-size: 15px; }
+  .samples .meta small { color: var(--muted); }
+  .spot { position: relative; }
+  .spot::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .25s; border-radius: inherit;
+                 background: radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%), rgba(var(--scan-rgb), .22), transparent 65%); }
+  .spot:hover::after, .spot:focus-within::after { opacity: 1; }
+
+  /* Upload */
+  .own { display: grid; gap: 12px; margin-top: 16px; }
+  .own-cols, .own-main, .own-side { display: grid; gap: 12px; align-content: start; }
+  .preview-tag { margin: 6px 0 -2px; font: 600 12px ui-monospace, Consolas, monospace; letter-spacing: .12em;
+                 text-transform: uppercase; color: var(--muted); }
+  #live-off[hidden] ~ .preview-tag { display: none; }
+  .keep .gets { margin: 8px 0 0; padding-left: 18px; list-style: disc; color: var(--muted); font-size: 14px; }
+  .gets li + li { margin-top: 4px; }
+  .own-side .keep { margin-top: 0; }
+  @media (min-width: 900px) {
+    .own-cols { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); align-items: start; }
+    .opens { align-items: center; }
+    .opens .body { display: flex; gap: 24px; align-items: center; justify-content: space-between; }
+    .opens .cta { flex: none; margin-top: 0; }
+  }
+  .drop { display: grid; gap: 4px; place-items: center; text-align: center; padding: 30px 16px; border: 2px dashed var(--line); border-radius: 14px; background: var(--card);
+          cursor: pointer; transition: border-color .2s, background .2s; }
+  .drop:hover, .drop.over { border-color: var(--accent); }
+  .drop.over { background: color-mix(in srgb, var(--accent) 8%, var(--card)); }
+  .drop:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .drop strong { font-size: 1.05rem; }
+  .switch { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--card); cursor: pointer; }
+  .switch input { position: absolute; opacity: 0; }
+  .switch .track { flex: none; width: 40px; height: 24px; margin-top: 2px; border-radius: 999px; background: var(--line); position: relative; transition: background .2s; }
+  .switch .track::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: transform .2s; }
+  .switch input:checked + .track { background: var(--ok); }
+  .switch input:checked + .track::after { transform: translateX(16px); }
+  .switch input:focus-visible + .track { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .switch input:disabled + .track { opacity: .6; }
+  .own.locked .drop, .own.locked .switch, .own.locked #shared, .own.locked .capin, .own.locked .import { opacity: .55; filter: grayscale(1); pointer-events: none; }
+  .code { display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; padding: 12px 14px;
+          border: 1px solid var(--accent); border-radius: 12px; background: var(--card); }
+  .code input { flex: 0 1 200px; font: 600 16px ui-monospace, Consolas, monospace; padding: 9px 12px; border-radius: 8px;
+                border: 1px solid var(--line); background: var(--bg); color: var(--fg); letter-spacing: .08em; }
+  details.note summary { cursor: pointer; color: var(--muted); font-size: 14px; }
+  details.note p { margin-top: 6px; }
+  .notice { padding: 10px 12px; border-radius: 10px; background: var(--card); border: 1px solid var(--line); }
+  .notice.warn { border-color: var(--warn); }
+  .opens { display: flex; gap: 14px; align-items: flex-start; padding: 16px 18px; border-radius: 14px;
+           border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--line)); background: color-mix(in srgb, var(--accent) 7%, var(--card)); }
+  .opens .lock { flex: none; width: 26px; height: 26px; margin-top: 2px; color: var(--accent); }
+  .opens p { margin: 4px 0 0; }
+  .opens .cta { margin-top: 12px; }
+  .soon { font-weight: 400; color: var(--muted); }
+
+  /* Run view: Stepper, sticky photo, Pixel Transition, report */
+  #view { scroll-margin-top: 12px; }
+  .steps { list-style: none; margin: 16px 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .steps li { position: relative; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--card); transition: border-color .3s, background .3s; }
+  .steps b { display: block; font-size: 14px; }
+  .steps span { display: block; min-height: 1.3em; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .steps li::after { content: ""; position: absolute; left: 12px; right: 12px; bottom: 6px; height: 2px; border-radius: 2px; background: var(--accent); transform: scaleX(0);
+                     transform-origin: left; transition: transform .4s; }
+  .steps li.active { border-color: var(--accent); }
+  .steps li.active::after { transform: scaleX(.5); animation: crawl 1.4s ease-in-out infinite alternate; }
+  .steps li.done { border-color: color-mix(in srgb, var(--ok) 60%, var(--line)); }
+  .steps li.done::after { transform: scaleX(1); background: var(--ok); }
+  .steps li.done b::after { content: " ✓"; color: var(--ok); }
+  .steps li.warn { border-color: var(--warn); }
+  .steps li.warn::after { transform: scaleX(1); background: var(--warn); }
+  @keyframes crawl { from { transform: scaleX(.15); } to { transform: scaleX(.85); } }
+  @media (max-width: 520px) { .steps { grid-template-columns: repeat(2, 1fr); } }
+  #status { margin-top: 10px; }
+  .split { position: relative; display: grid; gap: 20px; margin-top: 14px; }
+  @media (min-width: 900px) { .split { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); align-items: start; } .split > .left { position: sticky; top: 12px; } }
+  .tabs { display: flex; gap: 8px; margin-bottom: 8px; }
+  .tabs button { padding: 7px 14px; }
+  .tabs button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+  .stages { display: grid; gap: 8px; }
+  .stages.many { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
+  .stage { position: relative; line-height: 0; }
+  .stage img { width: 100%; border-radius: 10px; }
+  .badge, .alone { position: absolute; z-index: 4; padding: 4px 10px; border-radius: 999px; line-height: 1.5; font-size: 13px; font-weight: 600; color: #fff; background: rgba(0, 0, 0, .7); }
+  .badge { top: 10px; right: 10px; }
+  .alone { left: 8px; bottom: 8px; }
+  .many .badge, .many .alone { padding: 2px 8px; font-size: 11px; }
+  .many .badge { top: 6px; right: 6px; }
+  .badge.ok { background: var(--ok); color: var(--on-ok); }
+  .box { position: absolute; border: 2px solid var(--c); border-radius: 4px; animation: pop .35s ease-out backwards;
+         transition: opacity .2s, box-shadow .2s, left .5s ease, top .5s ease, width .5s ease, height .5s ease; }
+  .box.fixed { --c: var(--ok); }
+  .box span { position: absolute; top: -2px; left: -2px; padding: 0 6px; line-height: 1.5; font-size: 12px; font-weight: 700; color: var(--on-level); background: var(--c); border-radius: 4px 0 4px 0; }
+  .box.fixed span { color: var(--on-ok); }
+  .box.fixed span::after { content: " ✓"; }
+  .box.off, .stages.after .box:not(.hot) { display: none; }
+  .box.hot { z-index: 2; box-shadow: 0 0 0 2px rgba(255, 255, 255, .9), 0 0 18px 4px var(--c); }
+  .stages.dim .box:not(.hot) { opacity: .3; }
+  @keyframes pop { from { transform: scale(1.4); opacity: 0; } }
+  .scan { position: absolute; z-index: 3; inset: 0; overflow: hidden; border-radius: 10px; pointer-events: none; background: rgba(var(--scan-rgb), .08); }
+  .scan::before { content: ""; position: absolute; left: 0; right: 0; top: -35%; height: 35%; background: linear-gradient(transparent, rgba(var(--scan-rgb), .45));
+                  border-bottom: 2px solid rgb(var(--scan-rgb)); animation: sweep 2s linear infinite; }
+  .scan span { position: absolute; left: 10px; bottom: 10px; padding: 4px 10px; border-radius: 999px; line-height: 1.5; font-size: 13px; font-weight: 600; color: #fff; background: rgba(0, 0, 0, .7); }
+  @keyframes sweep { to { top: 100%; } }
+  .pixels { position: absolute; inset: 0; z-index: 5; display: grid; border-radius: 10px; overflow: hidden; pointer-events: none; }
+  .pixels i { background: var(--pixel); opacity: 0; transition: opacity .12s; }
+  .pixels.in i { opacity: 1; }
+  .links { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; z-index: 6; }
+  .links path { fill: none; stroke: var(--c); stroke-width: 2; stroke-dasharray: 1; animation: draw .45s ease-out backwards; }
+  .links circle { fill: var(--c); }
+  @keyframes draw { from { stroke-dashoffset: 1; } }
+  .downloads { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .keep { margin-top: 14px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--card); }
+  .keep ul { list-style: none; margin: 8px 0 0; padding: 0; }
+  .keep label { display: flex; gap: 8px; align-items: baseline; padding: 3px 0; cursor: pointer; }
+  .keep .back { margin: 8px 0 0; color: var(--warn); }
+  .cap-text { margin: 8px 0 4px; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .caps { list-style: none; margin: 0; padding: 0; }
+  .caps li + li { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); }
+  .import { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
+  .keep del { color: var(--warn); }
+  .capin { display: grid; gap: 6px; }
+  .capin textarea { font: inherit; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--card); color: var(--fg); resize: vertical; }
+
+  .dossier { position: relative; padding: 16px; background: var(--card); border: 1px solid var(--line); border-top: 4px solid var(--fg); border-radius: 12px; }
+  .dossier header { padding-right: 110px; }
+  .dossier header small { display: block; font: 600 12px/1.4 ui-monospace, Consolas, monospace; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  .dossier header strong { font-size: 1.15rem; }
+  .dossier .summary { margin: 8px 0 0; font-style: italic; }
+  .dossier .summary:empty { display: none; }
+  .together { margin: 8px 0 0; padding: 8px 10px; border-left: 3px solid var(--accent); background: color-mix(in srgb, var(--accent) 8%, transparent); }
+  .rows { list-style: none; padding: 0; margin: 10px 0 0; }
+  .row { padding: 10px; margin: 0 -10px; border-radius: 8px; animation: rise .35s ease-out backwards; transition: background .2s; }
+  .row + .row { border-top: 1px solid var(--line); }
+  .row.hot { background: color-mix(in srgb, var(--accent) 10%, transparent); }
+  .row.wait { color: var(--muted); }
+  .row.wait::after { content: ""; display: block; height: .95em; width: 60%; margin-top: 8px; border-radius: 2px; background: linear-gradient(90deg, var(--line), var(--card), var(--line));
+                     background-size: 200% 100%; animation: shimmer 1.4s linear infinite; }
+  @keyframes shimmer { to { background-position: -200% 0; } }
+  @keyframes rise { from { opacity: 0; transform: translateY(6px); } }
+  .cat { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .tag { padding: 0 8px; border-radius: 999px; font-size: 12px; font-weight: 700; line-height: 1.6; color: var(--on-level); background: var(--c); }
+  .row.blocked .cat .tag { text-decoration: line-through; opacity: .55; }
+  .now { margin-left: auto; font-size: 13px; font-weight: 700; }
+  .now.ok { color: var(--ok); } .now.warn { color: var(--warn); }
+  .redact { margin: 6px 0 2px; line-height: 1; min-height: .95em; }
+  .redact i { display: inline-block; width: var(--w); height: .95em; margin-right: .5ch; background: var(--fg); border-radius: 2px; vertical-align: middle;
+              animation: wipe .5s ease-out backwards; transition: width .6s, margin .6s, opacity .6s; }
+  .redact i.gone { width: 0; margin-right: 0; opacity: 0; }
+  .row.blocked .redact::after { content: "removed before posting"; font-size: 12px; font-weight: 600; color: var(--ok); }
+  @keyframes wipe { from { width: 0; } }
+  .why { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
+  .via { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .chip { display: inline-flex; flex-wrap: wrap; gap: 4px; align-items: center; padding: 2px 4px 2px 8px; border: 1px solid var(--line); border-radius: 999px; font-size: 13px; }
+  .chip > span:not(.tag) { white-space: nowrap; }
+  .chip.across { border-color: var(--accent); border-radius: 12px; }
+  .chip b { min-width: 1.5em; border-radius: 4px; text-align: center; font-size: 12px; background: var(--line); }
+  .chip i { font-style: normal; font-size: 12px; color: var(--accent); }
+  .stamp { position: absolute; top: 14px; right: 14px; padding: 2px 10px; border: 3px solid currentColor; border-radius: 6px; color: var(--warn);
+           font: 800 15px/1.4 ui-monospace, Consolas, monospace; letter-spacing: .1em; text-transform: uppercase; transform: rotate(-8deg);
+           animation: stamp .4s cubic-bezier(.3, 1.6, .6, 1) backwards; }
+  .stamp.ok { color: var(--ok); }
+  @keyframes stamp { from { transform: rotate(-8deg) scale(2.4); opacity: 0; } }
+  /* Shiny Text */
+  .shiny { background: linear-gradient(110deg, currentColor 42%, #fff 50%, currentColor 58%) 0 0 / 260% 100%; -webkit-background-clip: text; background-clip: text;
+           -webkit-text-fill-color: transparent; animation: shine 3.2s linear infinite; }
+  @keyframes shine { from { background-position: 100% 0; } to { background-position: -160% 0; } }
+
+  details.trace { margin-top: 24px; }
+  details.trace summary { cursor: pointer; font-weight: 600; }
+  ol.log { list-style: none; padding: 0; margin: 0; }
+  ol.log > li { padding: 12px; margin-top: 8px; background: var(--card); border: 1px solid var(--line); border-radius: 10px; }
+  ol.log .head { font-weight: 600; }
+  ol.log .time { float: right; color: var(--muted); font-size: 13px; font-weight: 400; }
+  ol.log ul { margin: 6px 0 0; padding-left: 18px; color: var(--muted); font-size: 14px; }
+  footer { margin-top: 48px; padding: 24px 0 40px; border-top: 1px solid var(--line); color: var(--muted); font-size: 14px; }
+  footer nav { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 8px; }
+  .sparks { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50; }
+  @media (prefers-reduced-motion: reduce) { *, ::before, ::after { animation: none !important; transition: none !important; } }
+  [hidden] { display: none !important; }
+  /* Background: soft saffron, indigo and green glows that drift slowly, over a faint dot grid. Replaces the hero scanner. */
+  .hero canvas { display: none; }
+  /* Dither, after the React Bits background of that name: retro waves quantised with an 8x8 Bayer matrix, drawn by a
+     WebGL canvas (dither() below) at a third of the screen size and scaled up with hard pixels. Without WebGL,
+     .no-gl shows a static CSS glow instead. */
+  #bg { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -2; pointer-events: none; image-rendering: pixelated;
+         -webkit-mask-image: linear-gradient(#000, #000 15%, transparent 70%); mask-image: linear-gradient(#000, #000 15%, transparent 70%); }
+  .no-gl #bg { display: none; }
+  .no-gl body::before { content: ""; position: fixed; inset: 0; z-index: -2; pointer-events: none;
+                        background: radial-gradient(50rem 24rem at 20% -4%, rgba(155, 130, 255, .30), transparent 70%),
+                                    radial-gradient(40rem 22rem at 75% -6%, rgba(var(--saf-rgb), .14), transparent 70%); }
+  /* Snap Safe India look: warm paper, a saffron-white-green edge on the hero, chips and detect cards */
+  .hero::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 5px; z-index: 1;
+                  background: linear-gradient(90deg, var(--accent), var(--saffron) 50%, var(--ok)); }
+  .eyebrow { color: var(--saffron); }
+  .hero h1 { letter-spacing: -.03em; }
+  .chips { list-style: none; margin: 18px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+  .chips li { padding: 4px 12px; border: 1px solid var(--line); border-radius: 999px; background: var(--card);
+              font-size: 13px; font-weight: 600; color: var(--fg); }
+  .compare { box-shadow: 0 12px 40px -18px rgba(var(--scan-rgb), .45); }
+  .detects { list-style: none; margin: 16px 0 0; padding: 0; display: grid; gap: 12px;
+             grid-template-columns: repeat(auto-fill, minmax(min(250px, 100%), 1fr)); }
+  .detects li { padding: 14px 16px; background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+                border-top: 3px solid var(--saffron); }
+  .detects li:nth-child(3n + 2) { border-top-color: var(--accent); }
+  .detects li:nth-child(3n) { border-top-color: var(--ok); }
+  .detects b { display: block; margin-bottom: 4px; }
+  /* Effects in the style of React Bits (reactbits.dev, MIT + Commons Clause), written in plain CSS and JS:
+     Gradient Text, Blur Text on headings, Star Border on the main button, Tilted Card, scroll-in reveal */
+  main h2 .w { white-space: pre; }
+  @property --a { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
+  @keyframes spin { to { --a: 360deg; } }
+  @keyframes gshift { to { background-position: 300% 0; } }
+  @media (prefers-reduced-motion: no-preference) {
+    .hero h1 { background: linear-gradient(90deg, var(--fg) 0%, var(--accent) 25%, var(--saffron) 50%, var(--accent) 75%, var(--fg) 100%);
+               background-size: 300% 100%; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+               animation: gshift 10s linear infinite; }
+    .star { position: relative; isolation: isolate; }
+    .star::before { content: ""; position: absolute; inset: -3px; border-radius: 13px; padding: 3px; z-index: -1; pointer-events: none;
+                    background: conic-gradient(from var(--a), var(--saffron), var(--card), var(--ok), var(--accent), var(--saffron));
+                    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+                    mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); animation: spin 4s linear infinite; }
+    .js-reveal main h2 .w { display: inline-block; opacity: 0; filter: blur(8px); transform: translateY(.45em);
+                            transition: opacity .6s ease, filter .6s ease, transform .6s ease; transition-delay: calc(var(--i, 0) * 70ms); }
+    .js-reveal main h2.in .w { opacity: 1; filter: none; transform: none; }
+    .js-reveal .rv { opacity: 0; translate: 0 18px;
+                     transition: opacity .6s ease calc(var(--i, 0) * 60ms), translate .6s ease calc(var(--i, 0) * 60ms); }
+    .js-reveal .rv.in { opacity: 1; translate: none; }
+    .tilt-on .detects li, .tilt-on .pair, .tilt-on .samples .spot {
+      transform: perspective(800px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+      transition: transform .18s ease-out, opacity .6s ease calc(var(--i, 0) * 60ms), translate .6s ease calc(var(--i, 0) * 60ms); }
+  }
+  /* Indian benchmark section: filled from india/results.json, hidden without it */
+  .table-wrap { overflow-x: auto; margin-top: 14px; }
+  .bench { border-collapse: collapse; width: 100%; font-size: 15px; }
+  .bench th, .bench td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  .bench th { color: var(--muted); font-weight: 600; }
+  .bench td.num { font-variant-numeric: tabular-nums; }
+  .pairs { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr)); gap: 12px; margin: 16px 0; }
+  .pair { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 10px; }
+  .pair .imgs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .pair img { width: 100%; border-radius: 6px; display: block; }
+  .pair figcaption { font-size: 13px; color: var(--muted); margin-top: 6px; }
+</style>
+</head>
+<body>
+<canvas id="bg" aria-hidden="true"></canvas>
+<header class="hero">
+  <canvas id="scanner" aria-hidden="true"></canvas>
+  <div class="wrap">
+    <div class="hero-grid">
+      <div>
+        <p class="eyebrow">Photo privacy agent · made for India</p>
+        <h1 id="headline" data-text="Check your photo before you post it.">Check your photo before you post it.</h1>
+        <p class="lede">Aadhaar cards, number plates, courier labels, house name boards, UPI screens: it finds what a
+          stranger could use, hides only that, and checks again. Names, addresses and numbers are never printed, not
+          even to you.</p>
+        <div class="cta">
+          <a class="btn primary spark star" href="#own">Check your photo</a>
+          <a class="btn spark" href="#samples-section">Watch a sample</a>
+        </div>
+        <ul class="chips" aria-label="What it looks for">
+          <li>Aadhaar</li><li>PAN</li><li>UPI IDs</li><li>Number plates</li><li>PIN codes</li><li>Telugu · Hindi · Tamil text</li>
+        </ul>
+      </div>
+      <div class="compare" id="compare">
+        <img src="samples/in_id_card-1.safe.png" alt="A sample identity card photo after the agent: the name, address, PIN code and ID number are hidden" decoding="async">
+        <img class="before" src="samples/in_id_card-1.jpg" alt="A sample identity card on a table, with a fictional name, address, PIN code and 12-digit number" decoding="async">
+        <span class="handle" aria-hidden="true"></span>
+        <span class="lbl l" aria-hidden="true">Before</span><span class="lbl r" aria-hidden="true">After</span>
+        <input type="range" min="0" max="100" value="50" aria-label="Compare the photo before and after the agent's edits">
+      </div>
+    </div>
+    <ol class="loop" aria-label="How the agent works">
+      <li><b>Attack</b><code data-model>AI model</code><br><span class="muted small">Builds an exposure graph: each clue, what it gives away, how precisely.</span></li>
+      <li><b>Plan</b><code>min-cost hitting set</code><br><span class="muted small">Picks the fewest edits that break every way in.</span></li>
+      <li><b>Edit</b><code>pixelate · inpaint</code><br><span class="muted small">Edits only inside each object's mask.</span></li>
+      <li><b>Re-attack</b><code data-model>AI model</code><br><span class="muted small">Attacks the result and repeats until nothing specific is left.</span></li>
+    </ol>
+  </div>
+</header>
+
+<main class="wrap">
+  <section id="detects" aria-labelledby="detects-title">
+    <h2 id="detects-title">What it looks for</h2>
+    <p class="lede">Photos in India give away different things than photos elsewhere. The checker knows the formats, and
+      reads Telugu, Hindi and Tamil text as well as English.</p>
+    <ul class="detects">
+      <li><b>ID cards and numbers</b><span class="muted small">Aadhaar, PAN, voter ID, college and school ID cards, lanyards, roll numbers.</span></li>
+      <li><b>Number plates</b><span class="muted small">State and district codes, full plates, BH series, RC books.</span></li>
+      <li><b>Payments</b><span class="muted small">UPI IDs and QR codes, IFSC codes, GST numbers, payment screenshots.</span></li>
+      <li><b>Addresses</b><span class="muted small">Door and flat numbers, house name boards, colony names, PIN codes, "near ..." landmarks.</span></li>
+      <li><b>Parcels and bills</b><span class="muted small">Courier labels with a name, phone and address; barcodes and QR codes.</span></li>
+      <li><b>Occasions</b><span class="muted small">Wedding invites, flex banners, uniforms, hostel and coaching-centre names.</span></li>
+    </ul>
+  </section>
+
+  <section id="samples-section" hidden>
+    <h2 id="samples-title">Watch a sample</h2>
+    <p class="lede">Each one replays a recorded run of the real agent, sped up. Every name and address in them is fictional.</p>
+    <div class="samples" id="samples" aria-labelledby="samples-title"></div>
+  </section>
+
+  <section id="results" hidden aria-labelledby="results-title">
+    <h2 id="results-title">Indian benchmark</h2>
+    <p class="lede" id="results-lede"></p>
+    <div class="table-wrap"><table class="bench" id="bench"></table></div>
+    <div class="pairs" id="pairs"></div>
+    <p class="muted small">Rendered scenes with fictional values, not real photos, one run per setting. The attacker
+      samples, so numbers move between runs. Scoring: a secret counts as removed only if it was readable in the original
+      and is gone from the result. Scenes and scorer are in <code>bench/india</code> and <code>bench/indiabench.py</code>.</p>
+  </section>
+
+  <section id="view" hidden aria-label="Agent run">
+    <h2>The agent at work</h2>
+    <ol class="steps" id="steps">
+      <li data-step="attack"><b>Attack</b><span></span></li>
+      <li data-step="plan"><b>Plan</b><span></span></li>
+      <li data-step="edit"><b>Edit</b><span></span></li>
+      <li data-step="check"><b>Re-attack</b><span></span></li>
+    </ol>
+    <p id="status" class="notice" role="status" hidden></p>
+    <div class="split">
+      <div class="left">
+        <div class="tabs" id="tabs" hidden>
+          <button data-show="before" aria-pressed="false">Before</button>
+          <button data-show="after" aria-pressed="true">After</button>
+        </div>
+        <div class="stages" id="stages"></div>
+        <div class="downloads" id="downloads"></div>
+        <section class="keep" id="keep" hidden aria-labelledby="keep-title">
+          <b id="keep-title">Keep something?</b>
+          <p class="muted small">Untick anything you want to keep, like your own shop's sign. The copy updates here;
+            it is not re-checked.</p>
+          <ul id="kept"></ul>
+          <p class="back small" id="back" hidden></p>
+        </section>
+        <section class="keep" id="cap" hidden aria-labelledby="cap-title">
+          <b id="cap-title">Caption</b>
+          <ul class="caps" id="cap-list"></ul>
+        </section>
+      </div>
+      <aside class="dossier" aria-live="polite">
+        <header><small>Exposure report</small><strong>What a stranger learns</strong></header>
+        <span class="stamp" id="stamp" hidden></span>
+        <p class="summary" id="summary"></p>
+        <p class="together" id="together" hidden></p>
+        <p class="together" id="injected" hidden></p>
+        <ol class="rows" id="rows"></ol>
+        <p class="muted small">Redacted on purpose: the attacker reports what kind of detail shows, never the detail itself.
+          Longer bars mean a more precise answer.</p>
+      </aside>
+      <svg class="links" id="links" aria-hidden="true"></svg>
+    </div>
+    <details class="trace">
+      <summary>Agent trace</summary>
+      <ol class="log" id="log"></ol>
+    </details>
+  </section>
+
+  <section id="own">
+    <h2>Check your own photo</h2>
+    <p class="lede">One photo, or up to 20 from the same account, or your Instagram export: they are checked together,
+      so details that are harmless alone but give you away in combination count too.</p>
+    <div class="own locked" id="own-form">
+      <div class="opens" id="live-off" hidden>
+        <svg class="lock" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 11V8a5 5 0 0 1 10 0v3" fill="none"
+          stroke="currentColor" stroke-width="2"/><rect x="5" y="11" width="14" height="10" rx="2" fill="currentColor"/></svg>
+        <div class="body">
+          <div>
+            <b>Live checks are switched off on this server</b>
+            <p class="muted small">Every live check spends model credits and takes a couple of minutes, so it is only
+              on when the team turns it on. Until then the form below is a preview, and the samples replay real runs
+              of the agent, recorded as they happened.</p>
+          </div>
+          <div class="cta">
+            <button class="btn primary spark" type="button" id="try-sample">Play a sample</button>
+          </div>
+        </div>
+      </div>
+      <label class="code" id="code-wrap" hidden>
+        <span><b>Access code</b><br><span class="muted small">Ask the team for it. The samples above need
+          no code.</span></span>
+        <input id="code" type="text" autocomplete="off" spellcheck="false" aria-label="Access code">
+      </label>
+      <p class="preview-tag">Preview: what a live check gives you</p>
+      <div class="own-cols">
+      <div class="own-main">
+      <label class="capin">
+        <span><b>Caption</b> <span class="muted small">optional: what you will post with the photos. It is checked
+          with them, since a caption often names what the photo hides.</span></span>
+        <textarea id="caption" rows="2" maxlength="2200" placeholder="Moved into our new flat in MVP Colony! #newhome #vizag"></textarea>
+      </label>
+      <label class="drop spot" id="drop">
+        <input id="photo" class="sr-only" type="file" accept="image/jpeg,image/png,image/webp" multiple>
+        <strong>Drop photos here, or choose</strong>
+        <span class="muted small">JPEG, PNG or WebP, up to 20 MB each</span>
+      </label>
+      <button class="btn primary" id="shared" type="button" hidden></button>
+      <div class="import">
+        <label class="btn" id="import-wrap">Import an Instagram export (.zip)
+          <input id="zip" class="sr-only" type="file" accept=".zip,application/zip"></label>
+        <span class="muted small">Read on your device. Only the photos and captions of your latest 20 posts are sent,
+          and they are checked as one account.</span>
+      </div>
+      </div>
+      <div class="own-side">
+      <div class="keep">
+        <b>What you get back</b>
+        <ul class="gets">
+          <li>A safe copy: edits only where needed, PNG with no EXIF or GPS</li>
+          <li>What a stranger could learn from it, and how precisely</li>
+          <li>Your caption, without the details it gives away</li>
+          <li>Everything that was hidden, to keep whatever you choose</li>
+        </ul>
+      </div>
+      <label class="switch" id="private-wrap" hidden>
+        <input type="checkbox" id="private" role="switch" checked><span class="track" aria-hidden="true"></span>
+        <span><b>Edits on this server</b><br><span class="muted small" id="private-desc">Pixelation and inpainting run on this server, inside the boxes the model finds. They look rougher than generative edits.</span></span>
+      </label>
+      <details class="note">
+        <summary>What happens to your photo</summary>
+        <p class="muted small">This site stores nothing: the photo lives in memory for one request. To find the clues it
+          is sent to the model's host (Google's Gemini API), whose own data terms apply, so prefer staged or
+          non-sensitive photos while testing. The safe copy is a PNG with no EXIF or GPS data. Live runs are rate limited
+          and run one at a time.</p>
+      </details>
+      </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <nav>
+      <a href="https://github.com/Yasaswini-ch/snap-safe-india">Source on GitHub</a>
+    </nav>
+    <p>Built for Hacktoberfest Hack Day x AI for Vizag 2026. Effects in the style of <a href="https://reactbits.dev">React Bits</a>.</p>
+  </div>
+</footer>
+
+<script>
+const $ = id => document.getElementById(id);
+const CATEGORY = {
+  home_location: "Where you live", current_location: "Where this was taken", work_or_school: "Work or school",
+  identity: "Who you are", contact: "How to reach you", routine: "Your routine",
+  financial_or_id: "ID and account numbers", other_people: "People around you",
+};
+const LEVEL = ["Hidden", "Broad", "Narrowed", "Specific", "Exact"];
+const WORDS = [0, 1, 2, 3, 5];  // redacted words per level: a more precise answer is a longer line
+const ALLOWED = { contact: 1, financial_or_id: 1 };  // mirrors agent.STRICT; everything else may stay at agent.TARGET (2)
+const ACTION = { erase: "Erased", replace: "Replaced with a blank version", pixelate: "Pixelated", blur: "Blurred" };
+const SAMPLES = [  // the page shows the ones the server has a recording of (/api/samples)
+  { name: "in_id_card", label: "ID card", note: "Name, address, PIN code, ID number" },
+  { name: "in_parcel", label: "Courier parcel", note: "Name, phone and address on a label" },
+  { name: "in_plate", label: "Number plate", note: "State and district code, full plate" },
+  { name: "in_upi", label: "UPI screen", note: "UPI ID, name and reference number" },
+  { name: "in_telugu", label: "Telugu shop sign", note: "Name and phone in Telugu and English" },
+];
+const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const sleep = ms => new Promise(r => setTimeout(r, calm ? 0 : ms));
+const stages = () => [...$("stages").children];
+let originals = [], results = [], touched = new Set(), t0 = 0, timer = 0, statusText = "", eventTime = null, privateRun = false, openModel = "The model";
+let boxes = new Map(), clues = {}, linked = "", round = 1, firstGraph = null, finals = [], hidden = [], captionsWas = [], captionsNow = [];
+
+function el(tag, props = {}, ...children) {
+  const node = Object.assign(document.createElement(tag), props);
+  node.append(...children);
+  return node;
+}
+
+// ---- Effects, adapted from React Bits to plain JS. All of them stand still for prefers-reduced-motion. ----
+
+// Grid Scan: a faint grid behind the hero, lit up band by band as a scan line passes from top to bottom.
+function scanner(canvas) {
+  const ctx = canvas.getContext("2d"), rgb = getComputedStyle(document.documentElement).getPropertyValue("--scan-rgb").trim();
+  const cell = 44;
+  let w = 0, h = 0, visible = true;
+  const size = () => {
+    const dpr = Math.min(devicePixelRatio || 1, 2);
+    w = canvas.clientWidth; h = canvas.clientHeight;
+    canvas.width = w * dpr; canvas.height = h * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  };
+  const grid = alpha => {
+    ctx.strokeStyle = `rgba(${rgb}, ${alpha})`;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (let x = 0.5; x <= w; x += cell) { ctx.moveTo(x, 0); ctx.lineTo(x, h); }
+    for (let y = 0.5; y <= h; y += cell) { ctx.moveTo(0, y); ctx.lineTo(w, y); }
+    ctx.stroke();
+  };
+  const frame = now => {
+    ctx.clearRect(0, 0, w, h);
+    grid(0.1);
+    if (!calm) {
+      const y = ((now / 1000 * 0.08) % 1.25 - 0.1) * h, band = 120;
+      const glow = ctx.createLinearGradient(0, y - band, 0, y);
+      glow.addColorStop(0, `rgba(${rgb}, 0)`); glow.addColorStop(1, `rgba(${rgb}, 0.12)`);
+      ctx.fillStyle = glow; ctx.fillRect(0, y - band, w, band);
+      ctx.save(); ctx.beginPath(); ctx.rect(0, y - band, w, band); ctx.clip(); grid(0.35); ctx.restore();
+      ctx.fillStyle = `rgba(${rgb}, 0.55)`; ctx.fillRect(0, y, w, 1.5);
+    }
+    if (visible && !calm) requestAnimationFrame(frame);
+  };
+  new ResizeObserver(() => { size(); if (calm) frame(0); }).observe(canvas);
+  new IntersectionObserver(([e]) => { const was = visible; visible = e.isIntersecting; if (visible && !was && !calm) requestAnimationFrame(frame); }).observe(canvas);
+  size();
+  requestAnimationFrame(frame);
+}
+
+// Decrypted Text: the headline resolves left to right out of scrambled letters of the same case.
+function decrypt(node) {
+  const text = node.dataset.text;
+  node.setAttribute("aria-label", text);
+  if (calm) return;
+  const pick = c => /[a-z]/.test(c) ? "abcdefghijklmnopqrstuvwxyz"[Math.random() * 26 | 0]
+                  : /[A-Z]/.test(c) ? "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[Math.random() * 26 | 0] : c;
+  const start = performance.now();
+  const frame = now => {
+    const done = Math.min(1, (now - start) / 1300), n = Math.floor(done * text.length);
+    node.textContent = text.slice(0, n) + [...text.slice(n)].map(pick).join("");
+    if (done < 1) requestAnimationFrame(frame);
+  };
+  requestAnimationFrame(frame);
+}
+
+// Count Up: numbers climb when they scroll into view.
+function countUp(node) {
+  const to = +node.dataset.to;
+  if (calm || !to) return;
+  const start = performance.now();
+  const frame = now => {
+    const p = Math.min(1, (now - start) / 1400);
+    node.textContent = Math.round(to * (1 - (1 - p) ** 3));
+    if (p < 1) requestAnimationFrame(frame);
+  };
+  requestAnimationFrame(frame);
+}
+
+// Spotlight Card: a soft light follows the pointer across sample cards and the drop zone.
+document.addEventListener("pointermove", e => {
+  const s = e.target.closest?.(".spot");
+  if (!s) return;
+  const r = s.getBoundingClientRect();
+  s.style.setProperty("--mx", `${e.clientX - r.left}px`);
+  s.style.setProperty("--my", `${e.clientY - r.top}px`);
+});
+
+// Pixel Transition: a photo changes behind a grid of blocks that fill in and clear in random order.
+function pixelSwap(stageEl, swap) {
+  if (calm || !stageEl.offsetWidth) return swap();
+  const cols = 14, rows = Math.max(4, Math.round(cols * stageEl.offsetHeight / stageEl.offsetWidth));
+  const cells = Array.from({ length: cols * rows }, () => el("i", { style: `transition-delay:${Math.random() * 220 | 0}ms` }));
+  const grid = el("div", { className: "pixels", style: `grid-template-columns:repeat(${cols},1fr);grid-template-rows:repeat(${rows},1fr)` }, ...cells);
+  grid.setAttribute("aria-hidden", "true");
+  stageEl.append(grid);
+  void grid.offsetWidth;
+  grid.classList.add("in");
+  setTimeout(() => {
+    swap();
+    cells.forEach(c => c.style.transitionDelay = `${Math.random() * 220 | 0}ms`);
+    grid.classList.remove("in");
+    setTimeout(() => grid.remove(), 400);
+  }, 340);
+}
+
+// Click Spark: short rays burst from the click point on the main buttons.
+const sparks = el("canvas", { className: "sparks" });
+sparks.setAttribute("aria-hidden", "true");
+document.body.append(sparks);
+function spark(x, y) {
+  if (calm) return;
+  const ctx = sparks.getContext("2d"), dpr = Math.min(devicePixelRatio || 1, 2), start = performance.now();
+  const root = document.documentElement;
+  sparks.width = root.clientWidth * dpr; sparks.height = root.clientHeight * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const color = getComputedStyle(document.documentElement).getPropertyValue("--accent");
+  const frame = now => {
+    const p = Math.min(1, (now - start) / 420);
+    ctx.clearRect(0, 0, innerWidth, innerHeight);
+    ctx.strokeStyle = color; ctx.globalAlpha = 1 - p; ctx.lineWidth = 2;
+    for (let i = 0; i < 8; i++) {
+      const a = i * Math.PI / 4, r1 = 8 + 26 * p, r2 = r1 + 12 * (1 - p);
+      ctx.beginPath(); ctx.moveTo(x + Math.cos(a) * r1, y + Math.sin(a) * r1); ctx.lineTo(x + Math.cos(a) * r2, y + Math.sin(a) * r2); ctx.stroke();
+    }
+    if (p < 1) requestAnimationFrame(frame); else ctx.clearRect(0, 0, innerWidth, innerHeight);
+  };
+  requestAnimationFrame(frame);
+}
+document.addEventListener("click", e => { if (e.target.closest(".spark")) spark(e.clientX, e.clientY); });
+
+// Before/after compare in the hero: sways on its own until someone drags it.
+function compare(box) {
+  const input = box.querySelector("input");
+  let moved = false;
+  const set = v => box.style.setProperty("--pos", `${v}%`);
+  input.addEventListener("input", () => { moved = true; set(input.value); });
+  if (calm) return;
+  const frame = now => {
+    if (moved) return;
+    const v = 50 + 34 * Math.sin(now / 1600);
+    set(v); input.value = Math.round(v);
+    requestAnimationFrame(frame);
+  };
+  requestAnimationFrame(frame);
+}
+
+// Stepper: where the run is. name: attack | plan | edit | check
+function step(name, state, note = "") {
+  const li = $("steps").querySelector(`[data-step="${name}"]`);
+  li.className = state;
+  li.querySelector("span").textContent = note;
+}
+const clock = () => `${eventTime ?? Math.round((Date.now() - t0) / 1000)}s`;
+
+// ---- The run ----
+
+function status(text, warn = false) {
+  statusText = text;
+  $("status").hidden = !text;
+  $("status").textContent = text;
+  $("status").classList.toggle("warn", warn);
+}
+
+function tick() {
+  $("status").textContent = `${statusText}… ${Math.round((Date.now() - t0) / 1000)}s`;
+}
+
+// Model output is untrusted (a photo can carry crafted text), so it only ever goes in via textContent.
+function log(head, items = []) {
+  // A replayed sample carries the real run's timestamps; show those, not the faster playback clock.
+  $("log").append(el("li", {}, el("div", { className: "head" }, head, el("span", { className: "time", textContent: clock() })),
+    ...(items.length ? [el("ul", {}, ...items.map(t => el("li", { textContent: t })))] : [])));
+}
+
+// Each clue's box is colored by the most precise thing it gives away; they appear as the report reveals them.
+function drawBoxes(g) {
+  boxes.forEach(b => b.remove());
+  boxes = new Map();
+  clues = Object.fromEntries(g.clues.map((c, i) => [c.id, { ...c, n: i + 1, photo: c.photo ?? 0 }]));
+  const worst = {};
+  for (const inf of g.inferences) for (const w of inf.ways) for (const id of w.clues) worst[id] = Math.max(worst[id] || 0, w.level);
+  g.clues.forEach((c, i) => {
+    if (!c.box) return;
+    const [x0, y0, x1, y1] = c.box, level = worst[c.id] || 1;
+    const b = el("div", { className: `box off l${level}`, title: `${c.label}: ${c.observation}`,
+      style: `left:${x0 * 100}%;top:${y0 * 100}%;width:${(x1 - x0) * 100}%;height:${(y1 - y0) * 100}%` },
+      el("span", { textContent: i + 1 }));
+    b.dataset.clue = c.id;
+    b.dataset.level = level;
+    stages()[clues[c.id].photo]?.append(b);
+    boxes.set(c.id, b);
+  });
+}
+
+// Account scan: the most each photo gives away on its own, and what the ways across photos reach together.
+function aloneAndTogether(g) {
+  const alone = originals.map(() => 0), best = {}, joint = {};
+  for (const inf of g.inferences) for (const w of inf.ways) {
+    const photos = new Set(w.clues.map(id => clues[id].photo)), c = inf.category;
+    if (photos.size === 1) {
+      const [p] = photos;
+      alone[p] = Math.max(alone[p], w.level);
+      best[c] = Math.max(best[c] || 0, w.level);
+    } else joint[c] = Math.max(joint[c] || 0, w.level);
+  }
+  // The category that combining posts sharpens the most, beyond any single photo's way to it.
+  const up = c => joint[c] - (best[c] || 0);
+  const gain = Object.keys(joint).filter(c => up(c) > 0).sort((a, b) => up(b) - up(a) || joint[b] - joint[a])[0];
+  return [alone, gain && { category: gain, alone: best[gain] || 0, together: joint[gain] }];
+}
+
+// Light up clues and draw a line from each to the report row it feeds. pairs: [[clue id, row element], ...]
+function link(pairs) {
+  pairs = pairs.filter(([id]) => boxes.has(id) && !boxes.get(id).classList.contains("off"));
+  const key = pairs.map(([id, row]) => id + row.dataset.i).join();
+  if (key === linked) return;
+  linked = key;
+  const ids = new Set(pairs.map(([id]) => id)), rows = new Set(pairs.map(([, row]) => row));
+  boxes.forEach((b, id) => b.classList.toggle("hot", ids.has(id)));
+  document.querySelectorAll(".row").forEach(r => r.classList.toggle("hot", rows.has(r)));
+  $("stages").classList.toggle("dim", ids.size > 0);
+  const svg = $("links"), base = svg.getBoundingClientRect(), at = (x, y) => `${x - base.left} ${y - base.top}`;
+  svg.replaceChildren(...pairs.flatMap(([id, row]) => {
+    const k = boxes.get(id).getBoundingClientRect(), r = row.getBoundingClientRect();
+    const beside = r.left >= k.right - 1;  // two columns: run sideways; stacked on a phone: run down
+    const [x1, y1] = beside ? [k.right, k.top + k.height / 2] : [k.left + k.width / 2, k.bottom];
+    const [x2, y2] = beside ? [r.left, r.top + 20] : [r.left + 24, r.top];
+    const d = beside ? `M${at(x1, y1)}C${at(x1 + 80, y1)} ${at(x2 - 80, y2)} ${at(x2, y2)}`
+                     : `M${at(x1, y1)}C${at(x1, y1 + 80)} ${at(x2, y2 - 80)} ${at(x2, y2)}`;
+    const color = `l${boxes.get(id).dataset.level}`;
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("d", d);
+    path.setAttribute("pathLength", 1);
+    path.setAttribute("class", color);
+    const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    const [cx, cy] = at(x2, y2).split(" ");
+    Object.entries({ cx, cy, r: 4, class: color }).forEach(([a, v]) => dot.setAttribute(a, v));
+    return [path, dot];
+  }));
+}
+
+function redaction(level, seed) {
+  let s = [...seed].reduce((a, ch) => (a * 31 + ch.charCodeAt(0)) >>> 0, 7);  // same category, same bars
+  return Array.from({ length: WORDS[level] }, (_, i) => {
+    s = (Math.imul(s, 1103515245) + 12345) >>> 0;
+    return el("i", { style: `--w:${2 + s % 7}ch;animation-delay:${150 + i * 90}ms` });
+  });
+}
+
+function chip(way) {
+  const photos = new Set(way.clues.map(id => clues[id]?.photo)).size;
+  const c = el("span", { className: photos > 1 ? "chip across" : "chip" },
+    ...way.clues.flatMap((id, k) => [k ? el("span", { textContent: "+" }) : "",
+      el("span", {}, el("b", { textContent: clues[id]?.n ?? "?" }), " ", clues[id]?.label ?? id)]),
+    ...(photos > 1 ? [el("i", { textContent: `${photos} photos together` })] : []),
+    el("span", { className: `tag l${way.level}`, textContent: LEVEL[way.level] }));
+  c.dataset.clues = way.clues.join(" ");
+  return c;
+}
+
+function reportRow(inf, ways) {
+  const row = el("li", { className: "row", tabIndex: 0 },
+    el("div", { className: "cat" }, el("strong", { textContent: CATEGORY[inf.category] }),
+      el("span", { className: `tag l${inf.level}`, textContent: LEVEL[inf.level] }), el("span", { className: "now" })),
+    el("div", { className: "redact", ariaHidden: "true" }, ...redaction(inf.level, inf.category)),
+    el("p", { className: "why", textContent: inf.reasoning }),
+    ...(ways ? [el("div", { className: "via" }, ...inf.ways.map(chip))] : []));
+  row.dataset.cat = inf.category;
+  row.dataset.clues = ways ? [...new Set(inf.ways.flatMap(w => w.clues))].join(" ") : "";
+  row.dataset.i = $("rows").children.length;
+  return row;
+}
+
+async function reveal(g) {
+  drawBoxes(g);
+  $("summary").textContent = g.summary;
+  if (originals.length > 1) {
+    const [alone, gain] = aloneAndTogether(g);
+    stages().forEach((s, i) => Object.assign(s.querySelector(".alone"), { hidden: false, textContent: `Alone: ${LEVEL[alone[i]]}` }));
+    $("together").textContent = gain
+      ? `${CATEGORY[gain.category]}: no single photo gives away more than "${LEVEL[gain.alone]}". Together they reach "${LEVEL[gain.together]}".`
+      : "Photos checked together. Nothing here is worse in combination than in a single photo.";
+    $("together").hidden = false;
+  }
+  $("rows").replaceChildren();
+  if (!g.inferences.length) $("rows").append(el("li", { className: "row", textContent: "Nothing here points to you." }));
+  for (const inf of [...g.inferences].sort((a, b) => b.level - a.level)) {
+    const row = reportRow(inf, true);
+    $("rows").append(row);
+    const ids = row.dataset.clues.split(" ");
+    ids.forEach(id => boxes.get(id)?.classList.remove("off"));
+    link(ids.map(id => [id, row]));
+    await sleep(650);
+  }
+  boxes.forEach(b => b.classList.remove("off"));  // clues no inference cites
+  link([]);
+}
+
+// After a re-attack: shrink each row to what can still be learned.
+function settle(exposure, g) {
+  for (const cat of Object.keys(exposure)) {
+    const inf = g?.inferences.find(i => i.category === cat);
+    if (inf && !document.querySelector(`.row[data-cat="${cat}"]`)) {
+      const row = reportRow({ ...inf, level: exposure[cat] }, false);
+      row.querySelector(".why").prepend("Found on re-check. ");
+      $("rows").append(row);
+    }
+  }
+  document.querySelectorAll(".row[data-cat]").forEach(row => {
+    const after = exposure[row.dataset.cat] || 0, now = row.querySelector(".now");
+    row.querySelectorAll(".redact i").forEach((w, i) => w.classList.toggle("gone", i >= WORDS[after]));
+    row.classList.toggle("blocked", !after);
+    now.textContent = after ? `now ${LEVEL[after]}` : "Blocked";
+    now.className = `now ${after <= (ALLOWED[row.dataset.cat] ?? 2) ? "ok" : "warn"}`;
+  });
+}
+
+function show(which) {
+  const after = which === "after";
+  stages().forEach((s, i) => {
+    const img = s.querySelector("img"), src = after ? results[i] : originals[i];
+    if (img.getAttribute("src") !== src) pixelSwap(s, () => { img.src = src; });
+    s.querySelector(".badge").hidden = !after || !s.querySelector(".badge").textContent;
+  });
+  $("stages").classList.toggle("after", after);
+  $("tabs").querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", b.dataset.show === which));
+}
+
+// Each stage of the run replaces the "after" pictures as soon as they exist: preview, edited, verified.
+// images: one per photo, null where this step left the photo as it was.
+function stage(images, badge, ok = false) {
+  images.forEach((image, i) => { if (image) results[i] = image; });
+  stages().forEach((s, i) => {
+    const b = s.querySelector(".badge");
+    b.textContent = originals.length === 1 || touched.has(i) ? badge : "Untouched";
+    b.classList.toggle("ok", ok);
+  });
+  $("tabs").hidden = false;
+  show("after");
+}
+
+// Turn the clue boxes green where an edit landed. Later rounds have their own clue ids, so match by place.
+function markFixed(d, n) {
+  if (n === 1) return boxes.get(d.id)?.classList.add("fixed");
+  const cx = (d.box[0] + d.box[2]) / 2, cy = (d.box[1] + d.box[3]) / 2;
+  boxes.forEach((b, id) => {
+    const { photo, box } = clues[id];
+    if (photo === (d.photo ?? 0) && box[0] <= cx && cx <= box[2] && box[1] <= cy && cy <= box[3]) b.classList.add("fixed");
+  });
+}
+
+function scanning(on) {
+  document.querySelectorAll(".scan").forEach(s => s.hidden = !on);
+}
+
+const jpeg = images => images.map(b => b && "data:image/jpeg;base64," + b);
+const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
+
+async function handle(e) {
+  eventTime = e.t == null ? null : Math.round(e.t);
+  if (e.type === "start") {
+    const notes = [];
+    if (e.replay) notes.push(`Replaying a recorded run of the real agent, ${e.replay}x faster. Times are from the real run.`);
+    if (e.mock) notes.push("Demo mode: no model key is set, so the attack is a placeholder.");
+    openModel = e.model || "The model";
+    if (e.private) notes.push(`${openModel}${e.host ? ` (${e.host})` : ""} finds the clues; masks and edits run on this server.`);
+    privateRun = !!e.private;
+    if (originals.length > 1) notes.push(`${originals.length} photos from one account: the attacker sees them all at once, so details that are harmless alone but give you away together count too.`);
+    e.metadata.forEach((m, i) => m.gps && notes.push(`${originals.length > 1 ? `Photo ${i + 1}` : "This file"} has GPS location data. The safe copy never includes it.`));
+    if (notes.length) log("Before anything else", notes);
+    step("attack", "active", privateRun ? openModel : "Muse Spark");
+    captionsWas = e.captions || (e.caption ? [e.caption] : []);
+    captionsNow = [...captionsWas];
+    showCaptions();
+  } else if (e.type === "status") {
+    statusText = e.text;
+    scanning(true);
+  } else if (e.type === "attack") {
+    const g = e.graph, where = c => originals.length > 1 ? `Photo ${(c.photo ?? 0) + 1}, ` : "";
+    scanning(false);
+    round = e.round;
+    const top = Math.max(0, ...Object.values(e.exposure));
+    log(e.round === 1 ? `Attack: ${plural(g.clues.length, "clue")}, worst exposure "${LEVEL[top]}"`
+                      : `Re-attack: worst exposure now "${LEVEL[top]}"`,
+      [g.summary, ...g.clues.map(c => `${where(c)}${c.label}: ${c.observation}`)].filter(Boolean));
+    if (e.round === 1) {
+      step("attack", "done", `${clock()} · ${plural(g.clues.length, "clue")}`);
+      step("plan", "active");
+      if (g.clues.length) statusText = `Found ${plural(g.clues.length, "clue")}. Making a safe copy`;
+      firstGraph = g;
+      await reveal(g);
+    } else {
+      step("check", "active", `round ${e.round} · worst ${LEVEL[top]}`);
+      settle(e.exposure, g);
+    }
+  } else if (e.type === "textcheck") {
+    // A plain transcription checked with fixed patterns, beside the attack: text in the photo cannot argue with it.
+    const read = Object.entries(e.found).map(([k, n]) => `${n} ${k}${n === 1 ? "" : k.endsWith("s") ? "es" : "s"}`).join(", ");
+    log("Text check: plain transcription, fixed patterns", [read ? `Read ${read}. Values are never shown.` : "No contact details in the text.",
+      ...(e.injection ? ["Some text in the photo addresses AI tools. It is content to review, never an instruction."] : []),
+      ...(e.doubt ? ["The attacker still reported less than this, even when told how much it missed."] : [])]);
+    if (e.injection) Object.assign($("injected"), { hidden: false, textContent:
+      "Text in this photo addresses AI tools, like a note telling a reviewer to report nothing. It was treated as content. " +
+      (read ? `A plain text check, which instructions cannot sway, read ${read}.` : "") +
+      (e.doubt ? " The attacker still reported less than that, so this result is not verified." : "") });
+  } else if (e.type === "caption") {
+    log("Caption rewritten", e.removed.map(l => `Taken out: ${l}`));
+    captionsNow[e.photo ?? 0] = e.caption;
+    showCaptions();
+  } else if (e.type === "outlines") {
+    // The attacker's boxes are estimates; SAM's outlines are where the objects really are.
+    for (const [id, o] of Object.entries(e.outlines)) {
+      const b = boxes.get(id);
+      if (b) Object.assign(b.style, { left: `${o[0] * 100}%`, top: `${o[1] * 100}%`,
+                                      width: `${(o[2] - o[0]) * 100}%`, height: `${(o[3] - o[1]) * 100}%` });
+    }
+    log(`${e.model || "SAM 3.1"} outlined ${plural(Object.keys(e.outlines).length, "clue")} on the photo`);
+  } else if (e.type === "plan") {
+    statusText = privateRun ? "Pixelating and inpainting on this server" : "Editing with SAM 3.1 masks and Muse Image";
+    const edits = e.text.match(/with (\d+) edit/)?.[1];
+    if (e.round === 1) step("plan", "done", edits ? plural(+edits, "edit") : "");
+    step("edit", "active", e.round > 1 ? `round ${e.round}` : privateRun ? "on this server" : "SAM 3.1 · Muse Image");
+    log(`Plan: ${e.text}`, e.stuck ? [`${e.stuck} way(s) in cannot be edited out and stay exposed.`] : []);
+  } else if (e.type === "preview") {
+    e.images.forEach((b, i) => b && touched.add(i));
+    stage(jpeg(e.images), "Preview: what will be hidden");
+  } else if (e.type === "edits") {
+    statusText = "Attacking the edited photos again to check";
+    e.images.forEach((b, i) => b && touched.add(i));
+    e.edits.forEach(d => markFixed(d, e.round));
+    stage(jpeg(e.images), "Edited, re-checking");
+    step("edit", "done", `${clock()} · ${plural(e.edits.length, "edit")}${e.round > 1 ? ` · round ${e.round}` : ""}`);
+    step("check", "active", `round ${e.round + 1}`);
+    log("Edits", e.edits.map(d => `${ACTION[d.action]}: ${d.label}${originals.length > 1 ? ` in photo ${d.photo + 1}` : ""} ` +
+                                 `(${{ sam: "SAM 3.1 mask", sam3: "SAM 3 mask" }[d.mask] || "box mask"}, ${d.engine})`));
+  } else if (e.type === "done") {
+    clearInterval(timer);
+    scanning(false);
+    const checked = round > 1;
+    const urls = e.image_urls || e.images.map(b => "data:image/png;base64," + b);
+    const badge = e.unverified ? "Edited, not re-checked" : e.doubt ? "Text check disagrees" : !e.safe ? "Some exposure remains"
+                : checked ? "Verified by a second attack" : "Nothing found to hide";
+    stage(urls, badge, e.safe);
+    finals = [...urls];
+    offer(urls);
+    offerKeep(e.hidden || []);
+    if (e.captions || e.caption != null) captionsNow = e.captions || [e.caption];
+    showCaptions(true);
+    settle(e.after);
+    $("stamp").replaceChildren(el("span", { className: e.safe ? "shiny" : "", textContent: e.unverified || e.doubt ? "Unchecked" : !e.safe ? "Exposed" : checked ? "Verified" : "Clean" }));
+    $("stamp").classList.toggle("ok", e.safe);
+    Object.assign($("stamp").dataset, { text: $("stamp").textContent, ok: e.safe ? "1" : "" });
+    $("stamp").hidden = false;
+    if (!checked && round === 1) { step("plan", "done", "nothing to edit"); step("edit", "done", "skipped"); }
+    step("check", e.safe ? "done" : "warn", e.unverified ? "re-check failed" : e.doubt ? "text check disagrees" : e.safe ? `${clock()} · clean` : `${clock()} · exposure remains`);
+    const worst = Math.max(0, ...Object.values(e.after));
+    status(e.unverified ? "Edited, but the re-check did not finish, so this copy is not verified. Check it yourself before posting."
+         : e.doubt ? "Not verified: a note in the photo seems to have talked the attacker out of reporting contact details that a plain text check read. Check the photo yourself."
+         : e.safe ? "Done. Nothing specific about you is visible any more. GPS and other file metadata are removed too."
+         : `Done, but some exposure remains ("${LEVEL[worst]}"). Open the agent trace for details.`, !e.safe);
+  } else if (e.type === "error") {
+    clearInterval(timer);
+    scanning(false);
+    $("steps").querySelectorAll(".active").forEach(li => li.className = "warn");
+    status(e.text, true);
+  }
+}
+
+// Download and share buttons for the current copies. On phones a copy can go straight to the share sheet
+// (WhatsApp, Instagram...). Files are built now, since Safari only allows share() right inside the tap.
+function offer(urls) {
+  const name = i => urls.length > 1 ? `safe-photo-${i + 1}.png` : "safe-photo.png";
+  // In an account, only the photos that changed need a new copy; the rest are as posted.
+  const which = urls.map((u, i) => i).filter(i => urls.length === 1 || touched.has(i) || urls[i] !== finals[i]);
+  $("downloads").replaceChildren(...which.map(i => el("a", { className: "btn primary spark", href: urls[i], download: name(i),
+    textContent: urls.length > 1 ? `Download photo ${i + 1}` : "Download safe copy" })));
+  const mine = originals;
+  if (navigator.canShare) Promise.all(which.map(async i => new File([await (await fetch(urls[i])).blob()], name(i), { type: "image/png" })))
+    .then(files => originals === mine && navigator.canShare({ files }) && $("downloads").append(el("button", {
+      className: "btn", type: "button", textContent: urls.length > 1 ? "Share safe copies" : "Share safe copy",
+      onclick: () => navigator.share({ files }).catch(() => {}) }))).catch(() => {});
+}
+
+// "Keep something?": one checkbox per object the agent hid. Unticking one puts the original pixels back inside its
+// mask (except where something still hidden overlaps), and the first attack's ways say what that gives back.
+function offerKeep(items) {
+  hidden = items;
+  $("keep").hidden = !items.length;
+  $("back").hidden = true;
+  $("kept").replaceChildren(...items.map((h, k) => el("li", {}, el("label", {},
+    Object.assign(el("input", { type: "checkbox", checked: true }), { onchange: () => keep(), value: k }),
+    el("span", { textContent: `Hidden: ${h.label}${originals.length > 1 ? ` (photo ${h.photo + 1})` : ""}` })))));
+}
+
+const picture = src => new Promise((ok, no) => Object.assign(new Image(), { onload: e => ok(e.target), onerror: no, src }));
+
+async function keep() {
+  const ticks = [...$("kept").querySelectorAll("input")], kept = ticks.filter(t => !t.checked).map(t => hidden[+t.value]);
+  const mine = originals;
+  const urls = await Promise.all(finals.map(async (fin, i) => {
+    const back = kept.filter(h => h.photo === i);
+    if (!back.length) return fin;
+    const still = hidden.filter(h => h.photo === i && !back.includes(h));
+    const [orig, done] = await Promise.all([picture(originals[i]), picture(fin)]);
+    const canvas = el("canvas", { width: done.naturalWidth, height: done.naturalHeight }), w = canvas.width, hgt = canvas.height;
+    const area = el("canvas", { width: w, height: hgt }), a = area.getContext("2d");
+    for (const h of back) a.drawImage(await picture("data:image/png;base64," + h.mask), 0, 0, w, hgt);
+    a.globalCompositeOperation = "destination-out";
+    for (const h of still) a.drawImage(await picture("data:image/png;base64," + h.mask), 0, 0, w, hgt);
+    a.globalCompositeOperation = "source-in";
+    a.drawImage(orig, 0, 0, w, hgt);
+    const c = canvas.getContext("2d");
+    c.drawImage(done, 0, 0);
+    c.drawImage(area, 0, 0);
+    return URL.createObjectURL(await new Promise(r => canvas.toBlob(r, "image/png")));
+  }));
+  if (originals !== mine) return;
+  results.forEach((u, i) => { if (u !== finals[i] && u.startsWith("blob:")) URL.revokeObjectURL(u); });
+  urls.forEach((u, i) => { results[i] = u; });
+  stages().forEach((s, i) => {
+    const b = s.querySelector(".badge"), mine = kept.some(h => h.photo === i);
+    b.dataset.text ??= b.textContent;
+    b.dataset.ok ??= b.classList.contains("ok") ? "1" : "";
+    b.textContent = mine ? "Your choice, not re-checked" : b.dataset.text;
+    b.classList.toggle("ok", !mine && b.dataset.ok === "1");
+  });
+  show("after");
+  offer(urls);
+  const back = givesBack(kept);
+  $("back").hidden = !kept.length;
+  $("back").textContent = !kept.length ? "" : back.length ? `Keeping this gives back: ${back.join("; ")}.`
+    : "Keeping this gives back nothing the first attack rated above the limits. This copy is not re-checked.";
+  $("stamp").firstChild.textContent = kept.length ? "Your call" : $("stamp").dataset.text;
+  $("stamp").classList.toggle("ok", !kept.length && $("stamp").dataset.ok === "1");
+  if (kept.length) status(`You kept ${plural(kept.length, "thing")}. This copy is your choice and has not been re-checked.`);
+}
+
+// From the first attack's report: the inferences that rise above the limits again once the kept clues are back.
+function givesBack(kept) {
+  if (!firstGraph) return [];
+  const stillHidden = new Set(hidden.filter(h => !kept.includes(h)).flatMap(h => h.clues));
+  const allHidden = new Set(hidden.flatMap(h => h.clues));
+  const level = (inf, gone) => Math.max(0, ...inf.ways.filter(w => !w.clues.some(c => gone.has(c))).map(w => w.level));
+  return firstGraph.inferences.filter(inf => level(inf, stillHidden) > Math.max(level(inf, allHidden), ALLOWED[inf.category] ?? 2))
+    .map(inf => `${CATEGORY[inf.category]}: ${LEVEL[level(inf, stillHidden)]}`);
+}
+
+// Captions as they will be posted, one per captioned photo: what the agent took out is struck through below each.
+function showCaptions(final = false) {
+  const all = captionsWas.map((was, i) => [was, captionsNow[i] ?? was, i]).filter(([was]) => was);
+  // Many captions: list only the ones that changed, and say how many were checked.
+  const items = all.length > 3 ? all.filter(([was, now]) => was !== now) : all;
+  $("cap").hidden = !all.length;
+  $("cap-title").textContent = all.length > 3 ? `Captions: ${all.length} checked, ${items.length} changed`
+    : items.length > 1 ? "Captions" : "Caption";
+  $("cap-list").replaceChildren(...items.map(([was, now, i]) => {
+    const kept = new Set(now.split(/\s+/)), gone = was.split(/\s+/).filter(t => t && !kept.has(t));
+    const copy = el("button", { className: "btn", type: "button", textContent: "Copy caption", hidden: !final });
+    copy.onclick = () => navigator.clipboard?.writeText(now).then(() => { copy.textContent = "Copied"; });
+    return el("li", {}, ...(originals.length > 1 ? [el("small", { className: "muted", textContent: `Photo ${i + 1}` })] : []),
+      el("p", { className: "cap-text", textContent: now }),
+      el("p", { className: "muted small" }, ...(gone.length
+        ? ["Taken out: ", ...gone.flatMap((t, k) => [k ? " " : "", el("del", { textContent: t })])]
+        : [final ? "Nothing here needed to change." : "Checked together with the photos."])),
+      copy);
+  }));
+}
+
+// Instagram's "Download your information" ZIP, read here with the browser's own inflater: the export never leaves
+// this device, only the latest posts' photos and captions do.
+async function zipEntries(file) {
+  const tail = new DataView(await file.slice(Math.max(0, file.size - 65557)).arrayBuffer());
+  let end = tail.byteLength - 22;
+  while (end >= 0 && tail.getUint32(end, true) !== 0x06054b50) end--;
+  if (end < 0) throw new Error("that is not a ZIP file");
+  const count = tail.getUint16(end + 10, true), size = tail.getUint32(end + 12, true), at = tail.getUint32(end + 16, true);
+  if (at === 0xffffffff) throw new Error("this export is over 4 GB; ask Instagram for a smaller date range");
+  const dir = new DataView(await file.slice(at, at + size).arrayBuffer()), names = new TextDecoder();
+  const entries = [];
+  for (let p = 0, i = 0; i < count; i++) {
+    const len = dir.getUint16(p + 28, true);
+    entries.push({ name: names.decode(new Uint8Array(dir.buffer, p + 46, len)), method: dir.getUint16(p + 10, true),
+                   size: dir.getUint32(p + 20, true), at: dir.getUint32(p + 42, true) });
+    p += 46 + len + dir.getUint16(p + 30, true) + dir.getUint16(p + 32, true);
+  }
+  return entries;
+}
+
+async function zipRead(file, entry) {
+  const head = new DataView(await file.slice(entry.at, entry.at + 30).arrayBuffer());
+  const start = entry.at + 30 + head.getUint16(26, true) + head.getUint16(28, true);
+  const raw = file.slice(start, start + entry.size);
+  if (entry.method === 0) return raw;
+  if (entry.method !== 8) throw new Error("this ZIP uses a compression the browser cannot read");
+  return new Response(raw.stream().pipeThrough(new DecompressionStream("deflate-raw"))).blob();
+}
+
+// Instagram writes UTF-8 text as Latin-1 escapes ("Ã¬..." for Telugu or Hindi); decode it back when that is what it is.
+const unmangle = t => !/[\u0080-ÿ]/.test(t) || /[^\u0000-ÿ]/.test(t) ? t
+  : (() => { try { return new TextDecoder("utf-8", { fatal: true }).decode(Uint8Array.from(t, c => c.charCodeAt(0))); } catch { return t; } })();
+
+async function importInstagram(file) {
+  status("Reading the export on this device");
+  const entries = await zipEntries(file);
+  const find = uri => entries.find(e => e.name === uri || e.name.endsWith("/" + uri));
+  const posts = [];
+  for (const e of entries.filter(e => /posts_\d+\.json$/.test(e.name))) {
+    const data = JSON.parse(await (await zipRead(file, e)).text());
+    for (const post of Array.isArray(data) ? data : Object.values(data).flat()) {
+      const media = (post?.media || []).find(m => /\.(jpe?g|png|webp)$/i.test(m.uri || "") && find(m.uri));
+      if (media) posts.push({ entry: find(media.uri), caption: unmangle(post.title || media.title || ""),
+                              at: media.creation_timestamp || post.creation_timestamp || 0 });
+    }
+  }
+  if (!posts.length) entries.filter(e => /media\/posts\/.+\.(jpe?g|png|webp)$/i.test(e.name))
+    .forEach(e => posts.push({ entry: e, caption: "", at: 0 }));
+  if (!posts.length) return status("No post photos found in this export. Choose the ZIP from Instagram's \"Download your information\".", true);
+  const latest = posts.sort((a, b) => b.at - a.at).slice(0, 20).reverse();
+  const type = name => /\.png$/i.test(name) ? "image/png" : /\.webp$/i.test(name) ? "image/webp" : "image/jpeg";
+  const files = await Promise.all(latest.map(async p => new File([await zipRead(file, p.entry)], p.entry.name.split("/").pop(), { type: type(p.entry.name) })));
+  check(files, latest.map(p => p.caption));
+}
+
+// More than six photos go up shrunk to the size the server would use anyway, so twenty fit in one upload.
+async function shrink(file) {
+  const bitmap = await createImageBitmap(file), scale = Math.min(1, 1536 / Math.max(bitmap.width, bitmap.height));
+  const canvas = el("canvas", { width: Math.round(bitmap.width * scale), height: Math.round(bitmap.height * scale) });
+  canvas.getContext("2d").drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  return new File([await new Promise(r => canvas.toBlob(r, "image/jpeg", 0.9))], file.name, { type: "image/jpeg" });
+}
+
+let running = false, server = { live: false, code: false };
+
+// Uploads stay locked while live runs are off, until a judges' code is typed when one is required, and during a run.
+function lockUpload() {
+  const locked = !server.live || (server.code && !$("code").value.trim());
+  $("own-form").classList.toggle("locked", locked);
+  $("photo").disabled = $("shared").disabled = $("zip").disabled = locked || running;
+}
+
+function busy(on) {
+  running = on;
+  document.querySelectorAll(".samples button").forEach(b => b.disabled = on);
+  lockUpload();
+}
+
+async function begin(srcs, request) {
+  originals = srcs;
+  results = [...srcs];
+  touched = new Set();
+  round = 1;
+  const many = srcs.length > 1;
+  $("stages").className = many ? "stages many" : "stages";
+  $("stages").replaceChildren(...srcs.map((src, i) => el("div", { className: "stage" },
+    el("img", { src, alt: many ? `Photo ${i + 1}` : "Your photo" }),
+    el("div", { className: "scan", hidden: true },
+      ...(i ? [] : [el("span", { textContent: many ? `Attacking all ${srcs.length} together` : "Attacking" })])),
+    el("span", { className: "badge", hidden: true }),
+    el("span", { className: "alone", hidden: true }))));
+  ["attack", "plan", "edit", "check"].forEach(n => step(n, ""));
+  $("log").replaceChildren();
+  $("links").replaceChildren();
+  $("downloads").replaceChildren();
+  linked = "";
+  $("summary").textContent = "";
+  $("rows").replaceChildren(el("li", { className: "row wait",
+    textContent: many ? "Reading the account the way a stranger would" : "Reading the photo the way a stranger would" }));
+  $("tabs").hidden = $("stamp").hidden = $("together").hidden = $("injected").hidden = $("keep").hidden = true;
+  firstGraph = null;
+  finals = [];
+  hidden = [];
+  $("cap").hidden = true;
+  boxes = new Map();
+  $("view").hidden = false;
+  $("view").scrollIntoView({ behavior: calm ? "auto" : "smooth" });
+  busy(true);
+  t0 = Date.now();
+  eventTime = null;
+  status("Starting");
+  timer = setInterval(tick, 1000);
+  let finished = false;
+  try {
+    const r = await request();
+    if (!r.ok) throw new Error((await r.json().catch(() => ({}))).detail || r.statusText);
+    const reader = r.body.pipeThrough(new TextDecoderStream()).getReader();
+    let buf = "";
+    for (;;) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buf += value;
+      let i;
+      while ((i = buf.indexOf("\n")) >= 0) {
+        const line = buf.slice(0, i);
+        buf = buf.slice(i + 1);
+        if (!line) continue;
+        const e = JSON.parse(line);
+        finished ||= e.type === "done" || e.type === "error";
+        await handle(e);  // the report's reveal finishes before the next stage shows
+      }
+    }
+    if (!finished) throw new Error("the connection closed before the check finished. Try again.");
+  } catch (err) {
+    clearInterval(timer);
+    scanning(false);
+    $("steps").querySelectorAll(".active").forEach(li => li.className = "warn");
+    status("Could not check this: " + err.message, true);
+  } finally {
+    clearInterval(timer);
+    busy(false);
+  }
+}
+
+// Hovering or focusing a report row (or one of its "via" chips) lights up the clues behind it, and the reverse.
+function fromRow(e) {
+  const row = e.target.closest?.(".row[data-clues]");
+  if (!row) return;
+  const ids = e.target.closest("[data-clues]").dataset.clues.split(" ").filter(Boolean);
+  link(ids.map(id => [id, row]));
+}
+$("rows").addEventListener("mouseover", fromRow);
+$("rows").addEventListener("focusin", fromRow);
+$("rows").addEventListener("mouseleave", () => link([]));
+$("rows").addEventListener("focusout", () => link([]));
+$("stages").addEventListener("mouseover", e => {
+  const id = e.target.closest(".box")?.dataset.clue;
+  if (id) link([...document.querySelectorAll(".row[data-clues]")].filter(r => r.dataset.clues.split(" ").includes(id)).map(r => [id, r]));
+});
+$("stages").addEventListener("mouseleave", () => link([]));
+addEventListener("resize", () => link([]));
+$("tabs").onclick = e => e.target.dataset.show && originals.length && show(e.target.dataset.show);
+
+async function check(files, captions = null) {
+  files = [...files].filter(f => f.type.startsWith("image/"));
+  if (!files.length) return;
+  if (files.length > 20) return status("Pick at most 20 photos from one account.", true);
+  const sent = files.length > 6 ? await Promise.all(files.map(shrink)) : files;
+  const body = new FormData();
+  sent.forEach(f => body.append("photos", f));
+  body.append("private", !$("private-wrap").hidden && $("private").checked);
+  body.append("code", $("code").value.trim());
+  if (captions) body.append("captions", JSON.stringify(captions));
+  else body.append("caption", $("caption").value.trim());
+  begin(files.map(f => URL.createObjectURL(f)), () => fetch("/api/run", { method: "POST", body }));
+}
+$("zip").onchange = e => {
+  const file = e.target.files[0];
+  e.target.value = "";
+  if (file) importInstagram(file).catch(err => status("Could not read the export: " + err.message, true));
+};
+$("photo").onchange = e => { const files = [...e.target.files]; e.target.value = ""; check(files); };
+const drop = $("drop");
+drop.addEventListener("dragover", e => { e.preventDefault(); drop.classList.add("over"); });
+drop.addEventListener("dragleave", () => drop.classList.remove("over"));
+drop.addEventListener("drop", e => { e.preventDefault(); drop.classList.remove("over"); if (!$("photo").disabled) check(e.dataTransfer.files); });
+
+$("code").addEventListener("input", lockUpload);
+lockUpload();
+fetch("/api/status").then(r => r.json()).then(s => {
+  server = s;
+  if (!s.live) liveOff();
+  $("code-wrap").hidden = !(s.live && s.code);
+  $("private-wrap").hidden = !s.private;
+  document.querySelectorAll("[data-model]").forEach(n => { if (s.model) n.textContent = s.model; });
+  $("private").disabled = !s.standard;  // private mode is the only live mode on this server
+  lockUpload();
+}).catch(liveOff);
+
+// No live runs on this server yet: say so where people look for them, and point at what works now.
+function liveOff() {
+  $("live-off").hidden = false;
+  const [check, watch] = document.querySelectorAll(".hero .cta a");
+  check.classList.remove("primary", "star");
+  watch.classList.add("primary", "star");
+  check.before(watch);
+  check.append(el("span", { className: "soon", textContent: " · off on this server" }));
+}
+$("try-sample").onclick = () => document.querySelector(".samples button")?.click();
+
+// Photos shared from another app arrive through sw.js and wait on the device until Check is tapped.
+async function takeShared() {
+  const n = +new URLSearchParams(location.search).get("shared");
+  if (!n || !self.caches) return;
+  history.replaceState(null, "", location.pathname + location.hash);
+  const cache = await caches.open("shared");
+  const files = (await Promise.all(Array.from({ length: n }, async (_, i) => {
+    const r = await cache.match(`/shared/${i}`);
+    return r && new File([await r.blob()], decodeURIComponent(r.headers.get("x-name") || `photo-${i + 1}`),
+                         { type: r.headers.get("content-type") || "image/jpeg" });
+  }))).filter(Boolean);
+  await caches.delete("shared");
+  if (!files.length) return;
+  $("shared").textContent = `Check the ${plural(files.length, "shared photo")}`;
+  $("shared").onclick = () => check(files);
+  $("shared").hidden = false;
+}
+takeShared();
+navigator.serviceWorker?.register("/sw.js");
+
+// Only recorded samples show up; with none, the whole section stays hidden.
+fetch("/api/samples").then(r => r.json()).then(have => {
+  const shown = SAMPLES.filter(s => have.includes(s.name));
+  $("samples-section").hidden = !shown.length;
+  $("samples").append(...shown.map(s => {
+    const srcs = Array.from({ length: s.photos || 1 }, (_, i) => `samples/${s.name}-${i + 1}.jpg`);
+    const b = el("button", { className: "spot" },
+      el("div", { className: "thumbs" }, ...srcs.slice(0, 3).map(src => el("img", { src, alt: "", loading: "lazy" }))),
+      el("span", { className: "meta" }, el("b", { textContent: s.label }), el("small", { textContent: s.note })));
+    b.onclick = () => begin(srcs, () => fetch(`/api/sample/${s.name}`));
+    return b;
+  }));
+  scrollReveal($("samples").children);
+}).catch(() => { $("samples-section").hidden = true; });
+
+// Reveal-on-scroll (Blur Text on headings, fade-up on cards) and Tilted Card, in the style of React Bits.
+// Content stays visible when JS or IntersectionObserver is missing: the hiding CSS only applies under .js-reveal.
+const seen = "IntersectionObserver" in window ? new IntersectionObserver(entries => entries.forEach(e => {
+  if (e.isIntersecting) { e.target.classList.add("in"); seen.unobserve(e.target); }
+}), { threshold: 0.15 }) : null;
+function scrollReveal(nodes) {
+  [...nodes].forEach((n, i) => {
+    if (n.dataset.rv) return;
+    n.dataset.rv = "1";
+    n.style.setProperty("--i", String(i % 8));
+    if (n.tagName !== "H2") n.classList.add("rv");
+    seen ? seen.observe(n) : n.classList.add("in");
+  });
+}
+document.querySelectorAll("main h2").forEach(h => {
+  const words = h.textContent.trim().split(/\s+/);
+  h.setAttribute("aria-label", words.join(" "));
+  h.textContent = "";
+  words.forEach((w, i) => {
+    const s = el("span", { className: "w", textContent: w + (i < words.length - 1 ? " " : "") });
+    s.style.setProperty("--i", String(i));
+    s.setAttribute("aria-hidden", "true");
+    h.append(s);
+  });
+});
+document.documentElement.classList.add("js-reveal");
+scrollReveal(document.querySelectorAll("main h2, .detects li, .samples .spot"));
+if (matchMedia("(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)").matches) {
+  document.documentElement.classList.add("tilt-on");
+  const tiltable = ".detects li, .pair, .samples .spot";
+  document.addEventListener("pointermove", e => {
+    const c = e.target.closest?.(tiltable);
+    if (!c) return;
+    const r = c.getBoundingClientRect();
+    c.style.setProperty("--ry", `${(((e.clientX - r.left) / r.width) - 0.5) * 8}deg`);
+    c.style.setProperty("--rx", `${-(((e.clientY - r.top) / r.height) - 0.5) * 8}deg`);
+  });
+  document.addEventListener("pointerout", e => {
+    const c = e.target.closest?.(tiltable);
+    if (c && !c.contains(e.relatedTarget)) { c.style.setProperty("--rx", "0deg"); c.style.setProperty("--ry", "0deg"); }
+  });
+}
+
+fetch("india/results.json").then(r => r.ok ? r.json() : Promise.reject()).then(data => {
+  const tags = ["in", "global"].filter(t => data.runs[t]);
+  if (!tags.length) return;
+  const pct = (a, b) => b ? `${a}/${b} (${Math.round(100 * a / b)}%)` : "n/a";
+  const names = { in: "India pack on", global: "India pack off" };
+  const metrics = [
+    ["Planted secrets removed", r => pct(r.removed, r.secrets)],
+    ["Scenes with every secret removed", r => pct(r.clean, r.with_secrets)],
+    ["Share of the frame changed (mean)", r => `${r.changed}%`],
+    ["Leak scenes flagged", r => pct(r.flagged, r.leak)],
+    ["Control scenes falsely flagged", r => pct(r.false_flags, r.controls)],
+    ["Text check found the expected ID types", r => pct(r.text_hits, r.expecting)],
+    ["Values echoed in the report", r => pct(r.echoed, r.printable)],
+    ["Mean seconds per scene", r => String(r.seconds)],
+  ];
+  const first = data.runs[tags[0]];
+  $("results-lede").textContent = `${first.scenes} rendered Indian scenes with planted fictional secrets: ID cards, a courier label, a number plate, a UPI screen, a Telugu shop sign.`;
+  $("bench").append(
+    el("thead", {}, el("tr", {}, el("th", { textContent: "Metric" }), ...tags.map(t => el("th", { textContent: names[t] })))),
+    el("tbody", {}, ...metrics.map(([label, f]) => el("tr", {}, el("th", { textContent: label, scope: "row" }),
+      ...tags.map(t => el("td", { className: "num", textContent: f(data.runs[t]) }))))));
+  const shown = tags[0];
+  $("pairs").append(...data.scenes.filter(s => s[shown]).map(s => el("figure", { className: "pair" },
+    el("div", { className: "imgs" },
+      el("img", { src: `india/${s.id}.jpg`, alt: `${s.id} before`, loading: "lazy" }),
+      el("img", { src: `india/${shown}/${s.id}_after.jpg`, alt: `${s.id} after`, loading: "lazy" })),
+    el("figcaption", { textContent: `${s.id.replace(/_/g, " ")}: ${s[shown].removed}/${s[shown].secrets} secrets removed, ${s[shown].changed}% changed` }))));
+  $("results").hidden = false;
+  scrollReveal($("pairs").children);
+}).catch(() => {});
+
+// Dither background: fbm waves, an 8x8 Bayer threshold, two-tone palette, waves that bend around a smoothed cursor.
+function dither(cv) {
+  const gl = cv.getContext("webgl", { premultipliedAlpha: true, antialias: false });
+  const fail = () => document.documentElement.classList.add("no-gl");
+  if (!gl) return fail();
+  const compile = (type, src) => {
+    const s = gl.createShader(type);
+    gl.shaderSource(s, src);
+    gl.compileShader(s);
+    return gl.getShaderParameter(s, gl.COMPILE_STATUS) ? s : null;
+  };
+  const vs = compile(gl.VERTEX_SHADER, "attribute vec2 a; void main() { gl_Position = vec4(a, 0.0, 1.0); }");
+  const fs = compile(gl.FRAGMENT_SHADER, `precision highp float;
+uniform vec2 res, mouse; uniform float t;
+float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+float noise(vec2 p) {
+  vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
+  return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), f.x), mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), f.x), f.y);
+}
+float fbm(vec2 p) { float v = 0.0, a = 0.5; for (int i = 0; i < 5; i++) { v += a * noise(p); p = p * 2.02 + vec2(17.3, 9.1); a *= 0.5; } return v; }
+float bayer(vec2 c) {
+  vec2 q = floor(mod(c, 8.0));
+  float x0 = mod(q.x, 2.0), x1 = mod(floor(q.x / 2.0), 2.0), x2 = floor(q.x / 4.0);
+  float y0 = mod(q.y, 2.0), y1 = mod(floor(q.y / 2.0), 2.0), y2 = floor(q.y / 4.0);
+  return (32.0 * abs(x0 - y0) + 16.0 * y0 + 8.0 * abs(x1 - y1) + 4.0 * y1 + 2.0 * abs(x2 - y2) + y2 + 0.5) / 64.0;
+}
+void main() {
+  vec2 p = (gl_FragCoord.xy - 0.5 * res) / res.y;
+  vec2 m = (mouse - 0.5 * res) / res.y;
+  vec2 away = p - m;
+  float d = length(away);
+  p += away / (d + 0.08) * exp(-d * 5.0) * 0.12;
+  vec2 q = p * 2.2;
+  float w = fbm(q * 0.9 + vec2(t * 0.06, t * 0.03) + fbm(q * 0.6 - t * 0.04) * 1.8);
+  w = smoothstep(0.25, 0.8, w);
+  float lvl = w * (0.5 + 0.5 * gl_FragCoord.y / res.y);
+  float on = step(bayer(gl_FragCoord.xy), lvl * lvl * lvl * 0.5);
+  vec3 col = mix(vec3(0.62, 0.51, 1.0), vec3(0.37, 0.92, 0.83), smoothstep(0.55, 1.0, w));
+  float a = on * 0.2;
+  gl_FragColor = vec4(col * a, a);
+}`);
+  const prog = gl.createProgram();
+  if (!vs || !fs) return fail();
+  gl.attachShader(prog, vs);
+  gl.attachShader(prog, fs);
+  gl.linkProgram(prog);
+  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return fail();
+  gl.useProgram(prog);
+  gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+  const loc = gl.getAttribLocation(prog, "a");
+  gl.enableVertexAttribArray(loc);
+  gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+  const u = n => gl.getUniformLocation(prog, n);
+  const PIXEL = 4;  // screen pixels per dither pixel
+  let want = [-1e4, -1e4], mouse = [-1e4, -1e4];
+  const size = () => {
+    cv.width = Math.max(2, Math.ceil(innerWidth / PIXEL));
+    cv.height = Math.max(2, Math.ceil(innerHeight / PIXEL));
+    gl.viewport(0, 0, cv.width, cv.height);
+    gl.uniform2f(u("res"), cv.width, cv.height);
+  };
+  addEventListener("resize", size);
+  addEventListener("pointermove", e => { want = [e.clientX / PIXEL, (innerHeight - e.clientY) / PIXEL]; });
+  size();
+  const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const draw = ms => {
+    mouse = mouse[0] < -1e3 ? want : [mouse[0] + (want[0] - mouse[0]) * 0.08, mouse[1] + (want[1] - mouse[1]) * 0.08];
+    gl.uniform1f(u("t"), ms / 1000);
+    gl.uniform2f(u("mouse"), mouse[0], mouse[1]);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    if (!still) requestAnimationFrame(draw);
+  };
+  still ? draw(6000) : requestAnimationFrame(draw);
+}
+dither($("bg"));
+
+scanner($("scanner"));
+decrypt($("headline"));
+$("compare").querySelector("img").addEventListener("error", () => { $("compare").hidden = true; });  // until the sample is recorded
+compare($("compare"));
+const counted = new IntersectionObserver(entries => entries.forEach(e => {
+  if (e.isIntersecting) { countUp(e.target); counted.unobserve(e.target); }
+}));
+document.querySelectorAll(".count").forEach(n => counted.observe(n));
+</script>
+</body>
+</html>

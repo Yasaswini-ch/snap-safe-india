@@ -1,0 +1,34 @@
+{
+ "id": "tax_card",
+ "kind": "leak",
+ "secrets": [
+  "SNEHA REDDY MALLIPUDI",
+  "ABCDE1234F"
+ ],
+ "expect": [
+  "PAN number"
+ ],
+ "verified": [
+  "SNEHA REDDY MALLIPUDI",
+  "ABCDE1234F"
+ ],
+ "seconds": 337.4,
+ "exposure_before": {
+  "identity": 4,
+  "financial_or_id": 4
+ },
+ "exposure_after": {},
+ "safe": true,
+ "attacks": 3,
+ "textcheck_found": [
+  "PAN number"
+ ],
+ "edits": [
+  "pixelate:name field:box",
+  "pixelate:identification number:box",
+  "pixelate:father's name:box"
+ ],
+ "values_printed": [],
+ "survived": [],
+ "changed": 0.0483
+}

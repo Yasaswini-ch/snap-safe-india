@@ -1,0 +1,39 @@
+{
+ "id": "upi_screen",
+ "kind": "leak",
+ "secrets": [
+  "Asha Kumari",
+  "asha.k@okhdfcbank"
+ ],
+ "expect": [
+  "UPI ID"
+ ],
+ "verified": [
+  "Asha Kumari",
+  "asha.k@okhdfcbank"
+ ],
+ "seconds": 491.0,
+ "exposure_before": {
+  "identity": 4,
+  "financial_or_id": 4,
+  "other_people": 4
+ },
+ "exposure_after": {
+  "financial_or_id": 1
+ },
+ "safe": true,
+ "attacks": 4,
+ "textcheck_found": [
+  "phone number"
+ ],
+ "edits": [
+  "pixelate:recipient name:box",
+  "pixelate:upi id:box",
+  "pixelate:bank name:box",
+  "pixelate:account number:box",
+  "pixelate:transaction amount:box"
+ ],
+ "values_printed": [],
+ "survived": [],
+ "changed": 0.0776
+}

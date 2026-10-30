@@ -1,0 +1,35 @@
+{
+ "id": "house_board",
+ "kind": "leak",
+ "secrets": [
+  "7-19-3",
+  "Venkata Ramana",
+  "MVP Colony"
+ ],
+ "expect": [
+  "street address"
+ ],
+ "verified": [
+  "7-19-3",
+  "Venkata Ramana",
+  "MVP Colony"
+ ],
+ "seconds": 158.5,
+ "exposure_before": {
+  "home_location": 4,
+  "identity": 3
+ },
+ "exposure_after": {},
+ "safe": true,
+ "attacks": 3,
+ "textcheck_found": [],
+ "edits": [
+  "pixelate:neighborhood and city:box",
+  "pixelate:person's name and title:box",
+  "pixelate:door number text:box",
+  "pixelate:house name text:box"
+ ],
+ "values_printed": [],
+ "survived": [],
+ "changed": 0.0911
+}

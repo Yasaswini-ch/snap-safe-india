@@ -1,0 +1,41 @@
+{
+ "id": "wedding_invite",
+ "kind": "leak",
+ "secrets": [
+  "Kiran Kumar",
+  "Divya",
+  "Dwaraka Nagar",
+  "90000 12345"
+ ],
+ "expect": [
+  "phone number"
+ ],
+ "verified": [
+  "Kiran Kumar",
+  "Divya",
+  "Dwaraka Nagar",
+  "90000 12345"
+ ],
+ "seconds": 369.2,
+ "exposure_before": {
+  "identity": 4,
+  "current_location": 4,
+  "contact": 4,
+  "routine": 2
+ },
+ "exposure_after": {},
+ "safe": true,
+ "attacks": 3,
+ "textcheck_found": [],
+ "edits": [
+  "pixelate:full names:box",
+  "pixelate:venue name:box",
+  "pixelate:phone number:box",
+  "pixelate:venue name:box",
+  "pixelate:location text:box",
+  "pixelate:phone number:box"
+ ],
+ "values_printed": [],
+ "survived": [],
+ "changed": 0.1234
+}

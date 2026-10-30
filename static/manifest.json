@@ -1,0 +1,21 @@
+{
+  "name": "Snap Safe India",
+  "short_name": "Snap Safe",
+  "description": "A photo privacy agent for India: it finds what a stranger could use in your photo and hides only that.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#070412",
+  "theme_color": "#070412",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "share_target": {
+    "action": "/share",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": { "files": [{ "name": "photos", "accept": ["image/jpeg", "image/png", "image/webp"] }] }
+  }
+}

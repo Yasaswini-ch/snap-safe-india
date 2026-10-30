@@ -1,0 +1,17 @@
+{
+ "id": "ctrl_tea_menu",
+ "kind": "control",
+ "secrets": [],
+ "expect": [],
+ "verified": [],
+ "seconds": 67.8,
+ "exposure_before": {},
+ "exposure_after": {},
+ "safe": true,
+ "attacks": 1,
+ "textcheck_found": [],
+ "edits": [],
+ "values_printed": [],
+ "survived": [],
+ "changed": 0.0
+}

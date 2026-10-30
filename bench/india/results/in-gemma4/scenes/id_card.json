@@ -1,0 +1,43 @@
+{
+ "id": "id_card",
+ "kind": "leak",
+ "secrets": [
+  "Ravi Teja Kondapalli",
+  "2345 6789 0123",
+  "12-4/7",
+  "530003"
+ ],
+ "expect": [
+  "Aadhaar number",
+  "PIN code"
+ ],
+ "verified": [
+  "Ravi Teja Kondapalli",
+  "2345 6789 0123",
+  "12-4/7",
+  "530003"
+ ],
+ "seconds": 228.5,
+ "exposure_before": {
+  "identity": 4,
+  "home_location": 4,
+  "financial_or_id": 4
+ },
+ "exposure_after": {},
+ "safe": true,
+ "attacks": 3,
+ "textcheck_found": [
+  "Aadhaar number",
+  "PIN code",
+  "street address"
+ ],
+ "edits": [
+  "pixelate:city name:box",
+  "pixelate:identification number:box",
+  "pixelate:full name:box",
+  "pixelate:locality name:box"
+ ],
+ "values_printed": [],
+ "survived": [],
+ "changed": 0.0786
+}
