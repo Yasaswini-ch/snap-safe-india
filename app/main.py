@@ -104,7 +104,7 @@ def status():
 
 @app.post("/api/run")
 async def run(request: Request, photos: list[UploadFile] = File(...), private: bool = Form(False),
-              code: str = Form(""), caption: str = Form(""), captions: str = Form("")):
+              code: str = Form(""), caption: str = Form(""), captions: str = Form(""), lang: str = Form("en")):
     """Stream the agent's progress as NDJSON: attack, plan, edits, re-attack, done (with the final PNGs).
     Several photos are scanned as one account: attacked together, so combinations across them count.
     private: Muse Spark Open finds the clues and every edit runs here; nothing goes to Meta's API.
@@ -132,7 +132,8 @@ async def run(request: Request, photos: list[UploadFile] = File(...), private: b
         release_run()
         raise
     mock = not private and meta.client is None
-    attack = meta.mock_attacker() if mock else functools.partial(meta.attack, private=private)
+    lang = lang if lang in meta.LANGS else "en"  # the language of the report's prose
+    attack = meta.mock_attacker() if mock else functools.partial(meta.attack, private=private, lang=lang)
     read = None if mock else functools.partial(meta.read_text, private=private, effort=meta.ATTACK_EFFORT)
     rewrite = None if mock else functools.partial(meta.rewrite_caption, private=private)
     texts = [t.strip() for t in texts]

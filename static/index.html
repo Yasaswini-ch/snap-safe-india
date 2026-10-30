@@ -306,6 +306,8 @@
       transform: perspective(800px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
       transition: transform .18s ease-out, opacity .6s ease calc(var(--i, 0) * 60ms), translate .6s ease calc(var(--i, 0) * 60ms); }
   }
+  .lang { display: grid; gap: 8px; }
+  .lang select { font: inherit; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--card); color: var(--fg); max-width: 320px; }
   /* Indian benchmark section: filled from india/results.json, hidden without it */
   .table-wrap { overflow-x: auto; margin-top: 14px; }
   .bench { border-collapse: collapse; width: 100%; font-size: 15px; }
@@ -466,6 +468,14 @@
         <span><b>Caption</b> <span class="muted small">optional: what you will post with the photos. It is checked
           with them, since a caption often names what the photo hides.</span></span>
         <textarea id="caption" rows="2" maxlength="2200" placeholder="Moved into our new flat in MVP Colony! #newhome #vizag"></textarea>
+      </label>
+      <label class="lang" for="lang">
+        <span><b>Report language</b> <span class="muted small">what the exposure report is written in. The edits are the same.</span></span>
+        <select id="lang">
+          <option value="en">English</option>
+          <option value="te">తెలుగు (Telugu)</option>
+          <option value="hi">हिन्दी (Hindi)</option>
+        </select>
       </label>
       <label class="drop spot" id="drop">
         <input id="photo" class="sr-only" type="file" accept="image/jpeg,image/png,image/webp" multiple>
@@ -1277,6 +1287,7 @@ async function check(files, captions = null) {
   sent.forEach(f => body.append("photos", f));
   body.append("private", !$("private-wrap").hidden && $("private").checked);
   body.append("code", $("code").value.trim());
+  body.append("lang", $("lang").value);
   if (captions) body.append("captions", JSON.stringify(captions));
   else body.append("caption", $("caption").value.trim());
   begin(files.map(f => URL.createObjectURL(f)), () => fetch("/api/run", { method: "POST", body }));
@@ -1336,6 +1347,10 @@ takeShared();
 navigator.serviceWorker?.register("/sw.js");
 
 // Only recorded samples show up; with none, the whole section stays hidden.
+// Remember the report language on this device.
+try { const saved = localStorage.getItem("lang"); if (saved && [...$("lang").options].some(o => o.value === saved)) $("lang").value = saved; } catch {}
+$("lang").addEventListener("change", () => { try { localStorage.setItem("lang", $("lang").value); } catch {} });
+
 fetch("/api/samples").then(r => r.json()).then(have => {
   const shown = SAMPLES.filter(s => have.includes(s.name));
   $("samples-section").hidden = !shown.length;
