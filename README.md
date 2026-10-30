@@ -123,6 +123,15 @@ the safe default for a public page. This has not been test-deployed yet.
   show.
 - The attacker is told never to print personal values; that is a prompt rule, not a filter.
 
+## Docs
+
+- [How it works](docs/how-it-works.md): each step of the agent, the box tightening, and what "verified" means
+- [Models, quotas and what we tried](docs/models.md): measurements, free-tier limits, and what did not work
+- [The Indian benchmark](docs/benchmark.md): method, commands and results (some tables are waiting for runs)
+- [Deploy and configure](docs/deploy.md): Render steps, every setting, and the Telegram bot
+- [Adding a country](docs/adding-a-country.md): a region pack is one file
+- [Demo script](docs/demo-script.md) and [submission text](docs/submission.md), with placeholders for the results
+
 ## Layout
 
 - `app/agent.py`: the loop (attack, plan, edit, re-attack) and the planner
@@ -133,6 +142,7 @@ the safe default for a public page. This has not been test-deployed yet.
 - `app/samples.py`: recording and replaying the gallery runs
 - `static/index.html`: the whole UI; `scripts/make_logo.py` draws the logo
 - `bench/india`, `bench/indiabench.py`: the Indian benchmark (scenes, scorer, results)
+- `docs/`: the pages listed above
 
 ## License
 

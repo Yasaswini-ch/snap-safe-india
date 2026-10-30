@@ -51,7 +51,7 @@ def main():
         recs = [r for r in recs if r["id"] in shown]
         if not recs:
             continue
-        runs[tag] = totals(recs)
+        runs[tag] = {**totals(recs), "model": recs[0].get("model", ""), "verifier": recs[0].get("verifier", "")}
         for r in recs:
             scenes.setdefault(r["id"], {"id": r["id"], "kind": r["kind"]})[tag] = {
                 "removed": len(r["verified"]) - len(r["survived"]), "secrets": len(r["verified"]),

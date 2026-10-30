@@ -77,6 +77,7 @@ def evaluate(scene: dict, out: Path) -> dict:
     events = list(agent.run([img], attack=functools.partial(meta.attack, private=True), private=True,
                             read=functools.partial(meta.read_text, private=True)))
     rec["seconds"] = round(time.time() - t, 1)
+    rec["model"], rec["verifier"] = meta.OPEN_MODEL, VERIFIER or meta.OPEN_MODEL  # who attacked and who read the photos
     attacks = [e for e in events if e["type"] == "attack"]
     done = events[-1]
     rec["exposure_before"], rec["exposure_after"], rec["safe"] = attacks[0]["exposure"], done["after"], done["safe"]

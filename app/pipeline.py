@@ -52,6 +52,53 @@ def box_mask(shape, box) -> np.ndarray:
     return mask
 
 
+def snap_box(img: np.ndarray, box, core=None) -> list[float]:
+    """Shrink a loose box to the ink inside it. `box` is the search window (normalized [x0, y0, x1, y1]); `core` is the
+    model's own box, which may be smaller when the window was widened. Ink is whatever differs from its local
+    background (text, a barcode, a plate's characters); letters on one line are merged, and the pieces that touch the
+    core are kept. Pieces that run edge to edge through the window (a card's border) are ignored. With no usable ink the
+    box comes back unchanged, so a snap can only tighten an edit, never lose one."""
+    h, w = img.shape[:2]
+    core = core or box
+    x0, y0, x1, y1 = (int(round(box[0] * w)), int(round(box[1] * h)), int(round(box[2] * w)), int(round(box[3] * h)))
+    cx0, cy0, cx1, cy1 = (int(round(core[0] * w)), int(round(core[1] * h)), int(round(core[2] * w)), int(round(core[3] * h)))
+    if x1 - x0 < 8 or y1 - y0 < 8:
+        return list(box)
+    gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)[y0:y1, x0:x1]
+    k = max(15, (min(gray.shape) // 2) | 1)
+    ink = (np.abs(gray.astype(np.int16) - cv2.blur(gray, (k, k)).astype(np.int16)) > 26).astype(np.uint8)
+    if ink.sum() < 12:
+        return list(box)
+    line = max(7, int(0.6 * max(cy1 - cy0, 1)))  # letters of one line merge; separate lines stay apart
+    merged = cv2.dilate(ink, cv2.getStructuringElement(cv2.MORPH_RECT, (line, 3)))
+    n, labels, stats, _ = cv2.connectedComponentsWithStats(merged)
+    keep, nearest = [], None
+    hh, ww = gray.shape
+    for i in range(1, n):
+        x, y, cw, ch, _ = stats[i]
+        spans_x, spans_y = x <= 1 and x + cw >= ww - 1, y <= 1 and y + ch >= hh - 1
+        if (spans_x and ch < 0.25 * hh) or (spans_y and cw < 0.25 * ww):
+            continue  # a border or an edge running through the window
+        gx0, gy0, gx1, gy1 = x + x0, y + y0, x + cw + x0, y + ch + y0
+        if gx1 > cx0 and gx0 < cx1 and gy1 > cy0 and gy0 < cy1:
+            keep.append(i)
+        else:
+            d = (((gx0 + gx1) - (cx0 + cx1)) / 2) ** 2 + (((gy0 + gy1) - (cy0 + cy1)) / 2) ** 2
+            if nearest is None or d < nearest[0]:
+                nearest = (d, i)
+    if not keep and nearest is not None:
+        keep = [nearest[1]]  # the model's box missed: take the closest ink instead
+    if not keep:
+        return list(box)
+    ys, xs = np.nonzero(ink & np.isin(labels, keep).astype(np.uint8))
+    if len(xs) < 8:
+        return list(box)
+    pad = max(3, int(0.3 * (ys.max() - ys.min() + 1)))
+    sx0, sy0 = max(0, xs.min() - pad), max(0, ys.min() - pad)
+    sx1, sy1 = min(ww, xs.max() + 1 + pad), min(hh, ys.max() + 1 + pad)
+    return [(x0 + sx0) / w, (y0 + sy0) / h, (x0 + sx1) / w, (y0 + sy1) / h]
+
+
 def grow(mask: np.ndarray, px: int) -> np.ndarray:
     """Pad the mask so edits cover anti-aliased edges the box or segment missed."""
     k = 2 * px + 1

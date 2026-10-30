@@ -2,6 +2,7 @@
 import base64
 import inspect
 import logging
+import os
 from concurrent.futures import ThreadPoolExecutor
 from itertools import combinations
 
@@ -22,6 +23,7 @@ EXACT_LIMIT = 16  # exact search is 2^n subsets
 ESCALATE = 0.3  # a clue at least this much inside an already-edited area gets the edit that cannot fail
 INPAINT_MAX = 0.005  # private mode: classic inpainting blends a house number but smears anything bigger
 SMALL = 0.01  # private mode: boxes under this share of the frame are widened from the first edit
+SNAP = os.environ.get("BOX_SNAP", "1") != "0"  # shrink each box to the ink inside it (pipeline.snap_box); BOX_SNAP=0 turns it off
 FALLBACK = ("sign", "label")  # plain nouns SAM finds on most objects that carry text, when a clue's own name fails
 MAX_EDITS = 12  # per round: bounds cost and memory on a small host; anything left goes in the next round
 
@@ -101,7 +103,11 @@ def _mask(img: np.ndarray, item: dict, private: bool = False) -> tuple[np.ndarra
     except Exception:
         log.exception("segmentation failed, falling back to the box")
         mask = None
-    return (mask, source) if mask is not None and mask.any() else (pipeline.box_mask(img.shape, item["box"]), "box")
+    if mask is not None and mask.any():
+        return mask, source
+    if SNAP:  # edit the ink inside the box, not the whole box
+        return pipeline.box_mask(img.shape, pipeline.snap_box(img, item["box"], item.get("core"))), "snap"
+    return pipeline.box_mask(img.shape, item["box"]), "box"
 
 
 def _generate(img: np.ndarray, item: dict) -> np.ndarray | None:
@@ -246,7 +252,7 @@ def run(imgs: list[np.ndarray], attack=meta.attack, target: int = TARGET, privat
             with ThreadPoolExecutor(8) as pool:
                 known = dict(zip([c["id"] for c in located],
                                  pool.map(lambda c: _mask(imgs[c["photo"]], c, private), located)))
-            outlines = {i: _bounds(m) for i, (m, source) in known.items() if source != "box"}
+            outlines = {i: _bounds(m) for i, (m, source) in known.items() if source not in ("box", "snap")}
             if outlines:
                 yield {"type": "outlines", "model": "SAM 3" if private else "SAM 3.1", "outlines": outlines}
         ids, stuck = plan(graph, target, captions=bool(any(captions) and rewrite))
@@ -271,7 +277,7 @@ def run(imgs: list[np.ndarray], attack=meta.attack, target: int = TARGET, privat
             if private and (again or (box[2] - box[0]) * (box[3] - box[1]) < SMALL):
                 box = widen(box)
             tried[p].append((box, c["label"]))
-            items.setdefault(p, []).append({"id": c["id"], "photo": p, "label": c["label"], "box": box,
+            items.setdefault(p, []).append({"id": c["id"], "photo": p, "label": c["label"], "box": box, "core": c["box"],
                                             "action": "pixelate" if again else c["suggested"]})
         count = sum(map(len, items.values())) + len(words)
         yield {"type": "plan", "round": n, "clues": ids, "stuck": len(stuck),
@@ -507,7 +513,7 @@ if __name__ == "__main__":
     meta.segment = meta.edit = lambda *a: calls.append(a)
     events = list(run([img], attack=meta.mock_attacker(), private=True))
     edits = next(e for e in events if e["type"] == "edits")["edits"]
-    assert not calls and {d["mask"] for d in edits} == {"box"}
+    assert not calls and {d["mask"] for d in edits} == ({"snap"} if SNAP else {"box"})
     assert [d["engine"] for d in edits] == ["pixelate", "pixelate", "pixelate"], edits
     small = {"label": "house number", "box": [0.5, 0.5, 0.53, 0.53], "action": "erase"}
     assert apply_edits(img, [small], private=True)[1][0]["engine"] == "inpaint"
