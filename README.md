@@ -23,6 +23,9 @@ Built for **Hacktoberfest Hack Day x AI for Vizag** (Nov 1, 2026).
   (`OPEN_RPM`) so a free key does not answer 429s, and an optional **second model for the re-attacks**
   (`OPEN_RECHECK_MODEL`): it has its own quota, and a second opinion on the edited photo is a better check than the same
   model grading its own edits.
+- **Report language.** The exposure report can be written in English, Telugu or Hindi (a dropdown on the page, `/lang` in the
+  bot). Only the prose changes: clue labels and the edits stay the same.
+- **A Telegram bot** that takes a photo and sends back the cleaned copy (see below).
 - **A rendered Indian benchmark** ([bench/india](bench/india), [bench/indiabench.py](bench/indiabench.py)), a new look,
   and a new logo.
 
@@ -88,6 +91,21 @@ placeholder attacker. Self-checks: `uv run python -m app.pipeline`, `app.meta`, 
 Re-record samples after changing the agent: `uv run --env-file .env python -m app.samples in_id_card in_parcel ...`.
 Each recording remembers which model made it. Run the benchmark with `uv run --env-file .env python -m bench.indiabench`
 (`REGION=global` for the pack-off run), then `python -m bench.india.publish` to fill the page's results section.
+
+## Telegram bot
+
+[app/telegram_bot.py](app/telegram_bot.py) puts the same agent behind a Telegram chat. Send it a photo (or an image as a file),
+and it replies with the cleaned PNG, what was hidden, what a stranger could learn before and after, and an honest verdict.
+
+1. In Telegram, talk to **@BotFather**, send `/newbot`, and copy the token it gives you.
+2. Put it in `.env` as `TELEGRAM_BOT_TOKEN=...` (never commit it).
+3. Run `uv run --env-file .env python -m app.telegram_bot` and keep that window open.
+4. In the chat: `/unlock <access code>` (the same `LIVE_CODE` as the site, if one is set), then send a photo.
+
+Commands: `/lang en|te|hi` for the report language, `/help`. One photo is checked at a time, others queue, and each chat is
+limited to `BOT_RUNS_PER_HOUR` photos an hour (default 3), because the model's quota is the limit. It is a separate process
+from the web page, so run it on a laptop for the demo. The offline self-check is
+`uv run python -m app.telegram_bot --selftest`. It has not been run against real Telegram yet.
 
 ## Deploy on Render
 
