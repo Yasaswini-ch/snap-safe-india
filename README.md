@@ -183,6 +183,7 @@ the safe default for a public page. This has not been test-deployed yet.
 - [Deploy and configure](docs/deploy.md): Render steps, every setting, and the Telegram bot
 - [Adding a country](docs/adding-a-country.md): a region pack is one file
 - [Demo script](docs/demo-script.md) and [write-up text](docs/write-up.md), with placeholders for the results
+- [Team plan](docs/team-plan.md): who does what before the event, with the order of work and the risks
 
 ## Layout
 
