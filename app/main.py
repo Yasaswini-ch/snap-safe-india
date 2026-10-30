@@ -114,7 +114,7 @@ async def run(request: Request, photos: list[UploadFile] = File(...), private: b
         raise HTTPException(503, "This mode is switched off right now. The sample photos still work.")
     # ponytail: no lockout on wrong codes; use a long random code, since each guess is a full upload anyway.
     if LIVE_CODE and not hmac.compare_digest(code.encode(), LIVE_CODE.encode()):
-        raise HTTPException(403, "That judges' code doesn't match. The sample photos work without one.")
+        raise HTTPException(403, "That access code doesn't match. The sample photos work without one.")
     if len(photos) > MAX_PHOTOS:
         raise HTTPException(413, f"At most {MAX_PHOTOS} photos at once")
     try:
