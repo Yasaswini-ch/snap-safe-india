@@ -469,14 +469,15 @@ def rewrite_caption(caption: str, details: list[str], private: bool = False) -> 
     return new.strip() if isinstance(new, str) and new.strip() else caption
 
 
-def read_text(img: np.ndarray, private: bool = False, effort: str = "") -> list[str]:
+def read_text(img: np.ndarray, private: bool = False, effort: str = "", model: str = "") -> list[str]:
     """Every readable piece of text, verbatim. A literal task, so text in the photo has little to steer; the open
-    model fell for an injected note as the attacker, not as a reader. effort: as ATTACK_EFFORT ("" = default)."""
+    model fell for an injected note as the attacker, not as a reader. effort: as ATTACK_EFFORT ("" = default).
+    model: another model to read with ("" = OPEN_MODEL)."""
     schema = {"type": "object", "properties": {"texts": {"type": "array", "items": {"type": "string"}}},
               "required": ["texts"], "additionalProperties": False}
     messages = [{"role": "user", "content": [{"type": "text", "text": TRANSCRIBE},
                                              {"type": "image_url", "image_url": {"url": _data_url(_small(img))}}]}]
-    texts = _ask(messages, schema, "transcript", private, effort).get("texts")
+    texts = _ask(messages, schema, "transcript", private, effort, model=model).get("texts")
     return [str(t) for t in texts if isinstance(t, (str, int, float))] if isinstance(texts, list) else []
 
 

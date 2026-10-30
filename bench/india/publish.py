@@ -1,9 +1,11 @@
 """Copy the Indian benchmark's results and before/after images into static/india for the page's results section.
 
-Usage: uv run python -m bench.india.publish        (after bench.indiabench has run for the tags below)
+Usage: uv run python -m bench.india.publish [--all]   (after bench.indiabench has run for the tags below)
+The page shows the five core scenes; --all shows every scene that has results.
 """
 import json
 import shutil
+import sys
 from pathlib import Path
 
 HERE = Path(__file__).parent
@@ -41,9 +43,12 @@ def totals(recs: list[dict]) -> dict:
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
     runs, scenes = {}, {}
+    spec = json.loads((HERE / "scenes.json").read_text(encoding="utf-8"))
+    shown = {sc["id"] for sc in spec if sc.get("core", True) or "--all" in sys.argv}
     for tag in TAGS:
         folder = HERE / "results" / tag
         recs = [json.loads(p.read_text(encoding="utf-8")) for p in sorted((folder / "scenes").glob("*.json"))]
+        recs = [r for r in recs if r["id"] in shown]
         if not recs:
             continue
         runs[tag] = totals(recs)

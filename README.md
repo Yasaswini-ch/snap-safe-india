@@ -55,7 +55,7 @@ Gemma 4 on this key is only the 26B model; the 31B model returned a server error
 
 ## Benchmark
 
-Ten rendered Indian scenes with planted fictional secrets (ID cards, a courier label, a number plate, a UPI screen, a
+Ten rendered Indian scenes are defined, and the benchmark runs five core ones by default (`--all` runs all ten): an ID card, a courier label, a number plate, a Telugu sign, and a control with nothing personal. Planted fictional secrets (ID cards, a courier label, a number plate, a UPI screen, a
 Telugu shop sign, a wedding invite, and a control with nothing personal). A secret counts as removed only if it was
 readable in the original and is gone from the result. The scenes are drawn, not photographed, and the verifier is the
 same kind of model as the attacker. See [bench/india](bench/india).

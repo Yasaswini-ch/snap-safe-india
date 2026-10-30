@@ -1424,7 +1424,7 @@ fetch("india/results.json").then(r => r.ok ? r.json() : Promise.reject()).then(d
     ["Mean seconds per scene", r => String(r.seconds)],
   ];
   const first = data.runs[tags[0]];
-  $("results-lede").textContent = `${first.scenes} rendered Indian scenes with planted fictional secrets: ID cards, a courier label, a number plate, a UPI screen, a Telugu shop sign.`;
+  $("results-lede").textContent = `${first.scenes} rendered Indian scenes with planted fictional secrets, such as ID cards, courier labels, number plates and shop signs.`;
   $("bench").append(
     el("thead", {}, el("tr", {}, el("th", { textContent: "Metric" }), ...tags.map(t => el("th", { textContent: names[t] })))),
     el("tbody", {}, ...metrics.map(([label, f]) => el("tr", {}, el("th", { textContent: label, scope: "row" }),

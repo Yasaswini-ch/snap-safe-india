@@ -11,7 +11,8 @@
   "expect": [
    "Aadhaar number",
    "PIN code"
-  ]
+  ],
+  "core": true
  },
  {
   "id": "tax_card",
@@ -22,7 +23,8 @@
   ],
   "expect": [
    "PAN number"
-  ]
+  ],
+  "core": false
  },
  {
   "id": "parcel_label",
@@ -37,7 +39,8 @@
    "phone number",
    "PIN code",
    "street address"
-  ]
+  ],
+  "core": true
  },
  {
   "id": "car_plate_in",
@@ -47,7 +50,8 @@
   ],
   "expect": [
    "vehicle plate"
-  ]
+  ],
+  "core": true
  },
  {
   "id": "house_board",
@@ -59,7 +63,8 @@
   ],
   "expect": [
    "street address"
-  ]
+  ],
+  "core": false
  },
  {
   "id": "upi_screen",
@@ -70,7 +75,8 @@
   ],
   "expect": [
    "UPI ID"
-  ]
+  ],
+  "core": false
  },
  {
   "id": "telugu_sign",
@@ -82,7 +88,8 @@
   ],
   "expect": [
    "phone number"
-  ]
+  ],
+  "core": true
  },
  {
   "id": "college_lanyard",
@@ -92,7 +99,8 @@
    "21A91A0512",
    "Block C, Room 214"
   ],
-  "expect": []
+  "expect": [],
+  "core": false
  },
  {
   "id": "wedding_invite",
@@ -105,12 +113,14 @@
   ],
   "expect": [
    "phone number"
-  ]
+  ],
+  "core": false
  },
  {
   "id": "ctrl_tea_menu",
   "kind": "control",
   "secrets": [],
-  "expect": []
+  "expect": [],
+  "core": true
  }
 ]

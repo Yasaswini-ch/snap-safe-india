@@ -5,7 +5,9 @@ the original and in the cleaned photo; a secret counts only if it was legible in
 private mode, so the attacker is whatever OPEN_MODEL is (Gemma 4 in this fork). Regions come from REGION, so running
 once with REGION=in and once with REGION=global shows what the India pack adds.
 
-Usage: REGION=in uv run --env-file .env python -m bench.indiabench [--tag in] [--workers 3] [--only id,id] [--force]
+Usage: REGION=in uv run --env-file .env python -m bench.indiabench [--tag in] [--workers 3] [--only id,id] [--all] [--verifier model] [--force]
+Runs the five core scenes; --all runs all ten. Scenes already scored in the results folder are reused, so a later --all run adds the rest
+and the summary covers every scene. --verifier reads the before and after photos with another model (independent, and it spares the quota).
 Scenes: uv run python -m bench.india.make_scenes
 """
 import argparse
@@ -63,11 +65,14 @@ def with_parts(secrets: list[str]) -> list[str]:
     return out
 
 
+VERIFIER = ""  # --verifier: the model that reads the before and after photos
+
+
 def evaluate(scene: dict, out: Path) -> dict:
     img, _ = pipeline.load_image((IMAGES / f"{scene['id']}.jpg").read_bytes())
     secrets = with_parts(scene["secrets"])
     rec = {"id": scene["id"], "kind": scene["kind"], "secrets": secrets, "expect": scene["expect"]}
-    rec["verified"] = legible(secrets, meta.read_text(img, private=True))
+    rec["verified"] = legible(secrets, meta.read_text(img, private=True, model=VERIFIER))
     t = time.time()
     events = list(agent.run([img], attack=functools.partial(meta.attack, private=True), private=True,
                             read=functools.partial(meta.read_text, private=True)))
@@ -83,7 +88,7 @@ def evaluate(scene: dict, out: Path) -> dict:
     said = [attacker_text(a["graph"]) for a in attacks]
     rec["values_printed"] = legible([s for s in rec["verified"] if len(norm(s)) >= PRINTED_MIN], said)
     ours = np.asarray(Image.open(io.BytesIO(base64.b64decode(done["images"][0]))).convert("RGB"))
-    rec["survived"] = legible(rec["verified"], meta.read_text(ours, private=True))
+    rec["survived"] = legible(rec["verified"], meta.read_text(ours, private=True, model=VERIFIER))
     rec["changed"] = round(changed(img, ours), 4)
     Image.fromarray(ours).save(out / "images" / f"{scene['id']}_after.jpg", quality=88)
     return rec
@@ -145,6 +150,8 @@ def main():
     ap.add_argument("--tag", default=None, help="results folder name; defaults to the REGION setting")
     ap.add_argument("--workers", type=int, default=3)
     ap.add_argument("--only", default="")
+    ap.add_argument("--all", action="store_true", help="run all ten scenes, not just the five core ones")
+    ap.add_argument("--verifier", default="", help="model that reads the before and after photos (default: the attacker's model)")
     ap.add_argument("--force", action="store_true")
     args = ap.parse_args()
     if meta.open_client is None:
@@ -155,6 +162,10 @@ def main():
     (out / "scenes").mkdir(parents=True, exist_ok=True)
     (out / "images").mkdir(exist_ok=True)
     scenes = json.loads((ROOT / "scenes.json").read_text(encoding="utf-8"))
+    global VERIFIER
+    VERIFIER = args.verifier
+    if not args.all and not args.only:
+        scenes = [sc for sc in scenes if sc.get("core", True)]
     if args.only:
         scenes = [s for s in scenes if s["id"] in args.only.split(",")]
     with ThreadPoolExecutor(args.workers) as pool:
