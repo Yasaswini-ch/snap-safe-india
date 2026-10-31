@@ -1,0 +1,29 @@
+{
+ "model": "gemma-4-26b-a4b-it",
+ "items": [
+  {
+   "id": "parcel_real",
+   "label": "Parcel on a doorstep",
+   "secrets": 9,
+   "removed": 9,
+   "changed": 11.4,
+   "seconds": 235.4
+  },
+  {
+   "id": "plate_real",
+   "label": "Number plate at a gate",
+   "secrets": 1,
+   "removed": 1,
+   "changed": 1.5,
+   "seconds": 96.1
+  },
+  {
+   "id": "upi_real",
+   "label": "Payment screen at a counter",
+   "secrets": 5,
+   "removed": 5,
+   "changed": 1.1,
+   "seconds": 184.2
+  }
+ ]
+}

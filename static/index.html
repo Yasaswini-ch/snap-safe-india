@@ -365,6 +365,7 @@
   /* At 375px the brand and the button were wider than the pill and the button stuck out of it. */
   @media (max-width: 420px) { .pillnav { gap: 8px; padding-left: 12px; } .pillnav .brand { font-size: 14px; gap: 6px; } .pillnav .btn { padding: 8px 12px; font-size: 14px; } }
   @media (max-width: 350px) { .pillnav .brand { font-size: 12px; } .pillnav .btn { padding: 8px 10px; font-size: 13px; } }
+  .subhead { margin: 28px 0 4px; font-size: 1.15rem; }
 </style>
 </head>
 <body>
@@ -443,7 +444,12 @@
     <p class="lede" id="results-lede"></p>
     <div class="table-wrap"><table class="bench" id="bench"></table></div>
     <div class="pairs" id="pairs"></div>
-    <p class="muted small">Rendered scenes with fictional values, not real photos, one run per setting. The attacker
+    <div id="real" hidden>
+      <h3 class="subhead">Photo-style images</h3>
+      <p class="lede" id="real-lede"></p>
+      <div class="pairs" id="real-pairs"></div>
+    </div>
+    <p class="muted small">Rendered scenes and generated photo-style images with fictional values, not photographs of real documents, one run per setting. The attacker
       samples, so numbers move between runs. Scoring: a secret counts as removed only if it was readable in the original
       and is gone from the result. Scenes and scorer are in <code>bench/india</code> and <code>bench/indiabench.py</code>.</p>
   </section>
@@ -1412,6 +1418,18 @@ fetch("/api/samples").then(r => r.json()).then(have => {
     return b;
   }));
 }).catch(() => { $("samples-section").hidden = true; });
+
+fetch("india/real/results.json").then(r => r.ok ? r.json() : Promise.reject()).then(data => {
+  if (!data.items.length) return;
+  const total = data.items.reduce((a, i) => [a[0] + i.removed, a[1] + i.secrets], [0, 0]);
+  $("real-lede").textContent = `Three photo-style images with made-up values, read and edited by ${data.model}: ${total[0]} of ${total[1]} secrets removed. One run each with the weaker free model. The parcel edit covers far more than the label, because the box is tilted.`;
+  $("real-pairs").append(...data.items.map(i => el("figure", { className: "pair" },
+    el("div", { className: "imgs" },
+      el("img", { src: `india/real/${i.id}.jpg`, alt: `${i.label} before`, loading: "lazy" }),
+      el("img", { src: `india/real/${i.id}_after.jpg`, alt: `${i.label} after`, loading: "lazy" })),
+    el("figcaption", { textContent: `${i.label}: ${i.removed}/${i.secrets} secrets removed, ${i.changed}% changed` }))));
+  $("real").hidden = false;
+}).catch(() => {});
 
 fetch("india/results.json").then(r => r.ok ? r.json() : Promise.reject()).then(data => {
   const tags = ["in", "global"].filter(t => data.runs[t]);

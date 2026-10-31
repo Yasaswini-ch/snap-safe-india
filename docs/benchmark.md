@@ -293,16 +293,16 @@ because the Gemini key was out of quota that day. India pack on, one run each, p
 
 | Photo | Secrets removed | Frame changed | Seconds |
 |---|---|---|---|
-| Parcel | 6 of 6 | 11.4% | 235 |
-| Payment screen | 3 of 3 | 1.1% | 184 |
+| Parcel | 9 of 9 | 11.4% | 235 |
+| Payment screen | 5 of 5 | 1.1% | 184 |
 | Number plate | 1 of 1 | 1.5% | 96 |
 
-All three ended with nothing readable in the edited photo, and the attacker's report echoed none of the values. The plate and the payment
+Secrets are counted word by word for names, as in the rest of this page (15 of 15 in all). All three ended with nothing readable in the edited photo, and the attacker's report echoed none of the values. The plate and the payment
 screen are clean edits (the amount and the green tick stay). The parcel is not: the label is hidden, but the boxes are much larger than the label
 and spill onto the wall, the door and the doormat, because the box is tilted in the photo. It leaks nothing and looks wrong. This is the box
 over-sizing already named in the limits, worse on a photograph than on a rendered scene. One run each with the weaker model, so it shows the agent
 works on photographs and not how often. Run again with Gemini 3 Flash after the quota resets.
-Reproduce with `bench/india/real/run.py`.
+Reproduce with `bench/india/real/run.py`; `bench/india/real/publish.py` puts them on the page.
 
 ## Limits
 
