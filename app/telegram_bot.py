@@ -137,6 +137,9 @@ def report(summary: str, done: dict) -> str:
     if done["safe"]:
         verdict = ("My own re-check found nothing specific left. That is my judgment, not a guarantee, so look at "
                    "the picture before you post it.")
+    elif done.get("leftover"):
+        verdict = ("A last literal read of the cleaned photo still finds " + ", ".join(done["leftover"]) +
+                   ", so this copy is not verified. Look at it carefully before you post.")
     elif done["unverified"]:
         verdict = "The re-check did not finish, so this copy is not verified. Look at it carefully before you post."
     elif done["doubt"]:

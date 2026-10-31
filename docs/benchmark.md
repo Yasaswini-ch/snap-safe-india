@@ -49,22 +49,38 @@ With the pack off the model missed the whole PAN card and changed twice as much 
 lenient: it counted a half-hidden name as removed, which a recorded Gemma sample later showed is wrong. Treat these as
 a first look.
 
-### Five core scenes, strict scoring
+### Gemini 3 Flash, India pack on, four of the five core scenes
 
-_To add after the run. Model that found the clues: ______. Model that read the photos: ______. Date: ______._
+Oct 31, 2026. Model that found the clues: `gemini-3-flash-preview`. Model that read the photos: `gemma-4-26b-a4b-it`. One run, with
+strict scoring and box snapping on. **This run came before the final literal check was added to the agent.** The control scene
+did not run, because the key's daily quota ran out, and the pack-off run was not done for the same reason.
 
-| | India pack on | India pack off |
+| | India pack on |
+|---|---|
+| Planted secrets removed | 11 of 19 (58%) |
+| Scenes with every secret removed | 2 of 4 |
+| Share of the photo changed (mean) | 7.1% |
+| Leak scenes flagged | 4 of 4 |
+| Text check found the expected ID types | 4 of 4 |
+| Values echoed in the report | 1 of 14 |
+| Mean seconds per scene | 44 |
+
+| Scene | Secrets removed | Changed |
 |---|---|---|
-| Planted secrets removed | _ of _ | _ of _ |
-| Scenes with every secret removed | _ of _ | _ of _ |
-| Share of the photo changed (mean) | _% | _% |
-| Leak scenes flagged | _ of _ | _ of _ |
-| Control falsely flagged | _ of _ | _ of _ |
-| Text check found the expected ID types | _ of _ | _ of _ |
-| Values echoed in the report | _ of _ | _ of _ |
-| Mean seconds per scene | _ | _ |
+| ID card | 2 of 7 (name and PIN still readable) | 4.1% |
+| Courier label | 7 of 7 | 17.3% |
+| Number plate | 1 of 1 | 2.8% |
+| Telugu sign | 1 of 4 | 4.3% |
 
-Per-scene tables are in `bench/india/results/<tag>/summary.md`.
+This is much weaker than the recordings in the sample gallery, which were single runs we picked and checked by hand. The ID card
+came out clean in a recorded run and left the name and PIN readable here, with the edit sitting just below the name line. The
+agent still called that result safe, because its own re-check missed it. That is the failure the final literal check targets
+(see [how-it-works.md](how-it-works.md)); the scenes need to be run again with it. Raw per-scene files go in
+`bench/india/results/in` and are committed with the rerun.
+
+### India pack off
+
+_Not run: no quota left on the key. To add._
 
 ### Gemma 4 on the same scenes
 

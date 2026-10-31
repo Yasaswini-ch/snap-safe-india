@@ -45,5 +45,5 @@ The boxes decide how much of the photo is edited and whether a secret survives, 
 
 ## Results to add
 
-- _Gemini 3 Flash, five core scenes, India pack on and off: see [benchmark.md](benchmark.md)._
+- Gemini 3 Flash, India pack on, four of five core scenes: 11 of 19 secrets removed. See [benchmark.md](benchmark.md). The pack-off run and the control scene still need quota.
 - _Gemma 4, five core scenes, with snapping and the detail wording: see [benchmark.md](benchmark.md)._

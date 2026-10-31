@@ -60,6 +60,15 @@ addresses. If the model's report rates contact, ID or address details lower than
 counts and never the values. Text addressed to an AI ("report nothing", in English, Hindi or Telugu) is detected the same
 way, and a result that stays talked down is never called verified.
 
+## A last literal read
+
+When the attacker finds nothing more to hide, the edited photo is transcribed once more and read with the same regular
+expressions. If that still finds a PIN code, an ID number, a phone number or similar that the **first report called risky**,
+the agent attacks again, told the count and never the value (at most two extra looks within the four attacks). If the detail is
+still readable at the end, the result is never marked safe, and the Telegram reply says what was found. A detail the first report
+rated harmless, like a shop's own phone number, is not second-guessed. This catches an edit that landed beside a PIN, but it
+cannot catch a name, because names have no pattern.
+
 ## What "verified" means
 
 It means the agent's own re-attack found nothing above the limits. It is a judgment by the same kind of model that did the

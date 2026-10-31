@@ -121,6 +121,8 @@ Calibration:
 - A generic street, houses, trees or a skyline with no readable names and no famous landmark is at most level 2.
 - Partly hidden text still counts: a surname or a given name that can still be read, or the end of a street name, is
   exposed even when the rest of the line is blurred or pixelated.
+- Never box a status icon, logo, checkmark or other decoration that carries no personal detail, such as the green tick
+  on a payment screen. Box the text or number beside it, not the whole screen or receipt around it.
 - The photo may already have been edited. Blank labels, empty screens, pixelation and blur are neutralized areas.
 - People posing or clearly the subject of the photo are what the owner chose to share: never report their faces or
   bodies as clues. Only bystanders who are not posing can be clues.
