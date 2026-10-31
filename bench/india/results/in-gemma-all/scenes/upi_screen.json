@@ -1,0 +1,65 @@
+{
+ "id": "upi_screen",
+ "kind": "leak",
+ "secrets": [
+  "Asha Kumari",
+  "asha.k@okhdfcbank",
+  "Asha",
+  "Kumari"
+ ],
+ "expect": [
+  "UPI ID"
+ ],
+ "verified": [
+  "Asha Kumari",
+  "asha.k@okhdfcbank",
+  "Asha",
+  "Kumari"
+ ],
+ "seconds": 132.3,
+ "model": "gemma-4-26b-a4b-it",
+ "verifier": "gemma-4-26b-a4b-it",
+ "exposure_before": {
+  "identity": 3,
+  "financial_or_id": 4
+ },
+ "exposure_after": {},
+ "safe": true,
+ "attacks": 2,
+ "textcheck_found": [
+  "UPI ID"
+ ],
+ "edits": [
+  "pixelate:recipient name:snap",
+  "pixelate:UPI ID:snap",
+  "pixelate:reference number:snap",
+  "pixelate:bank and account details:snap"
+ ],
+ "values_printed": [],
+ "survived": [],
+ "changed": 0.0547,
+ "requests": {
+  "total": 9,
+  "failed": 3,
+  "by_role": {
+   "agent": 6,
+   "verifier": 3
+  },
+  "by_model": {
+   "gemma-4-26b-a4b-it": 9
+  },
+  "by_kind": {
+   "attack": 1,
+   "attack_more": 1,
+   "transcribe": 7
+  },
+  "by_outcome": {
+   "200": 6,
+   "500": 3
+  },
+  "by_model_role": {
+   "gemma-4-26b-a4b-it / agent": 6,
+   "gemma-4-26b-a4b-it / verifier": 3
+  }
+ }
+}

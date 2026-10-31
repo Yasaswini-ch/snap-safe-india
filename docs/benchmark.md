@@ -140,11 +140,33 @@ types, as expected with the pack off; its effect is measured in the offline dete
 
 ### Gemma 4 on the same scenes
 
-_To add: the same table for Gemma, with box snapping and the detail wording on._
+Oct 31, 2026. All ten scenes, `gemma-4-26b-a4b-it` as both attacker and reader, current code (strict scoring, box snapping, final check),
+one run each, with the India pack on and off. Raw files: `bench/india/results/in-gemma-all` and `global-gemma-all`. The car plate scene hit Gemma
+server errors (HTTP 500) in the first pass of each run and was rerun on its own, so the per-run request counts in the summary files cover only the
+last invocation.
+
+| | India pack on | India pack off |
+|---|---|---|
+| Planted secrets removed | 47 of 48 (98%) | 41 of 48 (85%) |
+| Scenes with every secret removed | 8 of 9 | 6 of 9 |
+| Share of the photo changed (mean) | 6.7% | 6.3% |
+| Leak scenes flagged | 9 of 9 | 9 of 9 |
+| Control falsely flagged | 0 of 1 | 0 of 1 |
+| Text check found the expected ID types | 8 of 8 | 0 of 8 |
+| Values echoed in the report | 2 of 34 | 0 of 34 |
+| Mean seconds per scene | 200 | 203 |
+
+Per scene, secrets removed with the pack on / off: ID card 7/7 and 6/7, tax card 5/5 and 5/5, courier label 7/7 and 7/7, number plate 1/1 and 1/1,
+house name board 5/6 and 2/6, UPI screen 4/4 and 4/4, Telugu sign 4/4 and 4/4, college lanyard 6/6 and 4/6, wedding invite 8/8 and 8/8, control 0/0 and 0/0.
+
+The pack is worth about seven secrets of 48 here, mostly on the house name board, the college lanyard and the ID card, and it is what lets the regex
+text check find the ID types at all. That is one run per setting with the weaker model, and the gap sits in three scenes, so it could shift on another
+run. Two planted values were echoed in the attacker's report with the pack on (the pack off echoed none), which is a miss for the "never prints values"
+claim and is not explained by this run alone.
 
 ### The other five scenes
 
-_To add if run with `--all`._
+Included in the ten-scene Gemma 4 run above. The Gemini 3 Flash runs cover only the five core scenes; the other five (tax card, house name board, UPI screen, college lanyard, wedding invite) have no Gemini results yet.
 
 ## Photograph-like images (one run each; first four incomplete)
 

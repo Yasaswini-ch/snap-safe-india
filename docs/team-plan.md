@@ -20,6 +20,7 @@ The team plan for Hacktoberfest Hack Day x AI for Vizag (Sunday, Nov 1, 2026, 10
 - All six samples recorded (ID card, parcel label, Telugu sign, number plate, UPI screen, plus a tea stall menu as the nothing-to-hide control) and read back after cleaning. The UPI one leaves the first name visible Three photo-style samples (parcel, payment screen, number plate) are recorded with Gemma 4 too.
 - Telegram bot, tested offline and once on real Telegram with the made-up ID card (screenshots in `docs/img`)
 - The live page, tested by the team: no problems found
+- All ten benchmark scenes run with Gemma 4, pack on and off (47 of 48 against 41 of 48); the other five have no Gemini run yet
 - Telugu and Hindi wording read through, with extra Hindi, Telugu and Tamil "do not report" phrases and tests (a Tamil reader should still check the Tamil)
 - Submission write-up and the README numbers: filled in with what has run so far (only the demo video link and the access code are left blank)
 - Page check on desktop and at phone width: no overflow or layout bugs; one wording fix in the results section
@@ -84,10 +85,6 @@ Estimates are rough. Swap tasks if someone is faster at something. Yasaswini kee
   - Three of the five core scenes are done with the pack off: ID card, courier label and number plate (see `docs/benchmark.md`). Left: the **Telugu sign and the control**. Set `REGION=global` first (PowerShell: `$env:REGION='global'`), then `uv run --env-file .env python -m bench.indiabench --tag global --verifier gemma-4-26b-a4b-it`. Scenes already scored are reused. Then `uv run python -m bench.india.publish`, check the results section at localhost:8000, add the two scenes to the pack-off table in `README.md` and `docs/benchmark.md`, change the pack-off line in `docs/write-up.md` from three scenes to five, run `git pull`, commit and push.
   - **Needs:** the setup, about 8 Gemini requests, and no other Gemini job running: everyone using the key shares the per-minute limit
   - **Done when:** the results section shows both columns for all five scenes on the live page.
-- [ ] **Run the other five benchmark scenes (optional)** (1 h, mostly waiting)
-  - The rest of the ten: add `--all` to the same commands. Scenes already scored are reused, so only the other five run, and the summary files then cover all ten. The page keeps showing the five core scenes, so this adds depth for the README and the write-up without changing the page.
-  - **Needs:** the first benchmark done, and quota or billing
-  - **Done when:** both summary files list ten scenes.
 - [ ] **Fix the page bugs from QA** (ongoing)
   - The desktop and narrow-window pass is done; what is left is a look on a real phone. Fix what you find in `static/index.html`: wording, layout, anything that looks wrong on a phone. Open the page locally with `uv run --env-file .env uvicorn app.main:app` to check, run `git pull`, then commit and push. Send backend bugs to Likhitha. Page bugs come from your own reading and from the QA list.
   - **Needs:** the setup

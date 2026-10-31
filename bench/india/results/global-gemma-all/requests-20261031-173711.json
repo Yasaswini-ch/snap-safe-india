@@ -1,0 +1,68 @@
+{
+ "snapshot": {
+  "total": 7,
+  "failed": 1,
+  "by_role": {
+   "agent": 5,
+   "verifier": 2
+  },
+  "by_model": {
+   "gemma-4-26b-a4b-it": 7
+  },
+  "by_kind": {
+   "attack": 1,
+   "attack_more": 1,
+   "transcribe": 5
+  },
+  "by_outcome": {
+   "200": 6,
+   "500": 1
+  },
+  "by_model_role": {
+   "gemma-4-26b-a4b-it / agent": 5,
+   "gemma-4-26b-a4b-it / verifier": 2
+  }
+ },
+ "rows": [
+  [
+   "car_plate_in",
+   "agent",
+   "gemma-4-26b-a4b-it",
+   "attack",
+   "200",
+   1
+  ],
+  [
+   "car_plate_in",
+   "agent",
+   "gemma-4-26b-a4b-it",
+   "attack_more",
+   "200",
+   1
+  ],
+  [
+   "car_plate_in",
+   "agent",
+   "gemma-4-26b-a4b-it",
+   "transcribe",
+   "200",
+   2
+  ],
+  [
+   "car_plate_in",
+   "agent",
+   "gemma-4-26b-a4b-it",
+   "transcribe",
+   "500",
+   1
+  ],
+  [
+   "car_plate_in",
+   "verifier",
+   "gemma-4-26b-a4b-it",
+   "transcribe",
+   "200",
+   2
+  ]
+ ]
+}

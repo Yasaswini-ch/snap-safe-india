@@ -1,0 +1,71 @@
+{
+ "id": "house_board",
+ "kind": "leak",
+ "secrets": [
+  "7-19-3",
+  "Venkata Ramana",
+  "MVP Colony",
+  "Venkata",
+  "Ramana",
+  "Colony"
+ ],
+ "expect": [
+  "street address"
+ ],
+ "verified": [
+  "7-19-3",
+  "Venkata Ramana",
+  "MVP Colony",
+  "Venkata",
+  "Ramana",
+  "Colony"
+ ],
+ "seconds": 174.7,
+ "model": "gemma-4-26b-a4b-it",
+ "verifier": "gemma-4-26b-a4b-it",
+ "exposure_before": {
+  "home_location": 4,
+  "identity": 4
+ },
+ "exposure_after": {},
+ "safe": true,
+ "attacks": 3,
+ "textcheck_found": [
+  "street address"
+ ],
+ "edits": [
+  "pixelate:neighborhood and city:snap",
+  "pixelate:name and title:snap",
+  "pixelate:door number:snap",
+  "pixelate:house name:snap"
+ ],
+ "values_printed": [],
+ "survived": [
+  "Ramana"
+ ],
+ "changed": 0.0684,
+ "requests": {
+  "total": 9,
+  "failed": 2,
+  "by_role": {
+   "agent": 6,
+   "verifier": 3
+  },
+  "by_model": {
+   "gemma-4-26b-a4b-it": 9
+  },
+  "by_kind": {
+   "attack": 1,
+   "attack_more": 3,
+   "transcribe": 5
+  },
+  "by_outcome": {
+   "200": 7,
+   "500": 2
+  },
+  "by_model_role": {
+   "gemma-4-26b-a4b-it / agent": 6,
+   "gemma-4-26b-a4b-it / verifier": 3
+  }
+ }
+}

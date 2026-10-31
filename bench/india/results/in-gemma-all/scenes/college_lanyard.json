@@ -1,0 +1,69 @@
+{
+ "id": "college_lanyard",
+ "kind": "leak",
+ "secrets": [
+  "Lakshmi Prasanna Gadde",
+  "21A91A0512",
+  "Block C, Room 214",
+  "Lakshmi",
+  "Prasanna",
+  "Gadde"
+ ],
+ "expect": [],
+ "verified": [
+  "Lakshmi Prasanna Gadde",
+  "21A91A0512",
+  "Block C, Room 214",
+  "Lakshmi",
+  "Prasanna",
+  "Gadde"
+ ],
+ "seconds": 137.7,
+ "model": "gemma-4-26b-a4b-it",
+ "verifier": "gemma-4-26b-a4b-it",
+ "exposure_before": {
+  "work_or_school": 3,
+  "identity": 4,
+  "financial_or_id": 4,
+  "current_location": 4
+ },
+ "exposure_after": {
+  "work_or_school": 1
+ },
+ "safe": true,
+ "attacks": 2,
+ "textcheck_found": [],
+ "edits": [
+  "pixelate:college name and city:snap",
+  "pixelate:full name:snap",
+  "pixelate:roll number:snap",
+  "pixelate:hostel information:snap"
+ ],
+ "values_printed": [],
+ "survived": [],
+ "changed": 0.0812,
+ "requests": {
+  "total": 11,
+  "failed": 5,
+  "by_role": {
+   "agent": 6,
+   "verifier": 5
+  },
+  "by_model": {
+   "gemma-4-26b-a4b-it": 11
+  },
+  "by_kind": {
+   "attack": 1,
+   "attack_more": 1,
+   "transcribe": 9
+  },
+  "by_outcome": {
+   "200": 6,
+   "500": 5
+  },
+  "by_model_role": {
+   "gemma-4-26b-a4b-it / agent": 6,
+   "gemma-4-26b-a4b-it / verifier": 5
+  }
+ }
+}

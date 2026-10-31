@@ -323,7 +323,7 @@ run passed locally.
 
 - [How it works](docs/how-it-works.md): each step of the agent, the box tightening, and what "verified" means
 - [Models, quotas and what we tried](docs/models.md): measurements, free-tier limits, and what did not work
-- [The Indian benchmark](docs/benchmark.md): method, commands and results (the pack-off run now covers all five core scenes), the offline text-detector results and the request counter
+- [The Indian benchmark](docs/benchmark.md): method, commands and results (the pack-off run covers all five core scenes, and a ten-scene Gemma 4 run compares the pack on and off: 47 of 48 secrets against 41 of 48), the offline text-detector results and the request counter
 - [Deploy and configure](docs/deploy.md): Render steps, every setting, and the Telegram bot
 - [Adding a country](docs/adding-a-country.md): a region pack is one file
 - [Demo script](docs/demo-script.md) and [write-up text](docs/write-up.md), with the benchmark numbers filled in
