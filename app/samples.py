@@ -14,7 +14,8 @@ SAMPLES = Path(__file__).parent.parent / "static" / "samples"
 INDIA = Path(__file__).parent.parent / "bench" / "india" / "images"  # the Indian benchmark scenes (bench/india)
 # sample name -> benchmark photos, served as static/samples/{name}-{1..n}.jpg. Several photos = one account scan.
 SOURCES = {"in_id_card": ["id_card"], "in_parcel": ["parcel_label"], "in_plate": ["car_plate_in"],
-           "in_upi": ["upi_screen"], "in_telugu": ["telugu_sign"]}
+           "in_upi": ["upi_screen"], "in_telugu": ["telugu_sign"],
+           "in_tea": ["ctrl_tea_menu"]}  # the control: nothing personal, so nothing should be edited
 PRIVATE = set(SOURCES)  # recorded through the open-model path (OPEN_MODEL), edits on the server
 # What each post would say, for samples that have a caption. Captions often name what the photo's edits hide.
 CAPTIONS: dict[str, str | list[str]] = {

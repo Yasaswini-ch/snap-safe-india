@@ -543,6 +543,7 @@ const SAMPLES = [  // the page shows the ones the server has a recording of (/ap
   { name: "in_plate", label: "Number plate", note: "State and district code, full plate" },
   { name: "in_upi", label: "UPI screen", note: "UPI ID, name and reference number" },
   { name: "in_telugu", label: "Telugu shop sign", note: "Name and phone in Telugu and English" },
+  { name: "in_tea", label: "Tea stall menu", note: "Nothing personal, so nothing is edited" },
 ];
 const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const sleep = ms => new Promise(r => setTimeout(r, calm ? 0 : ms));
@@ -1005,6 +1006,7 @@ async function handle(e) {
     const worst = Math.max(0, ...Object.values(e.after));
     status(e.unverified ? "Edited, but the re-check did not finish, so this copy is not verified. Check it yourself before posting."
          : e.doubt ? "Not verified: a note in the photo seems to have talked the attacker out of reporting contact details that a plain text check read. Check the photo yourself."
+         : e.safe && !e.hidden.length ? "Done. Nothing specific about you is visible in this photo, so nothing was edited. GPS and other file metadata are removed from the copy."
          : e.safe ? "Done. Nothing specific about you is visible any more. GPS and other file metadata are removed too."
          : `Done, but some exposure remains ("${LEVEL[worst]}"). Open the agent trace for details.`, !e.safe);
   } else if (e.type === "error") {
