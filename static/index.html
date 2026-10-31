@@ -396,6 +396,15 @@
   .samples button:active, .detects li:active, .btn:active { transform: none; box-shadow: none; }
   .samples .thumbs, .pair .imgs { position: relative; }
   .mosaic { position: absolute; image-rendering: pixelated; pointer-events: none; z-index: 2; }
+  /* Phone fixes: the benchmark numbers were off screen to the right, and the three hero columns stacked into a very long hero */
+  @media (max-width: 560px) {
+    .bench th, .bench td { white-space: normal; padding: 8px 8px; font-size: 13px; vertical-align: top; }
+    .bench td.num { white-space: nowrap; }
+    .feats { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-top: 26px; }
+    .feats span { display: none; }
+    .feats svg { width: 32px; height: 32px; }
+    .feats b { font-size: .95rem; }
+  }
 </style>
 </head>
 <body>

@@ -20,6 +20,7 @@ The team plan for Hacktoberfest Hack Day x AI for Vizag (Sunday, Nov 1, 2026, 10
 - All six samples recorded (ID card, parcel label, Telugu sign, number plate, UPI screen, plus a tea stall menu as the nothing-to-hide control) and read back after cleaning. The UPI one leaves the first name visible Three photo-style samples (parcel, payment screen, number plate) are recorded with Gemma 4 too.
 - Telegram bot, tested offline and once on real Telegram with the made-up ID card (screenshots in `docs/img`)
 - The live page, tested by the team: no problems found
+- Phone-width page fixes: the benchmark table's numbers were off screen to the right, and the three hero columns made the hero very long; both fixed (any further bugs from a real phone still go to Sriya)
 - Backend QA: all self-checks and tests pass, and probes of the API's error paths (wrong code, empty and oversize files, bad captions, 25 photos, path traversal) found no bugs. Hindi photographs were run, so the Hindi check is done
 - All ten benchmark scenes run with Gemma 4, pack on and off (47 of 48 against 41 of 48); the other five have no Gemini run yet
 - Telugu and Hindi wording read through, with extra Hindi, Telugu and Tamil "do not report" phrases and tests (a Tamil reader should still check the Tamil)
@@ -78,10 +79,6 @@ Estimates are rough. Swap tasks if someone is faster at something. Yasaswini kee
   - Hindi is done. What is left: run one made-up Tamil sign through the page and note what happens, and read the Tamil phrases in `app/meta.py` (`TOLD` and `ADDRESSED`) for wrong or unnatural wording. The page already says the checker is "told to read" Tamil, so say what really happens.
   - **Needs:** the setup, and Gemini quota
   - **Done when:** the Tamil photo has a result noted in `docs/benchmark.md` limits, and the Tamil words are confirmed or corrected.
-- [ ] **Fix the page bugs from QA** (ongoing)
-  - The desktop and narrow-window pass is done; what is left is a look on a real phone. Fix what you find in `static/index.html`: wording, layout, anything that looks wrong on a phone. Open the page locally with `uv run --env-file .env uvicorn app.main:app` to check, run `git pull`, then commit and push. Send backend bugs to Likhitha. Page bugs come from your own reading and from the QA list.
-  - **Needs:** the setup
-  - **Done when:** every page bug you found is fixed.
 - [ ] **Demo script and recording (optional)** (2 h)
   - Three minutes: the problem (a photo with an ID number in it), the before and after slider, the ID-card replay in "The agent at work", the benchmark table, region packs. Record the screen with voice, and a second backup take.
   - **Needs:** samples and results on the page
