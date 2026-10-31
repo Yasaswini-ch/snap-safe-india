@@ -42,7 +42,7 @@ the MIT-licensed project before-you-post by WhorideChicken, which we adapted and
 On five rendered Indian scenes with planted fictional secrets (Gemini 3 Flash, one run each), the agent removed 19 of 19
 secrets, changed 8.8% of each photo on average, and left the control photo untouched. An earlier run of the same scenes removed
 only 11 of 19 and left a PIN code readable while the agent called the photo safe; we added a final literal check, and the two scenes that
-had failed passed on rerun. With the India pack switched off, the same agent removed 14 of 15 secrets on three of the five scenes, against 15 of 15 with it on;
+had failed passed on rerun. With the India pack switched off, the same agent removed 18 of 19 secrets on the five scenes, against 19 of 19 with it on;
 that is one secret in one run, so it is not proof the pack matters. The scenes are rendered, not photographed, every
 value in them is made up, and two of the five results are from before that check was added. See [benchmark.md](benchmark.md).
 
@@ -53,8 +53,8 @@ value in them is made up, and two of the five results are from before that check
   they need to be.
 - A check takes one to a few minutes, mostly waiting on the model's rate limit.
 - The photo is sent to Google's model to find the clues, so use made-up photos when trying it.
-- The report can be written in Telugu or Hindi. Offline tests cover the language plumbing; we have not checked the model's Telugu or Hindi text with a reader, and only the page prose changes language. Among Indian-language photos only a Telugu sign has been tested; Hindi and Tamil photos have not.
-- The pack-off comparison covers three of five scenes, because the free quota ran out.
+- The report can be written in Telugu or Hindi. Offline tests cover the language plumbing, and one live run each on the made-up ID card gave reports in the right script with no planted value in them; no native Telugu or Hindi reader has reviewed them, and only the report prose changes language. Among Indian-language photos only a Telugu sign has been tested; Hindi and Tamil photos have not.
+- The pack-off and pack-on runs for two scenes come from different code versions, so that comparison is not clean.
 
 ## Links
 

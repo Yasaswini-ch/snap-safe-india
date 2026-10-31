@@ -19,6 +19,26 @@
    "seconds": 59,
    "model": "gemini-3-flash-preview",
    "verifier": "gemma-4-26b-a4b-it"
+  },
+  "global": {
+   "scenes": 5,
+   "errors": 0,
+   "secrets": 19,
+   "removed": 18,
+   "clean": 3,
+   "with_secrets": 4,
+   "changed": 8.0,
+   "flagged": 4,
+   "leak": 4,
+   "false_flags": 0,
+   "controls": 1,
+   "text_hits": 0,
+   "expecting": 4,
+   "echoed": 1,
+   "printable": 14,
+   "seconds": 109,
+   "model": "gemini-3-flash-preview",
+   "verifier": "gemma-4-26b-a4b-it"
   }
  },
  "scenes": [
@@ -32,12 +52,24 @@
     "found": [
      "vehicle plate"
     ]
+   },
+   "global": {
+    "removed": 1,
+    "secrets": 1,
+    "changed": 2.9,
+    "found": []
    }
   },
   {
    "id": "ctrl_tea_menu",
    "kind": "control",
    "in": {
+    "removed": 0,
+    "secrets": 0,
+    "changed": 0.0,
+    "found": []
+   },
+   "global": {
     "removed": 0,
     "secrets": 0,
     "changed": 0.0,
@@ -55,6 +87,12 @@
      "Aadhaar number",
      "street address"
     ]
+   },
+   "global": {
+    "removed": 7,
+    "secrets": 7,
+    "changed": 7.6,
+    "found": []
    }
   },
   {
@@ -69,6 +107,12 @@
      "phone number",
      "street address"
     ]
+   },
+   "global": {
+    "removed": 6,
+    "secrets": 7,
+    "changed": 16.0,
+    "found": []
    }
   },
   {
@@ -81,6 +125,12 @@
     "found": [
      "phone number"
     ]
+   },
+   "global": {
+    "removed": 4,
+    "secrets": 4,
+    "changed": 13.6,
+    "found": []
    }
   }
  ]

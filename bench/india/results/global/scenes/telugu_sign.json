@@ -1,0 +1,67 @@
+{
+ "id": "telugu_sign",
+ "kind": "leak",
+ "secrets": [
+  "99999 12345",
+  "Sri Sai Medicals",
+  "శ్రీ సాయి మెడికల్స్",
+  "Medicals"
+ ],
+ "expect": [
+  "phone number"
+ ],
+ "verified": [
+  "99999 12345",
+  "Sri Sai Medicals",
+  "శ్రీ సాయి మెడికల్స్",
+  "Medicals"
+ ],
+ "seconds": 111.1,
+ "model": "gemini-3-flash-preview",
+ "verifier": "gemma-4-26b-a4b-it",
+ "exposure_before": {
+  "current_location": 4,
+  "contact": 4,
+  "work_or_school": 4
+ },
+ "exposure_after": {
+  "current_location": 2
+ },
+ "safe": true,
+ "attacks": 3,
+ "textcheck_found": [],
+ "edits": [
+  "pixelate:phone number on sign:snap",
+  "pixelate:neighborhood name on sign:snap",
+  "pixelate:pharmacy name in Telugu:snap"
+ ],
+ "values_printed": [
+  "Medicals"
+ ],
+ "survived": [],
+ "changed": 0.1362,
+ "requests": {
+  "total": 7,
+  "failed": 0,
+  "by_role": {
+   "agent": 5,
+   "verifier": 2
+  },
+  "by_model": {
+   "gemini-3-flash-preview": 5,
+   "gemma-4-26b-a4b-it": 2
+  },
+  "by_kind": {
+   "attack": 1,
+   "attack_more": 2,
+   "transcribe": 4
+  },
+  "by_outcome": {
+   "200": 7
+  },
+  "by_model_role": {
+   "gemini-3-flash-preview / agent": 5,
+   "gemma-4-26b-a4b-it / verifier": 2
+  }
+ }
+}

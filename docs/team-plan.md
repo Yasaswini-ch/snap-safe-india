@@ -23,7 +23,8 @@ The team plan for Hacktoberfest Hack Day x AI for Vizag (Sunday, Nov 1, 2026, 10
 - Telugu and Hindi wording read through, with extra Hindi, Telugu and Tamil "do not report" phrases and tests (a Tamil reader should still check the Tamil)
 - Submission write-up and the README numbers: filled in with what has run so far (only the demo video link and the access code are left blank)
 - Page check on desktop and at phone width: no overflow or layout bugs; one wording fix in the results section
-- Pack-off benchmark: ID card, courier label and number plate run (14 of 15 secrets removed with the pack off; see `docs/benchmark.md`)
+- Pack-off benchmark: all five core scenes run (18 of 19 secrets removed with the pack off, 19 of 19 with it on; see `docs/benchmark.md`). The request counter measured 12 requests for the last two scenes: 8 Gemini, 4 Gemma
+- Live Telugu and Hindi reports tried once each on the made-up ID card: right script, no planted value echoed, labels in English (no native-reader review yet)
 - A live upload through the agent with the new key (run locally): ID card, safe, nothing left readable
 - Offline text-detector benchmark (75 made-up texts plus 14 injection notes): precision 0.937, recall 0.894, F1 0.915 with the India pack on, recall 0.076 with it off; reproducible, no key needed (`bench/detectorbench.py`, results in `bench/india/results/detector`)
 - The benchmark now counts the API requests it sends (`bench/requestcount.py`), so the next run reports a measured count, not an estimate
@@ -33,7 +34,7 @@ The team plan for Hacktoberfest Hack Day x AI for Vizag (Sunday, Nov 1, 2026, 10
 ### Blocked
 
 - Gemini 3 Flash is the fast, accurate model. Its free tier gives **20 requests a day per Google project**. The new key has used most of today's. The old key resets around 12:30 PM IST.
-- The new key ran out of quota on Oct 31 during the pack-off benchmark. The Telugu sign and the control scene are not scored yet, and the Hindi and Tamil photos are not tried. Quota resets about 22 hours later.
+- The new key ran out of quota on Oct 31 during the pack-off benchmark, then worked again later the same day and the last two scenes ran. The Hindi and Tamil photos are still not tried.
 - Fix: switch on billing for the Google AI Studio project, or record only two samples after the reset.
 
 ### Not tested yet
@@ -79,7 +80,7 @@ Estimates are rough. Swap tasks if someone is faster at something. Yasaswini kee
   - The wording review is done. What is left: run the two made-up signs through the page and note what happens. Make them with `bench/india/make_scenes.py` style (a shop name, an owner name, a made-up phone number, in Devanagari and Tamil script), or photograph props. Read the Tamil phrases in `app/meta.py` (`TOLD` and `ADDRESSED`) and fix any that are wrong or unnatural. The page already says the checker is "told to read" them, so say what really happens.
   - **Needs:** the setup, and Gemini quota
   - **Done when:** both photos have a result noted in `docs/benchmark.md` limits, and the Tamil words are confirmed or corrected.
-- [ ] **Finish the pack-off benchmark** (20 min, mostly waiting)
+- [x] **Finish the pack-off benchmark** (done Oct 31: all five scenes scored; the page results were republished)
   - Three of the five core scenes are done with the pack off: ID card, courier label and number plate (see `docs/benchmark.md`). Left: the **Telugu sign and the control**. Set `REGION=global` first (PowerShell: `$env:REGION='global'`), then `uv run --env-file .env python -m bench.indiabench --tag global --verifier gemma-4-26b-a4b-it`. Scenes already scored are reused. Then `uv run python -m bench.india.publish`, check the results section at localhost:8000, add the two scenes to the pack-off table in `README.md` and `docs/benchmark.md`, change the pack-off line in `docs/write-up.md` from three scenes to five, run `git pull`, commit and push.
   - **Needs:** the setup, about 8 Gemini requests, and no other Gemini job running: everyone using the key shares the per-minute limit
   - **Done when:** the results section shows both columns for all five scenes on the live page.

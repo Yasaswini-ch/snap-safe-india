@@ -1,0 +1,84 @@
+{
+ "snapshot": {
+  "total": 12,
+  "failed": 0,
+  "by_role": {
+   "agent": 8,
+   "verifier": 4
+  },
+  "by_model": {
+   "gemini-3-flash-preview": 8,
+   "gemma-4-26b-a4b-it": 4
+  },
+  "by_kind": {
+   "attack": 2,
+   "attack_more": 2,
+   "transcribe": 8
+  },
+  "by_outcome": {
+   "200": 12
+  },
+  "by_model_role": {
+   "gemini-3-flash-preview / agent": 8,
+   "gemma-4-26b-a4b-it / verifier": 4
+  }
+ },
+ "rows": [
+  [
+   "ctrl_tea_menu",
+   "agent",
+   "gemini-3-flash-preview",
+   "attack",
+   "200",
+   1
+  ],
+  [
+   "ctrl_tea_menu",
+   "agent",
+   "gemini-3-flash-preview",
+   "transcribe",
+   "200",
+   2
+  ],
+  [
+   "ctrl_tea_menu",
+   "verifier",
+   "gemma-4-26b-a4b-it",
+   "transcribe",
+   "200",
+   2
+  ],
+  [
+   "telugu_sign",
+   "agent",
+   "gemini-3-flash-preview",
+   "attack",
+   "200",
+   1
+  ],
+  [
+   "telugu_sign",
+   "agent",
+   "gemini-3-flash-preview",
+   "attack_more",
+   "200",
+   2
+  ],
+  [
+   "telugu_sign",
+   "agent",
+   "gemini-3-flash-preview",
+   "transcribe",
+   "200",
+   2
+  ],
+  [
+   "telugu_sign",
+   "verifier",
+   "gemma-4-26b-a4b-it",
+   "transcribe",
+   "200",
+   2
+  ]
+ ]
+}

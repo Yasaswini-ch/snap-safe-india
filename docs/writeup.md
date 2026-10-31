@@ -140,13 +140,13 @@ Devanagari digits, Telugu-script addresses); the 4 false alarms are look-alikes 
 "Open Colony Sale"). With the pack off, precision of 1.000 rests on 5 findings. A full run takes about 0.2 to 0.5 s on a laptop.
 The texts are synthetic and written by us, so this is not accuracy on real photos, and it is **not** the accuracy of the model.
 
-**B. Image benchmark with the AI model (measured, small, partly complete).** Ten rendered Indian scenes with planted fictional
+**B. Image benchmark with the AI model (measured, small, one run per scene).** Ten rendered Indian scenes with planted fictional
 secrets; five core scenes run by default. With Gemini 3 Flash, India pack on, one run per scene: **19 of 19 secrets removed**,
 8.8% of the photo changed on average, the control photo not flagged. Two of the five scenes come from before the final literal
 check was added, and the same scenes had failed before (the ID card at 2 of 7, the Telugu sign at 1 of 4), so this shows the fix
-works on those scenes and not that the agent is reliable in general. With the pack off, three of five scenes have run: 14 of 15
-secrets removed against 15 of 15 with it on, a one-secret gap in one run that proves nothing. The free quota ran out before the
-Telugu sign and the control could run. The scenes are drawn, not photographed, and the verifier is the same kind of model as the
+works on those scenes and not that the agent is reliable in general. With the pack off, all five scenes have run: 18 of 19
+secrets removed (8.0% of the photo changed) against 19 of 19 with it on, a one-secret gap in one run that proves nothing, and two
+of the pack-on results come from older code, so it is not a clean comparison. The scenes are drawn, not photographed, and the verifier is the same kind of model as the
 attacker. **We do not report precision, recall or F1 for this part**, because a photo has no agreed list of every clue.
 
 **C. Language plumbing (verified offline).** 11 offline checks pass: the language reaches the prompt, unknown codes fall back to
@@ -154,9 +154,11 @@ English on the server and in the bot, Telugu and Hindi text (with conjuncts and 
 and the page offers exactly the server's languages. In a browser, Telugu and Hindi text rendered correctly on the page. The
 benchmark's request counter has 4 more offline checks against a stand-in API.
 
-**D. Live language quality (not verified).** We have not checked the model's Telugu or Hindi report with a reader, and only the
-report's prose changes language: the page labels, Telegram headings and verdicts, and clue labels stay English. Only a Telugu
-sign has been run among Indian-language photos; Hindi and Tamil photos have not.
+**D. Live language quality (one live run each, no native-reader review).** We ran the made-up ID card through Gemini 3 Flash once
+with the report in Telugu and once in Hindi. Both came back in the right script, with the clue labels in English and none of the
+planted values in the text, and both read as fluent and sensible to us; nobody who reads Telugu or Hindi natively has reviewed
+them. Only the report's prose changes language: the page labels, Telegram headings and verdicts, and clue labels stay English.
+Only a Telugu sign has been run among Indian-language photos; Hindi and Tamil photos have not.
 
 Other checks: the cleaned ID-card sample was read back after cleaning, and the Telegram bot ran once on real Telegram with the
 made-up ID card (about a minute, and a box that was larger than needed). The deployed site answers; a full live run on it was
@@ -164,7 +166,7 @@ not checked, though the same run passed locally.
 
 ## 12. Challenges Faced
 
-- **Quota.** Gemini 3 Flash's free tier gives 20 requests a day per project, which a five-scene run uses, so the pack-off run is incomplete and live use needs billing.
+- **Quota.** Gemini 3 Flash's free tier gives 20 requests a day per project, which a five-scene run uses, so the pack-off run took two days' worth of attempts and live use needs billing.
 - **Boxes that miss.** Models place boxes loosely; weaker models boxed a whole card or left a surname readable. We added box snapping, widening of small boxes, and a rule against boxing status icons.
 - **A lenient scorer.** Our first scoring counted a half-hidden name as removed. It now also checks each word of a name, which lowered the early numbers and made them honest.
 - **An agent that called a bad result safe.** In one run the ID card kept a name and PIN readable while the agent said it was safe; the last literal read was added for that.
@@ -174,8 +176,8 @@ not checked, though the same run passed locally.
 ## 13. Future Scope
 
 - Fix the detector's known misses: case-insensitive PAN and plates, the GSTIN last character, more UPI handles, Devanagari and Telugu digits, Telugu and Hindi address words.
-- Check the Telugu and Hindi reports with readers, try Hindi and Tamil photos, and test real phone photographs (glare, angle) instead of rendered scenes.
-- Finish the pack-off run and the other five benchmark scenes, with a count of requests per run, once there is quota or billing.
+- Have Telugu and Hindi readers review the reports, try Hindi and Tamil photos, and test real phone photographs (glare, angle) instead of rendered scenes.
+- Run the other five benchmark scenes, and repeat runs so the counts and the scores have a spread, once there is quota or billing.
 - Use an independent model or an on-device model for the re-check, and generative edits that look more natural.
 - Translate the page and bot interface; more region packs; faces and non-text clues scored in the benchmark.
 

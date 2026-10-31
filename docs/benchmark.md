@@ -111,19 +111,32 @@ street address), which is why that row reads 3 of 4. The recorded sample gallery
 
 ### India pack off
 
-Oct 31, 2026, `REGION=global`, `gemini-3-flash-preview`, photos read by `gemma-4-26b-a4b-it`, one run per scene. **Partial: three of
-the five core scenes.** The key's daily quota (20 requests per model) ran out, so the Telugu sign and the control errored and are not
-scored. Raw files are in `bench/india/results/global`.
+Oct 31, 2026, `REGION=global`, `gemini-3-flash-preview`, photos read by `gemma-4-26b-a4b-it`, one run per scene. The ID card, courier
+label and number plate ran first; the quota then ran out, and the Telugu sign and the control were run afterwards the same day. All
+five core scenes are now scored. Raw files are in `bench/india/results/global`.
 
 | Scene | Pack off | Pack on (final-check version) | Changed, pack off |
 |---|---|---|---|
 | ID card | 7 of 7 | 7 of 7 | 7.6% |
 | Courier label | 6 of 7 | 7 of 7 (before the final check) | 16.0% |
 | Number plate | 1 of 1 | 1 of 1 (before the final check) | 2.9% |
+| Telugu sign | 4 of 4 | 4 of 4 | 13.6% |
+| Control | nothing to remove, nothing edited | same | 0.0% |
 
-With the pack off, 14 of 15 planted secrets were removed, against 15 of 15 on these same three scenes with it on. That is one secret
-on one scene in one run, so it is not evidence that the pack matters. The text check found none of the expected ID types, as expected with
-the pack off. The Telugu sign and the control still need a run once the quota resets.
+| Pack off, all five scenes | Result |
+|---|---|
+| Planted secrets removed | 18 of 19 (95%) |
+| Scenes with every secret removed | 3 of 4 |
+| Share of the photo changed (mean) | 8.0% |
+| Leak scenes flagged | 4 of 4 |
+| Control falsely flagged | 0 of 1 |
+| Values echoed in the report | 1 of 14 |
+| Mean seconds per scene | 109 (one run, rough) |
+
+With the pack off, 18 of 19 planted secrets were removed, against 19 of 19 with it on. That is one secret (on the courier label) in one
+run, so it is not evidence that the pack matters for these scenes. The pack-on courier-label and number-plate results come from
+before the final check was added, so the two columns are not a clean comparison. The text check found none of the expected ID
+types, as expected with the pack off; its effect is measured in the offline detector benchmark below.
 
 ### Gemma 4 on the same scenes
 
@@ -229,8 +242,12 @@ after reads of a scene; `agent`: the attacker and the agent's own text checks), 
 `attack_more` for every later one, `transcribe`, `link`, `caption`) and by HTTP status. Nothing from the request itself is
 stored. After a run the totals are printed, appended to `summary.md`, and saved as `requests-<time>.json`; each scene's JSON
 also carries its own counts. Scenes reused from earlier runs send nothing, so their requests are not counted and the summary
-says so. **No count from a real run exists yet, so none is reported here, and the estimate of about 20 requests per
-five-scene run in the team plan is an estimate, not a measurement.** The counter is tested offline against a stand-in API
+says so. **One real run has been counted** (Oct 31, pack off, the Telugu sign and the control, Gemini 3 Flash attacker, Gemma 4 verifier):
+**12 requests, all answered with 200, none retried or failed.** By model: 8 to `gemini-3-flash-preview` and 4 to `gemma-4-26b-a4b-it`.
+By role: 8 agent and 4 verifier. By type: 2 first attacks, 2 later attacks, 8 transcriptions. That is 4 Gemini requests per scene
+here, but the control needed 1 attack and the Telugu sign 3, and two scenes are too few to give a per-run figure for five scenes,
+so the earlier estimate of about 20 requests per five-scene run is still an estimate. The numbers are in
+`bench/india/results/global/requests-20261031-153020.json`. The counter is tested offline against a stand-in API
 (`uv run python -m tests.test_requestcount`).
 
 ## Limits

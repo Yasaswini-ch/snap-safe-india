@@ -24,7 +24,7 @@ Built for **Hacktoberfest Hack Day x AI for Vizag** (Nov 1, 2026).
   (`OPEN_RECHECK_MODEL`): it has its own quota, and a second opinion on the edited photo is a better check than the same
   model grading its own edits.
 - **Report language.** The exposure report can be written in English, Telugu or Hindi (a dropdown on the page, `/lang` in the
-  bot). Only the prose changes: clue labels and the edits stay the same. The language plumbing is covered by offline tests; the quality of the model's Telugu and Hindi text has not been verified live (see Evaluation).
+  bot). Only the prose changes: clue labels and the edits stay the same. The language plumbing is covered by offline tests; the model's Telugu and Hindi text was run once each and has no native-reader review (see Evaluation).
 - **A Telegram bot** that takes a photo and sends back the cleaned copy (see below).
 - **A rendered Indian benchmark** ([bench/india](bench/india), [bench/indiabench.py](bench/indiabench.py)), a new look,
   and a new logo.
@@ -112,9 +112,9 @@ Four different things are checked, and they are kept apart on purpose. Only the 
 | | What it checks | Needs a key | Status |
 |---|---|---|---|
 | 1. Text detector | The regular expressions and the Aadhaar checksum that run beside the model | No | Measured, reproducible |
-| 2. Image benchmark | The whole agent (model, edits, re-check) on rendered scenes | Yes | Measured, one run per scene, partly complete |
+| 2. Image benchmark | The whole agent (model, edits, re-check) on rendered scenes | Yes | Measured, one run per scene, five core scenes |
 | 3. Language plumbing | That the language choice reaches the model, falls back to English and survives Unicode | No | Offline tests pass |
-| 4. Live language quality | Whether the model's Telugu and Hindi reports are correct and natural | Yes | **Not verified** |
+| 4. Live language quality | Whether the model's Telugu and Hindi reports are correct and natural | Yes | One run each looks right; **no native-reader review** |
 
 ### 1. Deterministic text detector (measured, offline)
 
@@ -175,27 +175,30 @@ scenes, 8.8% of the photo changed, nothing falsely flagged on the control**. Two
 literal check was added, and the same scenes had failed before (the ID card at 2 of 7, the Telugu sign at 1 of 4), so read it
 as "the fix works on those", not as proof of reliability.
 
-The same setup with the India pack **off** has run on three of the five core scenes (the quota ran out before the Telugu
-sign and the control):
+The same setup with the India pack **off** has now run on all five core scenes (Oct 31, one run each):
 
 | Scene | Pack off | Pack on |
 |---|---|---|
 | ID card | 7 of 7 | 7 of 7 |
 | Courier label | 6 of 7 | 7 of 7 |
 | Number plate | 1 of 1 | 1 of 1 |
-| Total | 14 of 15 | 15 of 15 |
+| Telugu sign | 4 of 4 | 4 of 4 |
+| Control (nothing to hide) | nothing edited, not flagged | nothing edited, not flagged |
+| Total | 18 of 19 (95%), 8.0% of the photo changed | 19 of 19 (100%), 8.8% changed |
 
-The gap is one secret on one scene in one run, so it does not show that the pack matters for these scenes. The pack's other job,
-the exact ID-type check, is not scored when it is off; the text-detector table above is where its effect is measured. The
-Telugu sign and the control are still to run.
+The gap is one secret on one scene in one run, so it does not show that the pack matters for these scenes. The pack-on and
+pack-off rows also come from different code versions for two scenes (see above). The pack's other job, the exact ID-type check,
+is not scored when it is off; the text-detector table above is where its effect is measured.
 
 An earlier first run with Gemma 4 and lenient scoring (full names only) removed 26 of 26 secrets with the pack on and 24 of 26
 with it off. That scoring counted a half-hidden name as removed, so treat it as a first look. Details, the strict-scoring
 history and the raw files are in [docs/benchmark.md](docs/benchmark.md) and under `bench/india/results`.
 
 The benchmark now counts the API requests it sends (including retries and extra attack rounds), split by model, by role
-(attacker or verifier) and by request type, so a run's quota use is a measured number. Nothing in this README counts requests
-from a run that has not been done.
+(attacker or verifier) and by request type, so a run's quota use is a measured number. The one real run so far (the pack-off Telugu sign and control, with Gemini 3 Flash
+as the attacker and Gemma 4 as the verifier) sent **12 requests, none failed or retried: 8 to Gemini 3 Flash** (2 first attacks,
+2 re-attacks, 4 text reads) **and 4 to Gemma 4** (the before and after reads). Two scenes is a small sample, so it does not
+give a per-run figure for five scenes.
 
 ### 3. Language plumbing (verified offline)
 
@@ -205,12 +208,17 @@ attacker's prompt for Telugu and Hindi and adds nothing for English; unknown or 
 Telegram upload as UTF-8; the page offers exactly the languages the server accepts; and a long Telugu report goes out as a
 message. They show the plumbing works. They do not show that the model writes good Telugu or Hindi.
 
-### 4. Live language quality (not verified)
+### 4. Live language quality (one live run each; not reviewed by a native reader)
 
 Only the prose of the report changes language (the summary, each clue's observation and each inference's reasoning). The page
-labels, the Telegram headings and verdict lines, the clue labels and the edits are always English. We have not recorded a
-live Telugu or Hindi report and checked it with a Telugu or Hindi reader, so we make no claim about how correct or natural it
-is. Photos with Hindi or Tamil text have not been tried; among non-English photos only the Telugu shop sign was run.
+labels, the Telegram headings and verdict lines, the clue labels and the edits are always English.
+
+On Oct 31 we ran the made-up ID card (`bench/india/images/id_card.jpg`) through Gemini 3 Flash once with the report language set
+to Telugu and once to Hindi (2 requests, both answered). In both, the summary, all 6 observations and the reasoning came back in
+the chosen script, the clue labels stayed English, and none of the planted values (name, Aadhaar number, PIN code, door number)
+appeared in the text. The Hindi and the Telugu read as fluent and sensible to us, but nobody who reads Telugu or Hindi natively
+has reviewed them, and it is one photo and one run per language, so we claim no more than that. Photos with Hindi or Tamil text
+have not been tried; among non-English photos only the Telugu shop sign was run.
 
 ## Run it
 
@@ -299,7 +307,7 @@ run passed locally.
 
 - [How it works](docs/how-it-works.md): each step of the agent, the box tightening, and what "verified" means
 - [Models, quotas and what we tried](docs/models.md): measurements, free-tier limits, and what did not work
-- [The Indian benchmark](docs/benchmark.md): method, commands and results (the pack-off run covers three of five scenes so far), the offline text-detector results and the request counter
+- [The Indian benchmark](docs/benchmark.md): method, commands and results (the pack-off run now covers all five core scenes), the offline text-detector results and the request counter
 - [Deploy and configure](docs/deploy.md): Render steps, every setting, and the Telegram bot
 - [Adding a country](docs/adding-a-country.md): a region pack is one file
 - [Demo script](docs/demo-script.md) and [write-up text](docs/write-up.md), with the benchmark numbers filled in
