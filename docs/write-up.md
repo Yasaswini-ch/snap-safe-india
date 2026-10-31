@@ -39,9 +39,11 @@ the MIT-licensed project before-you-post by WhorideChicken, which we adapted and
 
 ## Results
 
-[Fill in after the benchmark: planted secrets removed with the India pack on and off, share of the photo changed, scenes
-fully clean. See [benchmark.md](benchmark.md).] The scenes are rendered, not photographed, every value in them is made up,
-and each number comes from one run.
+On five rendered Indian scenes with planted fictional secrets (Gemini 3 Flash, one run each), the agent removed 19 of 19
+secrets, changed 8.8% of each photo on average, and left the control photo untouched. An earlier run of the same scenes removed
+only 11 of 19 and left a PIN code readable while the agent called the photo safe; we added a final literal check, and the two scenes that
+had failed passed on rerun. [Add the India-pack-off comparison when it is run.] The scenes are rendered, not photographed, every
+value in them is made up, and two of the five results are from before that check was added. See [benchmark.md](benchmark.md).
 
 ## Limits
 

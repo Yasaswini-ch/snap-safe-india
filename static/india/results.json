@@ -1,0 +1,87 @@
+{
+ "runs": {
+  "in": {
+   "scenes": 5,
+   "errors": 0,
+   "secrets": 19,
+   "removed": 19,
+   "clean": 4,
+   "with_secrets": 4,
+   "changed": 8.8,
+   "flagged": 4,
+   "leak": 4,
+   "false_flags": 0,
+   "controls": 1,
+   "text_hits": 3,
+   "expecting": 4,
+   "echoed": 0,
+   "printable": 14,
+   "seconds": 59,
+   "model": "gemini-3-flash-preview",
+   "verifier": "gemma-4-26b-a4b-it"
+  }
+ },
+ "scenes": [
+  {
+   "id": "car_plate_in",
+   "kind": "leak",
+   "in": {
+    "removed": 1,
+    "secrets": 1,
+    "changed": 2.8,
+    "found": [
+     "vehicle plate"
+    ]
+   }
+  },
+  {
+   "id": "ctrl_tea_menu",
+   "kind": "control",
+   "in": {
+    "removed": 0,
+    "secrets": 0,
+    "changed": 0.0,
+    "found": []
+   }
+  },
+  {
+   "id": "id_card",
+   "kind": "leak",
+   "in": {
+    "removed": 7,
+    "secrets": 7,
+    "changed": 6.4,
+    "found": [
+     "Aadhaar number",
+     "street address"
+    ]
+   }
+  },
+  {
+   "id": "parcel_label",
+   "kind": "leak",
+   "in": {
+    "removed": 7,
+    "secrets": 7,
+    "changed": 17.3,
+    "found": [
+     "PIN code",
+     "phone number",
+     "street address"
+    ]
+   }
+  },
+  {
+   "id": "telugu_sign",
+   "kind": "leak",
+   "in": {
+    "removed": 4,
+    "secrets": 4,
+    "changed": 17.6,
+    "found": [
+     "phone number"
+    ]
+   }
+  }
+ ]
+}

@@ -78,9 +78,40 @@ agent still called that result safe, because its own re-check missed it. That is
 (see [how-it-works.md](how-it-works.md)); the scenes need to be run again with it. Raw per-scene files go in
 `bench/india/results/in` and are committed with the rerun.
 
+### Rerun with the final check and the icon rule, five core scenes
+
+Same day, same model (`gemini-3-flash-preview`), the photos read by `gemma-4-26b-a4b-it`, India pack on, one run per scene. After
+the run above, the agent gained a final literal read of the edited photo and a prompt rule against boxing status icons.
+The ID card, the Telugu sign and the control were rerun with them. **The courier label and the number plate were not rerun**:
+their results are from the run above, before those changes. So this table mixes two code versions, and it is one run each.
+
+| | India pack on |
+|---|---|
+| Planted secrets removed | 19 of 19 |
+| Scenes with every secret removed | 4 of 4 |
+| Share of the photo changed (mean) | 8.8% |
+| Leak scenes flagged | 4 of 4 |
+| Control falsely flagged | 0 of 1 |
+| Text check found the expected ID types | 3 of 4 |
+| Values echoed in the report | 0 of 14 |
+| Mean seconds per scene | 59 |
+
+| Scene | Secrets removed | Changed | Code version |
+|---|---|---|---|
+| ID card | 7 of 7 (2 of 7 before) | 6.4% | with the final check |
+| Courier label | 7 of 7 | 17.3% | before it |
+| Number plate | 1 of 1 | 2.8% | before it |
+| Telugu sign | 4 of 4 (1 of 4 before) | 17.6% | with the final check |
+| Control | nothing to remove, nothing edited | 0.0% | with the final check |
+
+The two scenes that failed before now pass, which is what the final check is for, but two scenes are a small sample and the
+rerun is the same scenes the fix was aimed at, so this shows the fix works on them and not that the agent is reliable in
+general. The text check missed the PIN code on the ID card in this run's transcription (it found the Aadhaar number and the
+street address), which is why that row reads 3 of 4. The recorded sample gallery is separate from this benchmark.
+
 ### India pack off
 
-_Not run: no quota left on the key. To add._
+_Not run yet: it needs about 20 more Gemini requests. To add, so we can say what the India pack adds._
 
 ### Gemma 4 on the same scenes
 

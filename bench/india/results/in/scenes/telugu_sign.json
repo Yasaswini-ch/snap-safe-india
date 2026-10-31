@@ -1,0 +1,41 @@
+{
+ "id": "telugu_sign",
+ "kind": "leak",
+ "secrets": [
+  "99999 12345",
+  "Sri Sai Medicals",
+  "శ్రీ సాయి మెడికల్స్",
+  "Medicals"
+ ],
+ "expect": [
+  "phone number"
+ ],
+ "verified": [
+  "99999 12345",
+  "Sri Sai Medicals",
+  "శ్రీ సాయి మెడికల్స్",
+  "Medicals"
+ ],
+ "seconds": 71.9,
+ "model": "gemini-3-flash-preview",
+ "verifier": "gemma-4-26b-a4b-it",
+ "exposure_before": {
+  "work_or_school": 4,
+  "contact": 4,
+  "current_location": 3
+ },
+ "exposure_after": {},
+ "safe": true,
+ "attacks": 3,
+ "textcheck_found": [
+  "phone number"
+ ],
+ "edits": [
+  "pixelate:phone number text:snap",
+  "pixelate:location name text:snap",
+  "pixelate:business sign:snap"
+ ],
+ "values_printed": [],
+ "survived": [],
+ "changed": 0.1758
+}

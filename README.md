@@ -124,9 +124,12 @@ With the pack off, the model missed the whole PAN card and changed twice as much
 rendered scenes, and the two-secret gap comes from a single scene, so it could be luck.
 
 **That scoring was too lenient.** It counted a half-hidden name as removed, and the Gemma sample above shows why that
-matters. Scoring now also counts each word of a name on its own. Results with Gemini 3 Flash and the stricter scoring
-are not in yet: the free quota ran out before the benchmark could run. Results are in
-`bench/india/results/*-gemma4` and, once run, `bench/india/results/in` and `global`.
+matters. Scoring now also counts each word of a name on its own. Our latest run is with Gemini 3 Flash and the stricter scoring, India pack on: **19 of 19 planted secrets removed on the five core
+scenes, 8.8% of the photo changed, nothing falsely flagged on the control**. It is one run each, two of the five scenes come from
+before the final literal check was added, and the same scenes had failed before (the ID card at 2 of 7, the Telugu sign at 1 of 4),
+so read it as "the fix works on those", not as proof of reliability. The pack-off comparison has not been run. Details and the
+first-run numbers are in [docs/benchmark.md](docs/benchmark.md). Results are in
+`bench/india/results/*-gemma4` and `bench/india/results/in`, and in `global` once the pack-off run is done.
 
 ## Run it
 

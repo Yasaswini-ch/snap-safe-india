@@ -76,10 +76,10 @@ Estimates are rough. Swap tasks if someone is faster at something. Yasaswini kee
   - Also try one Hindi and one Tamil photo through the live site, because only a Telugu sign has been tested. The page already says the checker is “told to read” them, so note what happens.
   - **Needs:** nothing, start now
   - **Done when:** corrections are made or sent to Yasaswini.
-- [ ] **Run the benchmark and publish it** (1 h, mostly waiting)
-  - Five core scenes by default. Run `uv run --env-file .env python -m bench.indiabench --tag in --verifier gemma-4-26b-a4b-it`, then the same with `REGION=global` set first (PowerShell: `$env:REGION='global'`) and `--tag global`. The verifier option reads the before and after photos with Gemma, which spares Gemini's quota. Then `uv run python -m bench.india.publish`, check the results section at localhost:8000, run `git pull`, commit and push. Then move on to the README numbers.
-  - **Needs:** the setup, about 20 Gemini requests per run, and the samples already recorded: everyone using the key shares Gemini's per-minute limit, so never run two Gemini jobs at once
-  - **Done when:** the results section shows five scenes on the live page.
+- [ ] **Run the pack-off benchmark** (30 min, mostly waiting)
+  - The five core scenes with the India pack **on** are done and published: 19 of 19 secrets removed (see `docs/benchmark.md`). What is left is the same five scenes with the pack **off**, to show what the pack adds: set `REGION=global` first (PowerShell: `$env:REGION='global'`), then `uv run --env-file .env python -m bench.indiabench --tag global --verifier gemma-4-26b-a4b-it`. Then `uv run python -m bench.india.publish`, check the results section at localhost:8000, run `git pull`, commit and push.
+  - **Needs:** the setup, about 20 Gemini requests, and no other Gemini job running: everyone using the key shares the per-minute limit
+  - **Done when:** the results section shows both columns on the live page.
 - [ ] **Run the other five benchmark scenes (optional)** (1 h, mostly waiting)
   - The rest of the ten: add `--all` to the same commands. Scenes already scored are reused, so only the other five run, and the summary files then cover all ten. The page keeps showing the five core scenes, so this adds depth for the README and the write-up without changing the page.
   - **Needs:** the first benchmark done, and quota or billing
@@ -88,9 +88,9 @@ Estimates are rough. Swap tasks if someone is faster at something. Yasaswini kee
   - Title, short description, the problem, what it does, tools used (Gemini 3 Flash, Gemma 4, FastAPI, OpenCV), what we built (India detection, checksum, region packs, benchmark, page) and what it grew out of (before-you-post, MIT). State the limits: the "Verified" tag is the agent's own judgment. A draft is in [write-up.md](write-up.md); edit it and fill in the numbers.
   - **Needs:** benchmark numbers, for the results line
   - **Done when:** text is ready to paste into the event form, with screenshots chosen.
-- [ ] **Put the benchmark numbers in the README** (30 min)
-  - When the benchmark finishes, replace the Benchmark section of `README.md` with the tables from `bench/india/results/in/summary.md` and `global/summary.md`, and delete the sentence saying the Gemini results are not in yet. Say plainly where a number comes from one run or a small set.
-  - **Needs:** the benchmark, run by Sriya
+- [ ] **Add the pack-off numbers to the README** (15 min)
+  - The pack-on numbers are already in the README and `docs/benchmark.md`. When the pack-off run finishes, add its table next to them and fill the placeholder in `docs/write-up.md`. Say plainly where a number comes from one run or a small set.
+  - **Needs:** the pack-off benchmark, run by Sriya
   - **Done when:** the README matches the summary files.
 - [ ] **Fix the page bugs from QA** (ongoing)
   - Fix what you find in `static/index.html`: wording, layout, anything that looks wrong on a phone. Open the page locally with `uv run --env-file .env uvicorn app.main:app` to check, run `git pull`, then commit and push. Send backend bugs to Likhitha. Page bugs come from your own reading and from the QA list.
