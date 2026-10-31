@@ -17,7 +17,7 @@ The team plan for Hacktoberfest Hack Day x AI for Vizag (Sunday, Nov 1, 2026, 10
 - Pushed to GitHub with a clean history
 - Deployed on Render and answering, with the access code switched on
 - Report language: English, Telugu or Hindi
-- All six samples recorded (ID card, parcel label, Telugu sign, number plate, UPI screen, plus a tea stall menu as the nothing-to-hide control) and read back after cleaning. The UPI one leaves the first name visible
+- All six samples recorded (ID card, parcel label, Telugu sign, number plate, UPI screen, plus a tea stall menu as the nothing-to-hide control) and read back after cleaning. The UPI one leaves the first name visible Three photo-style samples (parcel, payment screen, number plate) are recorded with Gemma 4 too.
 - Telegram bot, tested offline and once on real Telegram with the made-up ID card (screenshots in `docs/img`)
 - The live page, tested by the team: no problems found
 - Telugu and Hindi wording read through, with extra Hindi, Telugu and Tamil "do not report" phrases and tests (a Tamil reader should still check the Tamil)

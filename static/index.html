@@ -609,6 +609,9 @@ const SAMPLES = [  // the page shows the ones the server has a recording of (/ap
   { name: "in_upi", label: "UPI screen", note: "UPI ID, name and reference number" },
   { name: "in_telugu", label: "Telugu shop sign", note: "Name and phone in Telugu and English" },
   { name: "in_tea", label: "Tea stall menu", note: "Nothing personal, so nothing is edited" },
+  { name: "in_parcel_real", label: "Parcel on a doorstep (photo)", note: "A photo-style image: label, phone and address" },
+  { name: "in_upi_real", label: "Payment screen (photo)", note: "A photo-style image: name, UPI ID and reference" },
+  { name: "in_plate_real", label: "Number plate (photo)", note: "A photo-style image: a plate on a parked car" },
 ];
 const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const sleep = ms => new Promise(r => setTimeout(r, calm ? 0 : ms));

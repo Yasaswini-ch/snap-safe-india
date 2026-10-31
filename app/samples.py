@@ -12,15 +12,18 @@ from pathlib import Path
 
 SAMPLES = Path(__file__).parent.parent / "static" / "samples"
 INDIA = Path(__file__).parent.parent / "bench" / "india" / "images"  # the Indian benchmark scenes (bench/india)
+REAL = INDIA.parent / "real"  # the photo-style test images (bench/india/real)
 # sample name -> benchmark photos, served as static/samples/{name}-{1..n}.jpg. Several photos = one account scan.
 SOURCES = {"in_id_card": ["id_card"], "in_parcel": ["parcel_label"], "in_plate": ["car_plate_in"],
            "in_upi": ["upi_screen"], "in_telugu": ["telugu_sign"],
-           "in_tea": ["ctrl_tea_menu"]}  # the control: nothing personal, so nothing should be edited
+           "in_tea": ["ctrl_tea_menu"],  # the control: nothing personal, so nothing should be edited
+           "in_parcel_real": ["parcel_real"], "in_upi_real": ["upi_real"], "in_plate_real": ["plate_real"]}  # photo-style images
 PRIVATE = set(SOURCES)  # recorded through the open-model path (OPEN_MODEL), edits on the server
 # What each post would say, for samples that have a caption. Captions often name what the photo's edits hide.
 CAPTIONS: dict[str, str | list[str]] = {
     "in_parcel": "Ordered last week and it is finally here 📦 Siripuram delivery was quick! #unboxing",
     "in_plate": "Our new ride is finally home 🚗 #newcar #vizag",
+    "in_plate_real": "Our new ride is finally home 🚗 #newcar #vizag",
 }
 SPEEDUP = 4
 
@@ -62,7 +65,7 @@ def record(name: str) -> None:
     for i, source in enumerate(SOURCES[name], 1):
         src = SAMPLES / f"{name}-{i}.jpg"
         if not src.exists():
-            shutil.copy(INDIA / f"{source}.jpg", src)
+            shutil.copy(next(p for p in (INDIA / f"{source}.jpg", REAL / f"{source}.jpg") if p.exists()), src)
         imgs.append(pipeline.load_image(src.read_bytes())[0])
     t0, lines = time.time(), []
     private = name in PRIVATE
