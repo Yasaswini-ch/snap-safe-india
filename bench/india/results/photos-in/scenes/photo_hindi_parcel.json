@@ -1,0 +1,79 @@
+{
+ "id": "photo_hindi_parcel",
+ "kind": "leak",
+ "secrets": [
+  "आरव शर्मा",
+  "गली नंबर 5",
+  "लक्ष्मी विहार",
+  "न्यू अशोक नगर",
+  "110096",
+  "9876543210",
+  "408-8765432-1234567",
+  "524187632198"
+ ],
+ "expect": [
+  "phone number",
+  "PIN code"
+ ],
+ "verified": [
+  "आरव शर्मा",
+  "गली नंबर 5",
+  "लक्ष्मी विहार",
+  "न्यू अशोक नगर",
+  "110096",
+  "9876543210",
+  "408-8765432-1234567",
+  "524187632198"
+ ],
+ "seconds": 188.3,
+ "model": "gemini-3-flash-preview",
+ "verifier": "gemma-4-26b-a4b-it",
+ "exposure_before": {
+  "identity": 4,
+  "home_location": 4,
+  "contact": 4,
+  "financial_or_id": 4
+ },
+ "exposure_after": {},
+ "safe": true,
+ "attacks": 3,
+ "textcheck_found": [
+  "PIN code",
+  "phone number"
+ ],
+ "edits": [
+  "pixelate:shipping label text:snap",
+  "pixelate:shipping label text:snap",
+  "pixelate:shipping label text:snap",
+  "pixelate:shipping label barcode:snap",
+  "pixelate:shipping label QR code:snap",
+  "pixelate:location details table:snap"
+ ],
+ "values_printed": [],
+ "survived": [],
+ "changed": 0.2413,
+ "requests": {
+  "total": 7,
+  "failed": 0,
+  "by_role": {
+   "agent": 5,
+   "verifier": 2
+  },
+  "by_model": {
+   "gemini-3-flash-preview": 5,
+   "gemma-4-26b-a4b-it": 2
+  },
+  "by_kind": {
+   "attack": 1,
+   "attack_more": 2,
+   "transcribe": 4
+  },
+  "by_outcome": {
+   "200": 7
+  },
+  "by_model_role": {
+   "gemini-3-flash-preview / agent": 5,
+   "gemma-4-26b-a4b-it / verifier": 2
+  }
+ }
+}

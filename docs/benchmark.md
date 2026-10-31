@@ -146,30 +146,41 @@ _To add: the same table for Gemma, with box snapping and the detail wording on._
 
 _To add if run with `--all`._
 
-## Photograph-like images (partial, one run)
+## Photograph-like images (one run each; first four incomplete)
 
-Four images supplied by the team (`bench/india/photos`, with `scenes.json`): a tea-stall chalkboard menu (control), a medical shop sign in
-Telugu and English with a phone number, a library member card on a table, and a house gate with a name plate and a PIN plate. They look like
-photographs, not drawn scenes, and every value in them is meant to be fictional (the card says "Sample card, all details fictional"). They
-were re-saved as JPEG, which leaves no EXIF or GPS data. Run with `uv run --env-file .env python -m bench.indiabench --set photos --tag photos-in --verifier gemma-4-26b-a4b-it`
+Seven images supplied by the team (`bench/india/photos`, with `scenes.json`). They look like photographs, not drawn scenes, and every value in them is
+meant to be fictional. They were re-saved as JPEG, which leaves no EXIF or GPS data. Run with
+`uv run --env-file .env python -m bench.indiabench --set photos --tag photos-in --verifier gemma-4-26b-a4b-it`
 (`--set` needs its own `--tag`, so the published results are never overwritten). Results: `bench/india/results/photos-in`.
+Scenes already scored are reused, so the file mixes two runs, as described below.
 
-**Incomplete.** Gemini 3 Flash's free daily quota (20 requests) ran out during this run, so 9 of the 27 requests (19 Gemini, 8 Gemma) got a 429.
-Every scene finished, but in each leak scene the agent's re-attack did not complete: "safe" is False and the exposure after is just the
-exposure before. The numbers below are from the Gemma 4 read of the edited photo, one read each, and one run, so treat them as a first look.
+| Scene | What is in it | Secrets removed (Gemma read) | Changed | Attacks | Marked safe |
+|---|---|---|---|---|---|
+| Tea menu | control: chalkboard menu | nothing to remove, nothing edited | 0.0% | 1 | yes |
+| Medical shop sign | Telugu and English sign, phone number, scooter plate | 3 of 4 (the Telugu shop name was still readable) | 5.9% | 1 | no |
+| Library card | name, address, PIN, member number on a card | 10 of 10 | 11.9% | 1 | no |
+| House gate | name plate and a PIN plate | 7 of 7 | 12.0% | 1 | no |
+| UPI shop (Hindi) | PhonePe stand with QR and UPI ID, Hindi shop name and price list | 2 of 2 | 13.9% | 3 | yes |
+| Hindi parcel | Hindi name and address, PIN, mobile, order and AWB numbers | 8 of 8 | 24.1% | 3 | yes |
+| Telugu house plate | Telugu house name, number, colony, town, PIN, phone | 6 of 6 | 8.3% | 4 | no |
 
-| Scene | Secrets removed (Gemma read) | Changed | Text check found | Edits |
-|---|---|---|---|---|
-| Tea menu (control) | nothing to remove, nothing edited | 0.0% | - | 0 |
-| Medical shop sign | 3 of 4 (the Telugu shop name was still readable) | 5.9% | phone number, vehicle plate | 2 |
-| Library card | 10 of 10 | 11.9% | Aadhaar number, PIN code, street address | 3 |
-| House gate | 7 of 7 | 12.0% | PIN code | 2 |
+- **Incomplete first four.** In the first run (four scenes) Gemini 3 Flash's free daily quota (20 requests) ran out: 9 of 27 requests got a 429. Those scenes
+  finished, but the re-attack did not, so "safe" is no and the exposure after is just the exposure before. Their scores are one Gemma read only.
+- **Complete last three.** With a new key (22 requests: 15 Gemini, 7 Gemma, one Gemma request failed with a 500 and was retried), the UPI shop, the Hindi
+  parcel and the Telugu house ran to the end. The Hindi parcel and the UPI shop were marked safe by the agent; the Telugu house reached the
+  four-attack limit with exposure still "specific" for the home (level 3), so it was not marked safe.
+- **First live Hindi photo.** The Hindi parcel (Devanagari name, address and mobile) and the Hindi shop sign were read and edited. The text check found the
+  PIN code and phone number on the parcel and the UPI ID on the shop stand.
+- **What the scores miss.** Looking at the edited images ourselves: the pixelation boxes are often offset from the text they are meant to cover. On the
+  Telugu house plate the first line (`శ్రీ లక్ష్మ…`), the start of the house-number line (`ఇంటి నం. 12`) and the start of the colony name are still readable,
+  yet the Gemma read scored all six secrets as removed, because a secret counts as removed only when the whole string is gone. On the Hindi parcel the
+  label is mostly covered but one box sits above it, and a strip of the "DEL" box remains. So for Telugu and Hindi photos these scores are optimistic. Scoring
+  also compares text with combining marks (vowel signs) dropped, which makes Indic matching looser still.
+- **Heavy and offset edits.** The card, the name plates and the parcel label were pixelated more than the secrets need, and the shop sign's block was larger
+  than the phone number.
 
-Total: 20 of 21 planted secrets removed, 7.5% of the frame changed on average, control not flagged, all three leak scenes flagged.
-What we saw in the edited photos: the phone number and the scooter's plate on the shop sign were pixelated, with an oversized block over
-the sign's lower right; the whole card and the whole name plate and PIN plate were pixelated, so these edits are heavy. The shop's own name
-is a business name and was left partly visible. This is not a verified result: the re-check that decides "safe" did not run to the end, and
-the Gemma read that scored it is noisy. Rerun with `--force` after the quota resets for a complete run, and confirm the photos contain no real person's details before this repo stays public.
+Treat all of this as a first look: one run per scene, a noisy verifier, and no re-check on four of the seven. Rerun the first four with `--force` after the
+quota resets, and have someone read the Telugu and Hindi after-images. Confirm that the photos contain no real person's details before the repo stays public.
 
 ## Text detector benchmark (offline, no model)
 

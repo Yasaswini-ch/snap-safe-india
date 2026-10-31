@@ -1,0 +1,133 @@
+{
+ "snapshot": {
+  "total": 22,
+  "failed": 1,
+  "by_role": {
+   "agent": 15,
+   "verifier": 7
+  },
+  "by_model": {
+   "gemini-3-flash-preview": 15,
+   "gemma-4-26b-a4b-it": 7
+  },
+  "by_kind": {
+   "attack": 3,
+   "attack_more": 7,
+   "transcribe": 12
+  },
+  "by_outcome": {
+   "200": 21,
+   "500": 1
+  },
+  "by_model_role": {
+   "gemini-3-flash-preview / agent": 15,
+   "gemma-4-26b-a4b-it / verifier": 7
+  }
+ },
+ "rows": [
+  [
+   "photo_hindi_parcel",
+   "agent",
+   "gemini-3-flash-preview",
+   "attack",
+   "200",
+   1
+  ],
+  [
+   "photo_hindi_parcel",
+   "agent",
+   "gemini-3-flash-preview",
+   "attack_more",
+   "200",
+   2
+  ],
+  [
+   "photo_hindi_parcel",
+   "agent",
+   "gemini-3-flash-preview",
+   "transcribe",
+   "200",
+   2
+  ],
+  [
+   "photo_hindi_parcel",
+   "verifier",
+   "gemma-4-26b-a4b-it",
+   "transcribe",
+   "200",
+   2
+  ],
+  [
+   "photo_telugu_house",
+   "agent",
+   "gemini-3-flash-preview",
+   "attack",
+   "200",
+   1
+  ],
+  [
+   "photo_telugu_house",
+   "agent",
+   "gemini-3-flash-preview",
+   "attack_more",
+   "200",
+   3
+  ],
+  [
+   "photo_telugu_house",
+   "agent",
+   "gemini-3-flash-preview",
+   "transcribe",
+   "200",
+   1
+  ],
+  [
+   "photo_telugu_house",
+   "verifier",
+   "gemma-4-26b-a4b-it",
+   "transcribe",
+   "200",
+   2
+  ],
+  [
+   "photo_telugu_house",
+   "verifier",
+   "gemma-4-26b-a4b-it",
+   "transcribe",
+   "500",
+   1
+  ],
+  [
+   "photo_upi_kirana",
+   "agent",
+   "gemini-3-flash-preview",
+   "attack",
+   "200",
+   1
+  ],
+  [
+   "photo_upi_kirana",
+   "agent",
+   "gemini-3-flash-preview",
+   "attack_more",
+   "200",
+   2
+  ],
+  [
+   "photo_upi_kirana",
+   "agent",
+   "gemini-3-flash-preview",
+   "transcribe",
+   "200",
+   2
+  ],
+  [
+   "photo_upi_kirana",
+   "verifier",
+   "gemma-4-26b-a4b-it",
+   "transcribe",
+   "200",
+   2
+  ]
+ ]
+}

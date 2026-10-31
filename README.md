@@ -194,9 +194,12 @@ An earlier first run with Gemma 4 and lenient scoring (full names only) removed 
 with it off. That scoring counted a half-hidden name as removed, so treat it as a first look. Details, the strict-scoring
 history and the raw files are in [docs/benchmark.md](docs/benchmark.md) and under `bench/india/results`.
 
-A separate set of four photograph-like images (a chalkboard menu, a Telugu shop sign, a library card, a house gate) was also run once
-(`bench/india/photos`, `--set photos`): 20 of 21 planted secrets removed, but the run is **incomplete**: the free Gemini quota ran out, so
-the agent's re-check did not finish and no result there is verified. See [docs/benchmark.md](docs/benchmark.md).
+A separate set of seven photograph-like images (a chalkboard menu, a Telugu shop sign, a library card, a house gate, a Hindi UPI shop stand, a
+Hindi parcel and a Telugu house plate) was also run once (`bench/india/photos`, `--set photos`). The first four hit the free Gemini quota, so their
+re-check did not finish and none is verified. The last three ran to the end: the agent marked the UPI shop and the Hindi parcel safe, and not the Telugu
+house plate (four attacks, home still "specific"). The scorer said every planted secret was removed on those three, but our own look at the edited
+images found Telugu text still readable on the house plate and misplaced edit boxes, so that score is optimistic for Indian scripts. See
+[docs/benchmark.md](docs/benchmark.md).
 
 The benchmark now counts the API requests it sends (including retries and extra attack rounds), split by model, by role
 (attacker or verifier) and by request type, so a run's quota use is a measured number. The one real run so far (the pack-off Telugu sign and control, with Gemini 3 Flash
