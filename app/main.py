@@ -104,7 +104,8 @@ def status():
 
 @app.post("/api/run")
 async def run(request: Request, photos: list[UploadFile] = File(...), private: bool = Form(False),
-              code: str = Form(""), caption: str = Form(""), captions: str = Form(""), lang: str = Form("en")):
+              code: str = Form(""), caption: str = Form(""), captions: str = Form(""), lang: str = Form("en"),
+              style: str = Form("")):
     """Stream the agent's progress as NDJSON: attack, plan, edits, re-attack, done (with the final PNGs).
     Several photos are scanned as one account: attacked together, so combinations across them count.
     private: Muse Spark Open finds the clues and every edit runs here; nothing goes to Meta's API.
@@ -133,6 +134,7 @@ async def run(request: Request, photos: list[UploadFile] = File(...), private: b
         raise
     mock = not private and meta.client is None
     lang = lang if lang in meta.LANGS else "en"  # the language of the report's prose
+    style = style if style in ("pixelate", "clean") else ""  # how hidden text is covered; empty = the server default
     attack = meta.mock_attacker() if mock else functools.partial(meta.attack, private=private, lang=lang)
     read = None if mock else functools.partial(meta.read_text, private=private, effort=meta.ATTACK_EFFORT)
     rewrite = None if mock else functools.partial(meta.rewrite_caption, private=private)
@@ -143,7 +145,7 @@ async def run(request: Request, photos: list[UploadFile] = File(...), private: b
             yield json.dumps({"type": "start", "metadata": [m for _, m in loaded], "mock": mock, "private": private,
                               "captions": texts, "model": meta.OPEN_LABEL, "host": meta.OPEN_HOST}) + "\n"
             for event in agent.run([img for img, _ in loaded], attack=attack, private=private, read=read,
-                                   caption=texts, rewrite=rewrite):
+                                   caption=texts, rewrite=rewrite, style=style):
                 yield json.dumps(event) + "\n"
         except Exception:
             log.exception("agent run failed")

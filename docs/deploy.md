@@ -37,6 +37,7 @@ Environment tab; Render redeploys.
 | `OPEN_RECHECK_MODEL`, `OPEN_RECHECK_RPM` | A different model for the re-attacks. Off; the one we tried did not work | empty |
 | `LIVE_CODE` | Optional. When set, live runs need this code. The samples never do. | empty (open), and not set on Render |
 | `RUNS_PER_HOUR`, `RUNS_PER_DAY` | Live runs allowed per visitor and per site. With no code these are the only guard: a run costs about 6 to 12 requests, so give each free key about two runs a day | 2 and 6 in `render.yaml` |
+| `EDIT_STYLE` | `clean` makes the clean fill the default edit style (visitors can still pick Pixelate on the page); see [how-it-works.md](how-it-works.md) | `pixelate` |
 | `REGION` | Country packs to load: `in`, `us`, comma separated, or `global` for none | `in` |
 | `BOX_SNAP`, `BOX_FOCUS` | Box tightening, see [how-it-works.md](how-it-works.md) | on, `object` |
 | `TELEGRAM_BOT_TOKEN`, `BOT_RUNS_PER_HOUR` | For the Telegram bot | none, 3 |

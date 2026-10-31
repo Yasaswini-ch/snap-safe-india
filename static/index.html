@@ -553,6 +553,13 @@
           with them, since a caption often names what the photo hides.</span></span>
         <textarea id="caption" rows="2" maxlength="2200" placeholder="Moved into our new flat in MVP Colony! #newhome #vizag"></textarea>
       </label>
+      <label class="lang" for="style">
+        <span><b>Edit style</b> <span class="muted small">how hidden text is covered. Clean fill matches the colour around it and puts a placeholder such as XXXX XXXX 0000 where a number was; faces, busy backgrounds and large areas are still pixelated.</span></span>
+        <select id="style">
+          <option value="pixelate">Pixelate</option>
+          <option value="clean">Clean fill</option>
+        </select>
+      </label>
       <label class="lang" for="lang">
         <span><b>Report language</b> <span class="muted small">what the exposure report is written in. The edits are the same.</span></span>
         <select id="lang">
@@ -1519,6 +1526,7 @@ async function check(files, captions = null) {
   body.append("private", !$("private-wrap").hidden && $("private").checked);
   body.append("code", $("code").value.trim());
   body.append("lang", $("lang").value);
+  body.append("style", $("style").value);
   if (captions) body.append("captions", JSON.stringify(captions));
   else body.append("caption", $("caption").value.trim());
   begin(files.map(f => URL.createObjectURL(f)), () => fetch("/api/run", { method: "POST", body }));

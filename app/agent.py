@@ -3,6 +3,7 @@ import base64
 import inspect
 import logging
 import os
+import re
 from concurrent.futures import ThreadPoolExecutor
 from itertools import combinations
 
@@ -30,6 +31,9 @@ KIND_CATEGORIES = {"email address": ("contact",), "phone number": ("contact",),
                    "street address": ("home_location", "current_location", "work_or_school"),
                    **{k: ("financial_or_id", "identity") for k in regions.ID_KINDS}}
 SNAP = os.environ.get("BOX_SNAP", "1") != "0"  # shrink each box to the ink inside it (pipeline.snap_box); BOX_SNAP=0 turns it off
+STYLE = os.environ.get("EDIT_STYLE", "pixelate")  # "clean": cover text with the colour around it where that is plain (pipeline.clean_fill)
+CLEAN_MAX = 0.08  # a clean fill is for text-sized regions: a region over this share of the frame is pixelated
+PEOPLE = re.compile(r"face|person|people|child|kid|skin|body|selfie|portrait", re.I)  # never covered with a flat fill
 FALLBACK = ("sign", "label")  # plain nouns SAM finds on most objects that carry text, when a clue's own name fails
 MAX_EDITS = 12  # per round: bounds cost and memory on a small host; anything left goes in the next round
 
@@ -133,12 +137,14 @@ def _bounds(mask: np.ndarray) -> list[float]:
 
 
 def apply_edits(img: np.ndarray, items: list[dict], private: bool = False,
-                known: dict | None = None) -> tuple[np.ndarray, list[dict], np.ndarray]:
+                known: dict | None = None, style: str = "") -> tuple[np.ndarray, list[dict], np.ndarray]:
     """items: {label, box (0-1), action}. Model calls run in parallel on the same input; each result is
     composited only inside its own mask, so pixels outside every mask are untouched.
     private: nothing leaves this server. The attacker's box, grown wider since boxes can sit off the object, and
     pixelation or inpainting instead of SAM and Muse Image.
     known: masks already made for these clue ids, {id: (mask, source)}.
+    style: "clean" covers text with the colour around it (and a placeholder for number-like values) where that colour is
+    plain; faces, large regions, busy backgrounds and clues found again after an edit are pixelated as before.
     Returns the edited image, what was done, the union of all masks, and each edit's own mask."""
     pad = max(3, max(img.shape[:2]) // (60 if private else 200))
     known = known or {}
@@ -162,7 +168,10 @@ def apply_edits(img: np.ndarray, items: list[dict], private: bool = False,
             continue
         if private and item["action"] == "erase" and mask.mean() > INPAINT_MAX:
             item = {**item, "action": "pixelate"}
-        if item["action"] in ("erase", "replace"):
+        if ((style or STYLE) == "clean" and gen is None and not item.get("again") and not PEOPLE.search(item["label"])
+                and item["action"] != "keep" and mask.mean() <= CLEAN_MAX and pipeline.plain_around(out, mask)):
+            edited, engine = pipeline.clean_fill(out, mask, pipeline.placeholder_for(item["label"])), "clean"
+        elif item["action"] in ("erase", "replace"):
             edited, engine = (gen, "muse-image") if gen is not None else (pipeline.inpaint(out, mask), "inpaint")
         else:
             edited, engine = getattr(pipeline, item["action"])(out), item["action"]
@@ -197,14 +206,15 @@ def _text_check(reading) -> dict | None:
 
 
 def run(imgs: list[np.ndarray], attack=meta.attack, target: int = TARGET, private: bool = False, read=None,
-        caption: str | list[str] = "", rewrite=None):
+        caption: str | list[str] = "", rewrite=None, style: str = ""):
     """Yield progress events for the UI. One photo, or several from one account attacked together: the planner then
     breaks combinations across photos with the fewest edits overall. Image fields are lists in photo order, None for
     a photo a step left unchanged. The last event carries the final PNGs (lossless, metadata-free).
     private: edits stay on this server (see apply_edits); the caller passes the matching attacker.
     read: transcribes one photo (meta.read_text); with it, a deterministic text check runs beside the first attack.
     caption: what will be posted, one per photo (or one for the first), attacked with the photos;
-    rewrite(caption, details) removes details from one (meta.rewrite_caption), and every re-attack sees the result."""
+    rewrite(caption, details) removes details from one (meta.rewrite_caption), and every re-attack sees the result.
+    style: "clean" for the clean fill where it fits (see apply_edits); empty means EDIT_STYLE, "pixelate" unless set."""
     current, before, failed, doubt, retried = list(imgs), None, False, False, False
     hidden = []  # what was edited out, one entry per object across rounds, so the owner can choose to keep one
     captions = [caption] if isinstance(caption, str) else list(caption)
@@ -303,7 +313,7 @@ def run(imgs: list[np.ndarray], attack=meta.attack, target: int = TARGET, privat
                 box = widen(box)
             tried[p].append((box, c["label"]))
             items.setdefault(p, []).append({"id": c["id"], "photo": p, "label": c["label"], "box": box, "core": c["box"],
-                                            "action": "pixelate" if again else c["suggested"]})
+                                            "action": "pixelate" if again else c["suggested"], "again": again})
         count = sum(map(len, items.values())) + len(words)
         yield {"type": "plan", "round": n, "clues": ids, "stuck": len(stuck),
                "text": f"Breaking {len(risky_ways(graph, target))} ways in with {count} edit{'s' if count != 1 else ''}"}
@@ -327,7 +337,7 @@ def run(imgs: list[np.ndarray], attack=meta.attack, target: int = TARGET, privat
         if not items:
             continue
         with ThreadPoolExecutor(len(items)) as pool:
-            results = dict(zip(items, pool.map(lambda p: apply_edits(current[p], items[p], private, known), items)))
+            results = dict(zip(items, pool.map(lambda p: apply_edits(current[p], items[p], private, known, style), items)))
         done = []
         for p, (out, did, mask, own) in results.items():
             current[p] = out
@@ -550,6 +560,19 @@ if __name__ == "__main__":
     assert [d["engine"] for d in edits] == ["pixelate", "pixelate", "pixelate"], edits
     small = {"label": "house number", "box": [0.5, 0.5, 0.53, 0.53], "action": "erase"}
     assert apply_edits(img, [small], private=True)[1][0]["engine"] == "inpaint"
+    # Clean fill: on a plain background a plate-sized clue is covered flat, with a placeholder; a busy background, a face,
+    # a clue found again after an edit, and the default style all stay pixelation.
+    flat = np.full((200, 300, 3), (205, 208, 214), np.uint8)
+    flat[85:100, 100:200] = (30, 30, 36)
+    plate = {"label": "vehicle number plate", "box": [0.32, 0.41, 0.69, 0.51], "action": "pixelate"}
+    assert apply_edits(flat, [plate], private=True, style="clean")[1][0]["engine"] == "clean"
+    assert apply_edits(flat, [plate], private=True, style="pixelate")[1][0]["engine"] == "pixelate"
+    assert apply_edits(flat, [{**plate, "again": True}], private=True, style="clean")[1][0]["engine"] == "pixelate"
+    assert apply_edits(flat, [{**plate, "label": "child's face"}], private=True, style="clean")[1][0]["engine"] == "pixelate"
+    noisy = np.random.default_rng(1).integers(0, 256, flat.shape, dtype=np.uint8)
+    assert apply_edits(noisy, [plate], private=True, style="clean")[1][0]["engine"] == "pixelate"
+    covered, _, union, _ = apply_edits(flat, [plate], private=True, style="clean")
+    assert np.array_equal(covered[~union], flat[~union]) and covered[union].astype(int).max() < 215
     # A last literal read of the edited photo still finds a PIN code that the first report called risky: the attacker
     # is asked again, told the count and never the value. If the PIN is gone the second time the result is safe; if not,
     # it never is.
