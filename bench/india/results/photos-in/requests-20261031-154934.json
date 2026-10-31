@@ -1,0 +1,157 @@
+{
+ "snapshot": {
+  "total": 27,
+  "failed": 9,
+  "by_role": {
+   "agent": 19,
+   "verifier": 8
+  },
+  "by_model": {
+   "gemini-3-flash-preview": 19,
+   "gemma-4-26b-a4b-it": 8
+  },
+  "by_kind": {
+   "attack": 4,
+   "attack_more": 10,
+   "transcribe": 13
+  },
+  "by_outcome": {
+   "200": 18,
+   "429": 9
+  },
+  "by_model_role": {
+   "gemini-3-flash-preview / agent": 19,
+   "gemma-4-26b-a4b-it / verifier": 8
+  }
+ },
+ "rows": [
+  [
+   "photo_house_board",
+   "agent",
+   "gemini-3-flash-preview",
+   "attack",
+   "200",
+   1
+  ],
+  [
+   "photo_house_board",
+   "agent",
+   "gemini-3-flash-preview",
+   "attack_more",
+   "429",
+   3
+  ],
+  [
+   "photo_house_board",
+   "agent",
+   "gemini-3-flash-preview",
+   "transcribe",
+   "200",
+   1
+  ],
+  [
+   "photo_house_board",
+   "verifier",
+   "gemma-4-26b-a4b-it",
+   "transcribe",
+   "200",
+   2
+  ],
+  [
+   "photo_library_card",
+   "agent",
+   "gemini-3-flash-preview",
+   "attack",
+   "200",
+   1
+  ],
+  [
+   "photo_library_card",
+   "agent",
+   "gemini-3-flash-preview",
+   "attack_more",
+   "429",
+   3
+  ],
+  [
+   "photo_library_card",
+   "agent",
+   "gemini-3-flash-preview",
+   "transcribe",
+   "200",
+   1
+  ],
+  [
+   "photo_library_card",
+   "verifier",
+   "gemma-4-26b-a4b-it",
+   "transcribe",
+   "200",
+   2
+  ],
+  [
+   "photo_medical_sign",
+   "agent",
+   "gemini-3-flash-preview",
+   "attack",
+   "200",
+   1
+  ],
+  [
+   "photo_medical_sign",
+   "agent",
+   "gemini-3-flash-preview",
+   "attack_more",
+   "200",
+   1
+  ],
+  [
+   "photo_medical_sign",
+   "agent",
+   "gemini-3-flash-preview",
+   "attack_more",
+   "429",
+   3
+  ],
+  [
+   "photo_medical_sign",
+   "agent",
+   "gemini-3-flash-preview",
+   "transcribe",
+   "200",
+   1
+  ],
+  [
+   "photo_medical_sign",
+   "verifier",
+   "gemma-4-26b-a4b-it",
+   "transcribe",
+   "200",
+   2
+  ],
+  [
+   "photo_tea_menu",
+   "agent",
+   "gemini-3-flash-preview",
+   "attack",
+   "200",
+   1
+  ],
+  [
+   "photo_tea_menu",
+   "agent",
+   "gemini-3-flash-preview",
+   "transcribe",
+   "200",
+   2
+  ],
+  [
+   "photo_tea_menu",
+   "verifier",
+   "gemma-4-26b-a4b-it",
+   "transcribe",
+   "200",
+   2
+  ]
+ ]
+}

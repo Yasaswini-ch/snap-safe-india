@@ -194,6 +194,10 @@ An earlier first run with Gemma 4 and lenient scoring (full names only) removed 
 with it off. That scoring counted a half-hidden name as removed, so treat it as a first look. Details, the strict-scoring
 history and the raw files are in [docs/benchmark.md](docs/benchmark.md) and under `bench/india/results`.
 
+A separate set of four photograph-like images (a chalkboard menu, a Telugu shop sign, a library card, a house gate) was also run once
+(`bench/india/photos`, `--set photos`): 20 of 21 planted secrets removed, but the run is **incomplete**: the free Gemini quota ran out, so
+the agent's re-check did not finish and no result there is verified. See [docs/benchmark.md](docs/benchmark.md).
+
 The benchmark now counts the API requests it sends (including retries and extra attack rounds), split by model, by role
 (attacker or verifier) and by request type, so a run's quota use is a measured number. The one real run so far (the pack-off Telugu sign and control, with Gemini 3 Flash
 as the attacker and Gemma 4 as the verifier) sent **12 requests, none failed or retried: 8 to Gemini 3 Flash** (2 first attacks,

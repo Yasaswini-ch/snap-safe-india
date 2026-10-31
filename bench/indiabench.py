@@ -67,6 +67,7 @@ def with_parts(secrets: list[str]) -> list[str]:
 
 
 VERIFIER = ""  # --verifier: the model that reads the before and after photos
+SCENE_SET = ""  # --set: a scene set other than the rendered scenes
 COUNTER = requestcount.RequestCounter()  # every request actually sent to the model API in this run (bench/requestcount.py)
 
 
@@ -138,7 +139,7 @@ def summarize(recs: list[dict], tag: str) -> str:
         f"# Indian benchmark results ({time.strftime('%Y-%m-%d')}, REGION={tag}, model {meta.OPEN_MODEL})", "",
         f"{len(ok)} scenes scored ({len(leaky)} leak, {len(controls)} control), {len(recs) - len(ok)} errors. "
         f"{verified} planted secrets were legible in the originals and are the ground truth below.", "",
-        "The scenes are rendered, not photographed, and every value is fictional. One run each: the attacker samples.", "",
+        (f"Photograph-like images supplied by the team (set '{SCENE_SET}'); every value in them is meant to be fictional. One run each: the attacker samples." if SCENE_SET else "The scenes are rendered, not photographed, and every value is fictional. One run each: the attacker samples."), "",
         "| Metric | Result |", "|---|---|",
         f"| Planted secrets removed | {pct(verified - sum(len(r['survived']) for r in ok), verified)} |",
         f"| Scenes with every secret removed | {pct(sum(not r['survived'] for r in with_secrets), len(with_secrets))} |",
@@ -177,18 +178,25 @@ def main():
     ap.add_argument("--all", action="store_true", help="run all ten scenes, not just the five core ones")
     ap.add_argument("--verifier", default="", help="model that reads the before and after photos (default: the attacker's model)")
     ap.add_argument("--force", action="store_true")
+    ap.add_argument("--set", default="", help="another scene set under bench/india/<set> (images and scenes.json); give it its own --tag")
     args = ap.parse_args()
     if meta.open_client is None:
         raise SystemExit("Set OPEN_API_KEY (and the Gemma 4 values) in .env first")
     COUNTER.install(meta.open_client)
     from app import regions
     tag = args.tag or ("-".join(p.NAME.split()[0].lower() for p in regions.active()) or "global")
+    if args.set and not args.tag:
+        raise SystemExit("--set needs its own --tag, so the published results are not overwritten")
     out = ROOT / "results" / tag
     (out / "scenes").mkdir(parents=True, exist_ok=True)
     (out / "images").mkdir(exist_ok=True)
-    scenes = json.loads((ROOT / "scenes.json").read_text(encoding="utf-8"))
-    global VERIFIER
+    base = ROOT / args.set if args.set else ROOT
+    global IMAGES
+    IMAGES = base if args.set else IMAGES
+    scenes = json.loads((base / "scenes.json").read_text(encoding="utf-8"))
+    global VERIFIER, SCENE_SET
     VERIFIER = args.verifier
+    SCENE_SET = args.set
     if not args.all and not args.only:
         scenes = [sc for sc in scenes if sc.get("core", True)]
     if args.only:

@@ -146,6 +146,31 @@ _To add: the same table for Gemma, with box snapping and the detail wording on._
 
 _To add if run with `--all`._
 
+## Photograph-like images (partial, one run)
+
+Four images supplied by the team (`bench/india/photos`, with `scenes.json`): a tea-stall chalkboard menu (control), a medical shop sign in
+Telugu and English with a phone number, a library member card on a table, and a house gate with a name plate and a PIN plate. They look like
+photographs, not drawn scenes, and every value in them is meant to be fictional (the card says "Sample card, all details fictional"). They
+were re-saved as JPEG, which leaves no EXIF or GPS data. Run with `uv run --env-file .env python -m bench.indiabench --set photos --tag photos-in --verifier gemma-4-26b-a4b-it`
+(`--set` needs its own `--tag`, so the published results are never overwritten). Results: `bench/india/results/photos-in`.
+
+**Incomplete.** Gemini 3 Flash's free daily quota (20 requests) ran out during this run, so 9 of the 27 requests (19 Gemini, 8 Gemma) got a 429.
+Every scene finished, but in each leak scene the agent's re-attack did not complete: "safe" is False and the exposure after is just the
+exposure before. The numbers below are from the Gemma 4 read of the edited photo, one read each, and one run, so treat them as a first look.
+
+| Scene | Secrets removed (Gemma read) | Changed | Text check found | Edits |
+|---|---|---|---|---|
+| Tea menu (control) | nothing to remove, nothing edited | 0.0% | - | 0 |
+| Medical shop sign | 3 of 4 (the Telugu shop name was still readable) | 5.9% | phone number, vehicle plate | 2 |
+| Library card | 10 of 10 | 11.9% | Aadhaar number, PIN code, street address | 3 |
+| House gate | 7 of 7 | 12.0% | PIN code | 2 |
+
+Total: 20 of 21 planted secrets removed, 7.5% of the frame changed on average, control not flagged, all three leak scenes flagged.
+What we saw in the edited photos: the phone number and the scooter's plate on the shop sign were pixelated, with an oversized block over
+the sign's lower right; the whole card and the whole name plate and PIN plate were pixelated, so these edits are heavy. The shop's own name
+is a business name and was left partly visible. This is not a verified result: the re-check that decides "safe" did not run to the end, and
+the Gemma read that scored it is noisy. Rerun with `--force` after the quota resets for a complete run, and confirm the photos contain no real person's details before this repo stays public.
+
 ## Text detector benchmark (offline, no model)
 
 This is separate from the image benchmark above and below. It scores only the deterministic text check that runs beside the
