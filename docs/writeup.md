@@ -149,15 +149,17 @@ secrets removed (8.0% of the photo changed) against 19 of 19 with it on, a one-s
 of the pack-on results come from older code, so it is not a clean comparison. The scenes are drawn, not photographed, and the verifier is the same kind of model as the
 attacker. **We do not report precision, recall or F1 for this part**, because a photo has no agreed list of every clue.
 
-**B2. Photograph-like images (one run each, partly incomplete).** Seven images supplied by the team (a chalkboard menu as the control, a
-Telugu and English shop sign, a library card, a house gate, a Hindi UPI shop stand, a Hindi parcel and a Telugu house plate), and three
+**B2. Photograph-like images (one run each, partly incomplete).** Nine images supplied by the team (a chalkboard menu as the control, a
+Telugu and English shop sign, a library card, a house gate, a Hindi UPI shop stand, a Hindi parcel, a Telugu house plate, and a Tamil shop sign and clinic sign), and three
 generated photo-style images run by a teammate with Gemma 4 (a parcel, a payment screen, a number plate; 15 of 15 secrets removed, but the
-parcel edit is far larger than the label). For the first four of the seven, Gemini's free daily quota ran out, so their re-check never finished
+parcel edit is far larger than the label). For the first four of the nine, Gemini's free daily quota ran out, so their re-check never finished
 and they are **explicitly not verified**. The last three ran to completion: the agent marked the Hindi UPI shop stand and the Hindi parcel safe,
 and **did not mark the Telugu house plate safe** (four attacks, the home still rated "specific"). The scorer reported every planted secret removed
 on all three, but our own look at the edited images found Telugu text still readable on the house plate (the first line, the start of the house
 number and of the colony name) and edit boxes offset from the text they should cover, so for Indian scripts that scorer is optimistic: it
-counts a secret as removed only when the whole string is gone and compares text without vowel signs. Details are in [benchmark.md](benchmark.md).
+counts a secret as removed only when the whole string is gone and compares text without vowel signs. The two Tamil signs were run afterwards with
+Gemma 4 as attacker and reader (the Gemini quota was out): the shop sign was marked safe with its Tamil shop name partly readable and its boxes offset, and the clinic
+sign was over-edited (38% of the frame), left the doctor's name readable and was not marked safe. Details are in [benchmark.md](benchmark.md).
 
 **C. Language plumbing (verified offline).** 11 offline checks pass: the language reaches the prompt, unknown codes fall back to
 English on the server and in the bot, Telugu and Hindi text (with conjuncts and joiners) survives JSON and the Telegram upload,
@@ -168,7 +170,7 @@ benchmark's request counter has 4 more offline checks against a stand-in API.
 with the report in Telugu and once in Hindi. Both came back in the right script, with the clue labels in English and none of the
 planted values in the text, and both read as fluent and sensible to us; nobody who reads Telugu or Hindi natively has reviewed
 them. Only the report's prose changes language: the page labels, Telegram headings and verdicts, and clue labels stay English.
-Hindi and Telugu photographs have been run through the agent (see B2) but no reader has reviewed the edited images; Tamil photos have not been tried.
+Hindi, Telugu and Tamil photographs have been run through the agent (see B2; the Tamil ones only with Gemma 4) but no reader has reviewed the edited images.
 
 Other checks: the cleaned ID-card sample was read back after cleaning, and the Telegram bot ran once on real Telegram with the
 made-up ID card (about a minute, and a box that was larger than needed). The deployed site answers; a full live run on it was

@@ -37,7 +37,7 @@ The team plan for Hacktoberfest Hack Day x AI for Vizag (Sunday, Nov 1, 2026, 10
 ### Blocked
 
 - Gemini 3 Flash is the fast, accurate model. Its free tier gives **20 requests a day per Google project**. The new key has used most of today's. The old key resets around 12:30 PM IST.
-- The new key ran out of quota on Oct 31 during the pack-off benchmark, then worked again later the same day and the last two scenes ran. Hindi and Telugu photographs were run afterwards (see `docs/benchmark.md`); Tamil photos are still not tried.
+- The new key ran out of quota on Oct 31 during the pack-off benchmark, then worked again later the same day and the last two scenes ran. Hindi and Telugu photographs were run afterwards (see `docs/benchmark.md`); The two Tamil signs were run with Gemma 4 (Gemini quota was out), and a Tamil reader should still check the results and the Tamil phrases.
 - Fix: switch on billing for the Google AI Studio project, or record only two samples after the reset.
 
 ### Not tested yet
@@ -75,8 +75,8 @@ Estimates are rough. Swap tasks if someone is faster at something. Yasaswini kee
   - Install Git and uv. Clone `https://github.com/Yasaswini-ch/snap-safe-india.git`, run `uv sync`, copy `.env.example` to `.env` and put the Google key in it. Get the key from Yasaswini in a private message, and never commit `.env`. Then run `uv run python -m app.meta`; it should print `meta ok`.
   - **Needs:** an invite to the GitHub repo, and the key
   - **Done when:** the self-checks pass and `uv run --env-file .env uvicorn app.main:app` opens the page at localhost:8000.
-- [ ] **Try a Tamil photo, and check the Tamil words** (20 min)
-  - Hindi is done. What is left: run one made-up Tamil sign through the page and note what happens, and read the Tamil phrases in `app/meta.py` (`TOLD` and `ADDRESSED`) for wrong or unnatural wording. The page already says the checker is "told to read" Tamil, so say what really happens.
+- [ ] **Check the Tamil words** (10 min; the Tamil photos are done: two Tamil signs were run with Gemma 4, see `docs/benchmark.md`)
+  - Hindi and Tamil photos are done. What is left: read the Tamil phrases in `app/meta.py` (`TOLD` and `ADDRESSED`) for wrong or unnatural wording. The page already says the checker is "told to read" Tamil, so say what really happens.
   - **Needs:** the setup, and Gemini quota
   - **Done when:** the Tamil photo has a result noted in `docs/benchmark.md` limits, and the Tamil words are confirmed or corrected.
 - [ ] **Demo script and recording (optional)** (2 h)

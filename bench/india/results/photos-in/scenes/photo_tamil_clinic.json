@@ -1,0 +1,81 @@
+{
+ "id": "photo_tamil_clinic",
+ "kind": "leak",
+ "secrets": [
+  "அருள் மருத்துவமனை",
+  "பிரகாஷ்",
+  "97865 43210",
+  "அண்ணா நகர்",
+  "திருச்சி",
+  "620018"
+ ],
+ "expect": [
+  "phone number",
+  "PIN code"
+ ],
+ "verified": [
+  "அருள் மருத்துவமனை",
+  "பிரகாஷ்",
+  "97865 43210",
+  "அண்ணா நகர்",
+  "திருச்சி",
+  "620018"
+ ],
+ "seconds": 94.6,
+ "model": "gemini-3-flash-preview",
+ "verifier": "gemma-4-26b-a4b-it",
+ "exposure_before": {
+  "current_location": 4,
+  "identity": 4,
+  "work_or_school": 4,
+  "contact": 4
+ },
+ "exposure_after": {
+  "current_location": 2
+ },
+ "safe": false,
+ "attacks": 3,
+ "textcheck_found": [
+  "PIN code",
+  "phone number"
+ ],
+ "edits": [
+  "pixelate:physician name plate:snap",
+  "pixelate:contact number text:snap",
+  "pixelate:address sign text:snap",
+  "pixelate:hospital sign text:snap",
+  "pixelate:medical clinic sign:snap",
+  "pixelate:medical clinic sign:snap",
+  "pixelate:medical clinic sign:snap",
+  "pixelate:medical clinic sign:snap",
+  "pixelate:medical clinic sign:snap"
+ ],
+ "values_printed": [],
+ "survived": [],
+ "changed": 0.4355,
+ "requests": {
+  "total": 9,
+  "failed": 3,
+  "by_role": {
+   "agent": 7,
+   "verifier": 2
+  },
+  "by_model": {
+   "gemini-3-flash-preview": 7,
+   "gemma-4-26b-a4b-it": 2
+  },
+  "by_kind": {
+   "attack": 1,
+   "attack_more": 5,
+   "transcribe": 3
+  },
+  "by_outcome": {
+   "200": 6,
+   "429": 3
+  },
+  "by_model_role": {
+   "gemini-3-flash-preview / agent": 7,
+   "gemma-4-26b-a4b-it / verifier": 2
+  }
+ }
+}

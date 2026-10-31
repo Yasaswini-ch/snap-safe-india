@@ -21,7 +21,8 @@ SOURCES = {"in_id_card": ["id_card"], "in_parcel": ["parcel_label"], "in_plate":
            "in_parcel_real": ["parcel_real"], "in_upi_real": ["upi_real"], "in_plate_real": ["plate_real"],  # photo-style images
            "in_photo_tea": ["photo_tea_menu"], "in_photo_sign": ["photo_medical_sign"], "in_photo_card": ["photo_library_card"],
            "in_photo_gate": ["photo_house_board"], "in_photo_upi_hi": ["photo_upi_kirana"],
-           "in_photo_parcel_hi": ["photo_hindi_parcel"], "in_photo_house_te": ["photo_telugu_house"]}  # photograph-like images
+           "in_photo_parcel_hi": ["photo_hindi_parcel"], "in_photo_house_te": ["photo_telugu_house"],
+           "in_photo_store_ta": ["photo_tamil_store"], "in_photo_clinic_ta": ["photo_tamil_clinic"]}  # photograph-like images
 PRIVATE = set(SOURCES)  # recorded through the open-model path (OPEN_MODEL), edits on the server
 # What each post would say, for samples that have a caption. Captions often name what the photo's edits hide.
 CAPTIONS: dict[str, str | list[str]] = {

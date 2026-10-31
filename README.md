@@ -228,17 +228,17 @@ An earlier first run with Gemma 4 and lenient scoring (full names only) removed 
 with it off. That scoring counted a half-hidden name as removed, so treat it as a first look. Details, the strict-scoring
 history and the raw files are in [docs/benchmark.md](docs/benchmark.md) and under `bench/india/results`.
 
-A separate set of seven photograph-like images (a chalkboard menu, a Telugu shop sign, a library card, a house gate, a Hindi UPI shop stand, a
-Hindi parcel and a Telugu house plate) was also run once (`bench/india/photos`, `--set photos`). The first four hit the free Gemini quota, so their
+A separate set of nine photograph-like images (a chalkboard menu, a Telugu shop sign, a library card, a house gate, a Hindi UPI shop stand, a
+Hindi parcel, a Telugu house plate, a Tamil shop sign and a Tamil clinic sign) was also run once (`bench/india/photos`, `--set photos`). The first four hit the free Gemini quota, so their
 re-check did not finish and none is verified. The last three ran to the end: the agent marked the UPI shop and the Hindi parcel safe, and not the Telugu
 house plate (four attacks, home still "specific"). The scorer said every planted secret was removed on those three, but our own look at the edited
 images found Telugu text still readable on the house plate and misplaced edit boxes, so that score is optimistic for Indian scripts. Another
 set of three generated photo-style images (a parcel, a payment screen, a number plate; `bench/india/real`) was run by a teammate with Gemma 4
 because the Gemini quota was out: 15 of 15 secrets removed, with a parcel edit much larger than the label. See [docs/benchmark.md](docs/benchmark.md).
 
-All seven are also on the page: in the "Watch a sample" gallery (and so in "The agent at work") as recordings made with Gemma 4, and in the
+All nine are also on the page: in the "Watch a sample" gallery (and so in "The agent at work") as recordings made with Gemma 4, and in the
 "Photo-style images" results section, which marks the three that did not finish their re-check and the Telugu house plate that was not marked safe.
-The recordings are separate runs from the benchmark: in them the agent marked all seven safe, which is its own judgment, and for the Telugu house
+The recordings are separate runs from the benchmark: in them the agent marked all nine safe, which is its own judgment, and for the Telugu house
 plate that disagrees with the Gemini benchmark run above.
 
 The benchmark now counts the API requests it sends (including retries and extra attack rounds), split by model, by role
@@ -266,7 +266,8 @@ the chosen script, the clue labels stayed English, and none of the planted value
 appeared in the text. The Hindi and the Telugu read as fluent and sensible to us, but nobody who reads Telugu or Hindi natively
 has reviewed them, and it is one photo and one run per language, so we claim no more than that. Hindi and Telugu photos
 have since been run through the agent (a Hindi parcel, a Hindi UPI shop stand, a Telugu house plate; see part 2), but no Telugu or Hindi
-reader has reviewed the edited images or the reports, and Tamil photos have not been tried.
+reader has reviewed the edited images or the reports. Two Tamil signs have been run once with Gemma 4 (Gemini's quota was out): the shop sign was marked
+safe with its Tamil shop name partly readable, and the clinic sign was over-edited, left the doctor's name readable and was not marked safe.
 
 <p align="center"><img src="docs/img/divider.png" alt="" width="100%"></p>
 

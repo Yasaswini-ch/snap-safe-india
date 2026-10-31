@@ -53,7 +53,7 @@ value in them is made up, and two of the five results are from before that check
   they need to be.
 - A check takes one to a few minutes, mostly waiting on the model's rate limit.
 - The photo is sent to Google's model to find the clues, so use made-up photos when trying it.
-- The report can be written in Telugu or Hindi. Offline tests cover the language plumbing, and one live run each on the made-up ID card gave reports in the right script with no planted value in them; no native Telugu or Hindi reader has reviewed them, and only the report prose changes language. Among Indian-language photos a Telugu sign, a Hindi parcel, a Hindi UPI shop stand and a Telugu house plate have been run once each (the house plate was not marked safe, and Telugu text was still readable in our own look at the result); Tamil photos have not been tried.
+- The report can be written in Telugu or Hindi. Offline tests cover the language plumbing, and one live run each on the made-up ID card gave reports in the right script with no planted value in them; no native Telugu or Hindi reader has reviewed them, and only the report prose changes language. Among Indian-language photos a Telugu sign, a Hindi parcel, a Hindi UPI shop stand a Telugu house plate, a Tamil shop sign and a Tamil clinic sign have been run once each (the house plate and the clinic sign were not marked safe, and Telugu and Tamil text was still readable in our own look at the results; the Tamil ones used Gemma 4 only).
 - The pack-off and pack-on runs for two scenes come from different code versions, so that comparison is not clean.
 
 ## Links

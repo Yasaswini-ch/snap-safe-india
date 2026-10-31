@@ -1,0 +1,102 @@
+{
+ "snapshot": {
+  "total": 13,
+  "failed": 4,
+  "by_role": {
+   "agent": 9,
+   "verifier": 4
+  },
+  "by_model": {
+   "gemini-3-flash-preview": 9,
+   "gemma-4-26b-a4b-it": 4
+  },
+  "by_kind": {
+   "attack": 2,
+   "attack_more": 5,
+   "transcribe": 6
+  },
+  "by_outcome": {
+   "200": 9,
+   "429": 3,
+   "500": 1
+  },
+  "by_model_role": {
+   "gemini-3-flash-preview / agent": 9,
+   "gemma-4-26b-a4b-it / verifier": 4
+  }
+ },
+ "rows": [
+  [
+   "photo_tamil_clinic",
+   "agent",
+   "gemini-3-flash-preview",
+   "attack",
+   "200",
+   1
+  ],
+  [
+   "photo_tamil_clinic",
+   "agent",
+   "gemini-3-flash-preview",
+   "attack_more",
+   "200",
+   2
+  ],
+  [
+   "photo_tamil_clinic",
+   "agent",
+   "gemini-3-flash-preview",
+   "attack_more",
+   "429",
+   3
+  ],
+  [
+   "photo_tamil_clinic",
+   "agent",
+   "gemini-3-flash-preview",
+   "transcribe",
+   "200",
+   1
+  ],
+  [
+   "photo_tamil_clinic",
+   "verifier",
+   "gemma-4-26b-a4b-it",
+   "transcribe",
+   "200",
+   2
+  ],
+  [
+   "photo_tamil_store",
+   "agent",
+   "gemini-3-flash-preview",
+   "attack",
+   "200",
+   1
+  ],
+  [
+   "photo_tamil_store",
+   "agent",
+   "gemini-3-flash-preview",
+   "transcribe",
+   "200",
+   1
+  ],
+  [
+   "photo_tamil_store",
+   "verifier",
+   "gemma-4-26b-a4b-it",
+   "transcribe",
+   "200",
+   1
+  ],
+  [
+   "photo_tamil_store",
+   "verifier",
+   "gemma-4-26b-a4b-it",
+   "transcribe",
+   "500",
+   1
+  ]
+ ]
+}

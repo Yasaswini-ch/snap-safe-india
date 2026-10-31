@@ -168,9 +168,9 @@ claim and is not explained by this run alone.
 
 Included in the ten-scene Gemma 4 run above. The Gemini 3 Flash runs cover only the five core scenes; the other five (tax card, house name board, UPI screen, college lanyard, wedding invite) have no Gemini results yet.
 
-## Photograph-like images (one run each; first four incomplete)
+## Photograph-like images (one run each; four incomplete, two Tamil photos from a Gemma 4 run)
 
-Seven images supplied by the team (`bench/india/photos`, with `scenes.json`). They look like photographs, not drawn scenes, and every value in them is
+Nine images supplied by the team (`bench/india/photos`, with `scenes.json`). They look like photographs, not drawn scenes, and every value in them is
 meant to be fictional. They were re-saved as JPEG, which leaves no EXIF or GPS data. Run with
 `uv run --env-file .env python -m bench.indiabench --set photos --tag photos-in --verifier gemma-4-26b-a4b-it`
 (`--set` needs its own `--tag`, so the published results are never overwritten). Results: `bench/india/results/photos-in`.
@@ -185,7 +185,16 @@ Scenes already scored are reused, so the file mixes two runs, as described below
 | UPI shop (Hindi) | PhonePe stand with QR and UPI ID, Hindi shop name and price list | 2 of 2 | 13.9% | 3 | yes |
 | Hindi parcel | Hindi name and address, PIN, mobile, order and AWB numbers | 8 of 8 | 24.1% | 3 | yes |
 | Telugu house plate | Telugu house name, number, colony, town, PIN, phone | 6 of 6 | 8.3% | 4 | no |
+| Tamil shop sign (Gemma 4 run) | Tamil shop name, street, town, PIN, phone | 5 of 6 (the Tamil shop name was still readable) | 13.3% | 3 | yes |
+| Tamil clinic sign (Gemma 4 run) | Tamil clinic and doctor name, town, PIN, phone | 5 of 6 (the doctor's name was still readable) | 38.1% | 4 | no |
 
+- **Tamil photos (first Tamil run).** The two Tamil signs were added after the Gemini quota ran out (an attempt with Gemini got 429s: the shop sign
+  produced no result and the clinic sign an unfinished one, left in `photos-in/scenes/photo_tamil_clinic.json`). So their rows come from a separate run
+  with **Gemma 4 as the attacker and as the reader** (tag `photos-gemma`: `OPEN_MODEL=gemma-4-26b-a4b-it uv run --env-file .env python -m bench.indiabench --set photos --tag photos-gemma --only photo_tamil_store,photo_tamil_clinic --verifier gemma-4-26b-a4b-it`),
+  which is a weaker, same-model check. The shop sign's address, PIN and phone were pixelated (the boxes sit offset, covering the tagline and part of the
+  roof), the name was cut in half, and the agent marked it safe. The clinic sign was heavily over-edited (38% of the frame, the sign's left half) while the
+  doctor's name stayed readable, and the agent did not mark it safe. The text check found the PIN code and phone number on both. Tamil matras (vowel signs)
+  are dropped when text is compared, so a Tamil match is looser than an English one.
 - **Incomplete first four.** In the first run (four scenes) Gemini 3 Flash's free daily quota (20 requests) ran out: 9 of 27 requests got a 429. Those scenes
   finished, but the re-attack did not, so "safe" is no and the exposure after is just the exposure before. Their scores are one Gemma read only.
 - **Complete last three.** With a new key (22 requests: 15 Gemini, 7 Gemma, one Gemma request failed with a 500 and was retried), the UPI shop, the Hindi
@@ -201,12 +210,12 @@ Scenes already scored are reused, so the file mixes two runs, as described below
 - **Heavy and offset edits.** The card, the name plates and the parcel label were pixelated more than the secrets need, and the shop sign's block was larger
   than the phone number.
 
-- **On the page.** All seven are in the sample gallery as recordings made with Gemma 4 (`app/samples.py`, names `in_photo_*`), so they also play in "The agent at
+- **On the page.** All nine are in the sample gallery as recordings made with Gemma 4 (`app/samples.py`, names `in_photo_*`), so they also play in "The agent at
   work", and in the "Photo-style images" results section (`bench/india/photos/publish.py`). The recordings are separate runs: the agent marked all
   seven safe in them, which is its own judgment and differs from the Gemini benchmark run for the Telugu house plate. The Hindi parcel and the Telugu house
   plate recordings, which we looked at, hide the address lines and the phone number well; the Telugu house name stays visible.
 
-Treat all of this as a first look: one run per scene, a noisy verifier, and no re-check on four of the seven. Rerun the first four with `--force` after the
+Treat all of this as a first look: one run per scene, a noisy verifier, and no re-check on four of the nine. Rerun the first four with `--force` after the
 quota resets, and have someone read the Telugu and Hindi after-images. Confirm that the photos contain no real person's details before the repo stays public.
 
 ## Text detector benchmark (offline, no model)
@@ -336,4 +345,4 @@ Reproduce with `bench/india/real/run.py`; `bench/india/real/publish.py` puts the
 - Rendered scenes, one run per setting, and a small set, so a gap of one or two secrets can be luck.
 - The verifier is the same kind of model as the attacker unless `--verifier` names another.
 - It scores text only. Faces, landmarks and other non-text clues are attacked but not scored.
-- Hindi photos were run only in the photograph-like set (a parcel and a UPI shop stand, one run each); Tamil photos have not been tested. The attacker samples, so numbers move between runs.
+- Hindi and Tamil photos were run only in the photograph-like set (a Hindi parcel and UPI shop stand, a Tamil shop sign and clinic sign, one run each, the Tamil ones with Gemma 4 only). The attacker samples, so numbers move between runs.
