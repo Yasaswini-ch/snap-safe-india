@@ -143,8 +143,7 @@ def apply_edits(img: np.ndarray, items: list[dict], private: bool = False,
     private: nothing leaves this server. The attacker's box, grown wider since boxes can sit off the object, and
     pixelation or inpainting instead of SAM and Muse Image.
     known: masks already made for these clue ids, {id: (mask, source)}.
-    style: "clean" covers text with the colour around it (and a placeholder for number-like values) where that colour is
-    plain; faces, large regions, busy backgrounds and clues found again after an edit are pixelated as before.
+    style: "clean" covers text with the colour around it where that colour is plain; faces, large regions, busy backgrounds and clues found again after an edit are pixelated as before.
     Returns the edited image, what was done, the union of all masks, and each edit's own mask."""
     pad = max(3, max(img.shape[:2]) // (60 if private else 200))
     known = known or {}
@@ -170,7 +169,7 @@ def apply_edits(img: np.ndarray, items: list[dict], private: bool = False,
             item = {**item, "action": "pixelate"}
         if ((style or STYLE) == "clean" and gen is None and not item.get("again") and not PEOPLE.search(item["label"])
                 and item["action"] != "keep" and mask.mean() <= CLEAN_MAX and pipeline.plain_around(out, mask)):
-            edited, engine = pipeline.clean_fill(out, mask, pipeline.placeholder_for(item["label"])), "clean"
+            edited, engine = pipeline.clean_fill(out, mask), "clean"
         elif item["action"] in ("erase", "replace"):
             edited, engine = (gen, "muse-image") if gen is not None else (pipeline.inpaint(out, mask), "inpaint")
         else:
@@ -560,7 +559,7 @@ if __name__ == "__main__":
     assert [d["engine"] for d in edits] == ["pixelate", "pixelate", "pixelate"], edits
     small = {"label": "house number", "box": [0.5, 0.5, 0.53, 0.53], "action": "erase"}
     assert apply_edits(img, [small], private=True)[1][0]["engine"] == "inpaint"
-    # Clean fill: on a plain background a plate-sized clue is covered flat, with a placeholder; a busy background, a face,
+    # Clean fill: on a plain background a plate-sized clue is covered flat; a busy background, a face,
     # a clue found again after an edit, and the default style all stay pixelation.
     flat = np.full((200, 300, 3), (205, 208, 214), np.uint8)
     flat[85:100, 100:200] = (30, 30, 36)

@@ -33,15 +33,9 @@ Each chosen clue is pixelated, or inpainted when it is a small object, **inside 
 are identical to the uploaded photo after it is decoded and scaled to at most 2048 px.
 
 **Clean fill (optional edit style).** Choose "Clean fill" on the page (or set `EDIT_STYLE=clean`) and a text-sized clue is covered with the
-colour just around it, softened so glare and shadow carry across, instead of being pixelated. A number-like value gets a grey placeholder
-in its place (`XX XX XX XXXX` for a plate, `00000 00000` for a phone, `XXXX XXXX 0000` for an ID or reference number), chosen so the
-text check can never mistake it for a real value. It is used only where the surroundings are plain; a face, a region over 8% of the
-frame, a busy background and a clue found again after an edit are pixelated as before, so it is an additional step, not a replacement.
-Pixels outside the mask are still untouched. On three photo-style test images with Gemma 4 (one run each): the plate and the payment screen
-were covered cleanly and ended Verified, and the courier label, on cardboard, fell back to pixelation.
-
-![A number plate covered with a clean fill](img/clean-fill-plate.jpg)
-![A payment screen with a clean fill and a placeholder](img/clean-fill-upi.jpg)
+colour just around it, softened so glare and shadow carry across, instead of being pixelated. It is used only where the surroundings are
+plain; a face, a region over 8% of the frame, a busy background and a clue found again after an edit are pixelated as before, so it is an
+additional step, not a replacement. Pixels outside the mask are still untouched.
 
 Boxes from a model are rarely tight, so two steps tighten them:
 
