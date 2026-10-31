@@ -9,6 +9,8 @@ services:
       # Without OPEN_API_KEY only the recorded samples play, which is the safe default for a public page.
       - key: OPEN_API_KEY  # your Google AI Studio key; set it as a secret here, never in this file
         sync: false
+      - key: OPEN_API_KEYS  # optional: several keys from different Google projects, comma separated; they take turns and cover for each other
+        sync: false
       - key: OPEN_API_BASE
         value: https://generativelanguage.googleapis.com/v1beta/openai/
       - key: OPEN_MODEL
@@ -19,9 +21,8 @@ services:
         value: Google AI Studio
       - key: OPEN_RPM  # the free tier allows 5 requests a minute for this model
         value: "4"
-      - key: LIVE_CODE  # live runs need this code; give it to judges. Samples never do
-        sync: false
-      # Free-tier Gemini 3 Flash allows 20 requests a day, about three checks. Raise these after enabling billing.
+      # Live runs are open to everyone, so these two limits are what protect the keys. Free-tier Gemini 3 Flash allows 20 requests a day per
+      # key, about two checks a key: set RUNS_PER_DAY to about twice the number of keys, or raise both after enabling billing.
       - key: RUNS_PER_HOUR
         value: "2"
       - key: RUNS_PER_DAY

@@ -31,7 +31,10 @@ MAX_ATTACK_TOKENS = 12000  # a normal report is under 7k; caps the rare run that
 # Private mode: the attacker is Muse Spark Open (open weights) on Baseten's Model API, which keeps no inputs or
 # outputs of synchronous requests. Nothing in that mode reaches Meta's API: edits run on this server, and masks come
 # from SAM 3 on our Modal GPU when SAM3_URL is set.
-OPEN_KEY = os.environ.get("OPEN_API_KEY")
+# One key, or several in OPEN_API_KEYS (comma separated). The free tiers count requests per Google project and per model, so keys
+# from different projects add up: see KeyPool.
+OPEN_KEYS = [k.strip() for k in (os.environ.get("OPEN_API_KEYS") or os.environ.get("OPEN_API_KEY") or "").split(",") if k.strip()]
+OPEN_KEY = OPEN_KEYS[0] if OPEN_KEYS else None
 OPEN_BASE = os.environ.get("OPEN_API_BASE", "https://inference.baseten.co/v1")
 OPEN_MODEL = os.environ.get("OPEN_MODEL", "meta-models/muse-spark-open-1026")  # the hackathon keys only take this ID
 # Names the page shows for the open-model attacker. Any OpenAI-compatible endpoint with image input and tool calls
@@ -50,10 +53,58 @@ OPEN_HOST = os.environ.get("OPEN_HOST", "Baseten")
 SAM3_URL = os.environ.get("SAM3_URL")
 SAM3_KEY = os.environ.get("SAM3_KEY", "")
 
-if API_KEY or OPEN_KEY:
-    from openai import OpenAI
+from openai import OpenAI, RateLimitError
+
+
+def _cooldown(err: Exception) -> float:
+    """Seconds a key should rest after a 429: the delay Google reports, else an hour for a daily limit and a minute for a
+    per-minute one. Kept between 30 seconds and 6 hours."""
+    text = str(err)
+    m = re.search(r"retryDelay['\"]?: ?['\"]?(\d+(?:\.\d+)?)s", text) or re.search(r"retry in (?:(\d+)h)?(?:(\d+)m)?(?:([\d.]+)s)?", text)
+    if m and any(m.groups()):
+        parts = [float(g or 0) for g in m.groups()]
+        secs = parts[0] if len(parts) == 1 else parts[0] * 3600 + parts[1] * 60 + parts[2]
+    else:
+        secs = 3600 if re.search(r"per ?day", text, re.I) else 60
+    return min(max(secs, 30.0), 21600.0)
+
+
+class KeyPool:
+    """Several API keys behind one client, so one key running out of quota does not stop a run. Calls start one key later
+    each time, which spreads the load over the keys; a key that answers 429 for a model rests (_cooldown) while the next key
+    takes the call. Quota is per Google project, so the keys should come from different projects. With one key it is a
+    plain client."""
+
+    def __init__(self, keys: list[str], make):
+        self.clients = [make(k) for k in keys]
+        self.dry: dict[tuple[int, str], float] = {}  # (key, model) -> when it may be tried again
+        self.start, self.lock = 0, threading.Lock()
+        self.chat = self.completions = self
+
+    def create(self, **kw):
+        model, n, last = kw.get("model", ""), len(self.clients), None
+        with self.lock:
+            first, self.start = self.start, (self.start + 1) % n
+        for i in range(n):
+            k = (first + i) % n
+            with self.lock:
+                if self.dry.get((k, model), 0.0) > time.monotonic():
+                    continue
+            try:
+                return self.clients[k].chat.completions.create(**kw)
+            except RateLimitError as e:
+                last = e
+                with self.lock:
+                    self.dry[(k, model)] = time.monotonic() + _cooldown(e)
+        if last:
+            raise last
+        with self.lock:  # every key is resting: ask the one that frees up first, and let the provider answer
+            k = min(range(n), key=lambda j: self.dry.get((j, model), 0.0))
+        return self.clients[k].chat.completions.create(**kw)
+
+
 client = OpenAI(api_key=API_KEY, base_url=BASE_URL, timeout=90, max_retries=1) if API_KEY else None
-open_client = OpenAI(api_key=OPEN_KEY, base_url=OPEN_BASE, timeout=240, max_retries=2) if OPEN_KEY else None
+open_client = KeyPool(OPEN_KEYS, lambda k: OpenAI(api_key=k, base_url=OPEN_BASE, timeout=240, max_retries=1 if len(OPEN_KEYS) > 1 else 2)) if OPEN_KEYS else None
 
 CATEGORIES = [
     "home_location", "current_location", "work_or_school", "identity",
@@ -353,6 +404,7 @@ def _throttle(model: str) -> None:
     rpm = RECHECK_RPM if RECHECK_MODEL and model == RECHECK_MODEL != OPEN_MODEL else OPEN_RPM
     if not rpm:
         return
+    rpm *= max(1, len(OPEN_KEYS))  # each key has its own per-minute limit
     with _call_lock:
         now = time.monotonic()
         nxt = _next_call.get(model, 0.0)

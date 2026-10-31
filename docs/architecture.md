@@ -64,9 +64,9 @@ sequenceDiagram
   participant A as Agent
   participant M as Vision model
 
-  U->>P: choose a photo, a language, enter the access code
+  U->>P: choose a photo and a language (and the access code, if the site sets one)
   P->>S: POST /api/run
-  S->>S: check the code, the rate limits, one run at a time
+  S->>S: check the code (if set), the rate limits, one run at a time
   S->>A: run(photo, caption)
   loop up to 4 attacks
     A->>M: photo and prompt, with the region note and language
@@ -139,7 +139,7 @@ flowchart LR
 flowchart LR
   DEV["Laptop"] -->|"git push main"| GH["GitHub<br/>Yasaswini-ch/snap-safe-india"]
   GH -->|"auto-deploy"| RD["Render<br/>builds the Dockerfile"]
-  SEC["Secrets in Render<br/>OPEN_API_KEY, LIVE_CODE"] --> RD
+  SEC["Secrets in Render<br/>OPEN_API_KEY or OPEN_API_KEYS"] --> RD
   RD --> SITE["snap-safe-india.onrender.com"]
   SITE -->|"photo and prompt"| GM[("Google AI Studio")]
   DEV -.->|"python -m app.telegram_bot"| TGB["Telegram bot"]
