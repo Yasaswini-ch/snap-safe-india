@@ -24,7 +24,7 @@ Built for **Hacktoberfest Hack Day x AI for Vizag** (Nov 1, 2026).
   (`OPEN_RECHECK_MODEL`): it has its own quota, and a second opinion on the edited photo is a better check than the same
   model grading its own edits.
 - **Report language.** The exposure report can be written in English, Telugu or Hindi (a dropdown on the page, `/lang` in the
-  bot). Only the prose changes: clue labels and the edits stay the same. The Telugu and Hindi reports have been tested and work.
+  bot). Only the prose changes: clue labels and the edits stay the same. The language plumbing is covered by offline tests; the quality of the model's Telugu and Hindi text has not been verified live (see Evaluation).
 - **A Telegram bot** that takes a photo and sends back the cleaned copy (see below).
 - **A rendered Indian benchmark** ([bench/india](bench/india), [bench/indiabench.py](bench/indiabench.py)), a new look,
   and a new logo.
@@ -105,32 +105,78 @@ More diagrams (a live check step by step, the exposure graph, region packs, the 
 
 Gemma 4 on this key is only the 26B model; the 31B model returned a server error every time we tried it.
 
-## Benchmark
+## Evaluation
 
-Ten rendered Indian scenes are defined, and the benchmark runs five core ones by default (`--all` runs all ten): an ID card, a courier label, a number plate, a Telugu sign, and a control with nothing personal. The scenes carry planted fictional
-secrets (the other five are a tax card, a house name board, a UPI screen, a college lanyard and a wedding invite). A secret counts as removed only if it was
-readable in the original and is gone from the result. The scenes are drawn, not photographed, and the verifier is the
+Four different things are checked, and they are kept apart on purpose. Only the first needs no API key.
+
+| | What it checks | Needs a key | Status |
+|---|---|---|---|
+| 1. Text detector | The regular expressions and the Aadhaar checksum that run beside the model | No | Measured, reproducible |
+| 2. Image benchmark | The whole agent (model, edits, re-check) on rendered scenes | Yes | Measured, one run per scene, partly complete |
+| 3. Language plumbing | That the language choice reaches the model, falls back to English and survives Unicode | No | Offline tests pass |
+| 4. Live language quality | Whether the model's Telugu and Hindi reports are correct and natural | Yes | **Not verified** |
+
+### 1. Deterministic text detector (measured, offline)
+
+The agent runs a deterministic check on a transcription of the photo: regular expressions for Aadhaar (with the Verhoeff
+checksum), PAN, GSTIN, voter ID, number plates, IFSC, UPI IDs, email, phone numbers, PIN codes and addresses, plus a check
+for notes that tell an AI reviewer to report nothing. We scored it on **75 hand-written, made-up texts** (18 contain nothing
+private) and **14 injection-note texts**, in [bench/india/detector_cases.json](bench/india/detector_cases.json). The labels
+were written from the text alone, before the detector was run. A kind counts once per text, so "Door No. 12, Gandhi Nagar"
+is one address.
+
+| | TP | FP | FN | Precision | Recall | F1 |
+|---|---|---|---|---|---|---|
+| India pack **on** | 59 | 4 | 7 | 0.937 | 0.894 | 0.915 |
+| India pack **off** | 5 | 0 | 61 | 1.000 | 0.076 | 0.141 |
+| Prompt-injection note detector (TP 6, FP 1, FN 1, TN 6) | | | | 0.857 | 0.857 | 0.857 |
+
+With the pack off the detector keeps only the generic patterns (email, some phone formats), so recall collapses; its
+precision of 1.000 rests on just 5 findings. The pack-on numbers split by kind of text: **42 of 42** ordinary formats and
+**17 of 17** items in the scene-like texts were found; **0 of 7** "known limit" formats were; and 4 of the 16 look-alike texts (things that are not private
+but resemble an ID) set off a false alarm.
+
+- **Missed (7, all known limits):** a lowercase PAN, a GSTIN whose last character is a letter, a Delhi plate such as `DL 8C AF 5030`,
+  a lowercase plate, a UPI handle that is not in the list (`@kotak`), a phone number in Devanagari digits, and an address
+  written in Telugu script.
+- **False alarms (4):** an invoice number `INV2024001` read as a voter ID, a batch code `KB 07 C 2025` read as a plate,
+  `Ref-123456` read as a PIN code, and "Open Colony Sale" read as an address.
+- **Injection note detector:** missed one paraphrased instruction, and flagged "Assistant Professor: do not report late".
+- **Timing (this laptop, Python 3.11, Windows):** the whole run takes about 0.2 to 0.5 s; one pass over all 89 texts takes
+  about 1 to 3 ms. Timing varies by machine and run. The scores themselves were identical on a rerun.
+
+**Limits.** The texts are synthetic and we wrote them, so this shows how the patterns do on formats we thought of, not on
+real photos. The mix matters: the 7 known-limit cases were added to show gaps, which lowers recall. The Tamil note phrases
+added recently are not in this dataset. This is not the accuracy of the AI model or of the finished photo.
+
+```bash
+uv run python -m bench.detectorbench --tag in
+# PowerShell, India pack off:
+$env:REGION='global'; uv run python -m bench.detectorbench --tag global
+```
+
+It writes `bench/india/results/detector/<tag>.md` and `.json` (per-kind and per-group tables, every miss and false alarm) and
+touches nothing else.
+
+### 2. Image benchmark with the AI model (measured, small, partly complete)
+
+Ten rendered Indian scenes are defined, and five core ones run by default (`--all` runs all ten): an ID card, a courier label,
+a number plate, a Telugu sign, and a control with nothing personal. The other five are a tax card, a house name board, a UPI
+screen, a college lanyard and a wedding invite. The scenes carry planted fictional secrets. A secret counts as removed only if
+it was readable in the original and is gone from the result. The scenes are drawn, not photographed, and the verifier is the
 same kind of model as the attacker. See [bench/india](bench/india).
 
-First run, with Gemma 4, with the original lenient scoring that checked full names only (one run each):
+**We do not report precision, recall or F1 for this part.** A photo has no agreed list of every clue in it, so false
+positives and false negatives would be guesses. What is reported is the share of planted secrets removed, whether the control
+photo was wrongly flagged, and the share of the frame changed.
 
-| | India pack on | India pack off |
-|---|---|---|
-| Planted secrets removed | 26 of 26 | 24 of 26 |
-| Scenes with every secret removed | 9 of 9 | 8 of 9 |
-| Share of the photo changed | 7.0% | 8.2% |
+Latest run: Gemini 3 Flash, strict scoring, India pack on, one run per scene: **19 of 19 planted secrets removed on the five core
+scenes, 8.8% of the photo changed, nothing falsely flagged on the control**. Two of the five scenes come from before the final
+literal check was added, and the same scenes had failed before (the ID card at 2 of 7, the Telugu sign at 1 of 4), so read it
+as "the fix works on those", not as proof of reliability.
 
-With the pack off, the model missed the whole PAN card and changed twice as much of the parcel label. This is one run on
-rendered scenes, and the two-secret gap comes from a single scene, so it could be luck.
-
-**That scoring was too lenient.** It counted a half-hidden name as removed, and the Gemma sample above shows why that
-matters. Scoring now also counts each word of a name on its own. Our latest run is with Gemini 3 Flash and the stricter scoring, India pack on: **19 of 19 planted secrets removed on the five core
-scenes, 8.8% of the photo changed, nothing falsely flagged on the control**. It is one run each, two of the five scenes come from
-before the final literal check was added, and the same scenes had failed before (the ID card at 2 of 7, the Telugu sign at 1 of 4),
-so read it as "the fix works on those", not as proof of reliability.
-
-The same Gemini 3 Flash setup with the India pack **off** has run on three of the five core scenes (the quota ran out before the
-Telugu sign and the control):
+The same setup with the India pack **off** has run on three of the five core scenes (the quota ran out before the Telugu
+sign and the control):
 
 | Scene | Pack off | Pack on |
 |---|---|---|
@@ -140,9 +186,31 @@ Telugu sign and the control):
 | Total | 14 of 15 | 15 of 15 |
 
 The gap is one secret on one scene in one run, so it does not show that the pack matters for these scenes. The pack's other job,
-the exact ID-type check, is not scored when it is off. The Telugu sign and the control are still to run. Details and the
-first-run numbers are in [docs/benchmark.md](docs/benchmark.md). Results are in
-`bench/india/results/*-gemma4`, `bench/india/results/in` and `bench/india/results/global`.
+the exact ID-type check, is not scored when it is off; the text-detector table above is where its effect is measured. The
+Telugu sign and the control are still to run.
+
+An earlier first run with Gemma 4 and lenient scoring (full names only) removed 26 of 26 secrets with the pack on and 24 of 26
+with it off. That scoring counted a half-hidden name as removed, so treat it as a first look. Details, the strict-scoring
+history and the raw files are in [docs/benchmark.md](docs/benchmark.md) and under `bench/india/results`.
+
+The benchmark now counts the API requests it sends (including retries and extra attack rounds), split by model, by role
+(attacker or verifier) and by request type, so a run's quota use is a measured number. Nothing in this README counts requests
+from a run that has not been done.
+
+### 3. Language plumbing (verified offline)
+
+`uv run python -m tests.test_language` runs 11 offline checks, with no key and no network: the language code reaches the
+attacker's prompt for Telugu and Hindi and adds nothing for English; unknown or differently-cased codes fall back to English
+(server and Telegram bot); made-up Telugu and Hindi text, including conjuncts and joiners, survives normalization, JSON and the
+Telegram upload as UTF-8; the page offers exactly the languages the server accepts; and a long Telugu report goes out as a
+message. They show the plumbing works. They do not show that the model writes good Telugu or Hindi.
+
+### 4. Live language quality (not verified)
+
+Only the prose of the report changes language (the summary, each clue's observation and each inference's reasoning). The page
+labels, the Telegram headings and verdict lines, the clue labels and the edits are always English. We have not recorded a
+live Telugu or Hindi report and checked it with a Telugu or Hindi reader, so we make no claim about how correct or natural it
+is. Photos with Hindi or Tamil text have not been tried; among non-English photos only the Telugu shop sign was run.
 
 ## Run it
 
@@ -156,9 +224,19 @@ Open http://localhost:8000. Without a key only the recorded samples play; `MOCK=
 placeholder attacker. Self-checks: `uv run python -m app.pipeline`, `app.meta`, `app.agent`, `app.regions.india`,
 `app.regions.us`.
 
+Offline checks that need no key (all of these were run before the submission):
+
+```bash
+uv run python -m tests.test_language        # Telugu, Hindi and English plumbing, Unicode, bot and server (11 checks)
+uv run python -m tests.test_requestcount    # the benchmark's API request counter, against a stand-in API (4 checks)
+uv run python -m bench.requestcount         # the counter's own self-check
+uv run python -m bench.detectorbench --tag in    # the text detector's precision, recall and F1
+```
+
 Re-record samples after changing the agent: `uv run --env-file .env python -m app.samples in_id_card in_parcel ...`.
 Each recording remembers which model made it. Run the benchmark with `uv run --env-file .env python -m bench.indiabench`
-(`REGION=global` for the pack-off run), then `python -m bench.india.publish` to fill the page's results section.
+(`REGION=global` for the pack-off run), then `python -m bench.india.publish` to fill the page's results section. The benchmark
+prints and saves a count of the requests it sent (`requests-<time>.json` next to the summary), split by model, role and type.
 
 ## Telegram bot
 
@@ -203,7 +281,9 @@ covers the "Name" label and part of the card heading. That is over-editing, not 
 
 [render.yaml](render.yaml) describes a free Docker web service with the Gemini settings filled in. Add `OPEN_API_KEY`
 as a secret, and `LIVE_CODE` if you want live runs gated. Without a key the page plays recorded samples only, which is
-the safe default for a public page. This has not been test-deployed yet.
+the safe default for a public page. It is deployed at https://snap-safe-india.onrender.com (free plan, so it sleeps and takes about a
+minute to wake), with the access code on. A full live run on the deployed site with the current key has not been checked there; the same
+run passed locally.
 
 ## Privacy and limits
 
@@ -219,10 +299,11 @@ the safe default for a public page. This has not been test-deployed yet.
 
 - [How it works](docs/how-it-works.md): each step of the agent, the box tightening, and what "verified" means
 - [Models, quotas and what we tried](docs/models.md): measurements, free-tier limits, and what did not work
-- [The Indian benchmark](docs/benchmark.md): method, commands and results (the pack-off run covers three of five scenes so far)
+- [The Indian benchmark](docs/benchmark.md): method, commands and results (the pack-off run covers three of five scenes so far), the offline text-detector results and the request counter
 - [Deploy and configure](docs/deploy.md): Render steps, every setting, and the Telegram bot
 - [Adding a country](docs/adding-a-country.md): a region pack is one file
 - [Demo script](docs/demo-script.md) and [write-up text](docs/write-up.md), with the benchmark numbers filled in
+- [Project write-up](docs/writeup.md): the long submission document, in 14 sections
 - [Team plan](docs/team-plan.md): who does what before the event, with the order of work and the risks
 
 ## Layout
@@ -234,7 +315,9 @@ the safe default for a public page. This has not been test-deployed yet.
 - `app/main.py`: `/api/run` streams progress as NDJSON; `/api/sample/{name}` replays a recorded run
 - `app/samples.py`: recording and replaying the gallery runs
 - `static/index.html`: the whole UI; `scripts/make_logo.py` draws the logo
-- `bench/india`, `bench/indiabench.py`: the Indian benchmark (scenes, scorer, results)
+- `bench/india`, `bench/indiabench.py`: the Indian benchmark (scenes, scorer, results); `bench/requestcount.py` counts its API requests
+- `bench/detectorbench.py`, `bench/india/detector_cases.json`: the offline text-detector benchmark (precision, recall, F1)
+- `tests/`: offline checks for the report language and the request counter
 - `docs/`: the pages listed above
 
 ## License

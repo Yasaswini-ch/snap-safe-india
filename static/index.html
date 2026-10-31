@@ -362,6 +362,9 @@
   .statband strong, .proof strong { font-family: inherit; }
   .samples .meta b { font-size: 15px; }
   .pillnav .brand { font-size: 15px; }
+  /* At 375px the brand and the button were wider than the pill and the button stuck out of it. */
+  @media (max-width: 420px) { .pillnav { gap: 8px; padding-left: 12px; } .pillnav .brand { font-size: 14px; gap: 6px; } .pillnav .btn { padding: 8px 12px; font-size: 14px; } }
+  @media (max-width: 350px) { .pillnav .brand { font-size: 12px; } .pillnav .btn { padding: 8px 10px; font-size: 13px; } }
 </style>
 </head>
 <body>

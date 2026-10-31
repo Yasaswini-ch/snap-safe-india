@@ -23,6 +23,7 @@ import numpy as np
 from PIL import Image
 
 from app import agent, meta, pipeline
+from bench import requestcount
 
 ROOT = Path(__file__).parent / "india"
 IMAGES = ROOT / "images"
@@ -66,16 +67,28 @@ def with_parts(secrets: list[str]) -> list[str]:
 
 
 VERIFIER = ""  # --verifier: the model that reads the before and after photos
+COUNTER = requestcount.RequestCounter()  # every request actually sent to the model API in this run (bench/requestcount.py)
+
+
+def labelled(fn, who: str, scene: str):
+    """fn, with the requests it sends counted as `who` for `scene`. The label is set inside the call, because the agent
+    runs some of its calls in worker threads, which do not inherit it."""
+    def run(*a, **k):
+        with requestcount.role(who, scene):
+            return fn(*a, **k)
+    return run
 
 
 def evaluate(scene: dict, out: Path) -> dict:
     img, _ = pipeline.load_image((IMAGES / f"{scene['id']}.jpg").read_bytes())
     secrets = with_parts(scene["secrets"])
     rec = {"id": scene["id"], "kind": scene["kind"], "secrets": secrets, "expect": scene["expect"]}
-    rec["verified"] = legible(secrets, meta.read_text(img, private=True, model=VERIFIER))
+    sid = scene["id"]
+    verify = labelled(functools.partial(meta.read_text, private=True, model=VERIFIER), "verifier", sid)
+    rec["verified"] = legible(secrets, verify(img))
     t = time.time()
-    events = list(agent.run([img], attack=functools.partial(meta.attack, private=True), private=True,
-                            read=functools.partial(meta.read_text, private=True)))
+    events = list(agent.run([img], attack=labelled(functools.partial(meta.attack, private=True), "agent", sid),
+                            private=True, read=labelled(functools.partial(meta.read_text, private=True), "agent", sid)))
     rec["seconds"] = round(time.time() - t, 1)
     rec["model"], rec["verifier"] = meta.OPEN_MODEL, VERIFIER or meta.OPEN_MODEL  # who attacked and who read the photos
     attacks = [e for e in events if e["type"] == "attack"]
@@ -89,8 +102,9 @@ def evaluate(scene: dict, out: Path) -> dict:
     said = [attacker_text(a["graph"]) for a in attacks]
     rec["values_printed"] = legible([s for s in rec["verified"] if len(norm(s)) >= PRINTED_MIN], said)
     ours = np.asarray(Image.open(io.BytesIO(base64.b64decode(done["images"][0]))).convert("RGB"))
-    rec["survived"] = legible(rec["verified"], meta.read_text(ours, private=True, model=VERIFIER))
+    rec["survived"] = legible(rec["verified"], verify(ours))
     rec["changed"] = round(changed(img, ours), 4)
+    rec["requests"] = COUNTER.snapshot(sid)  # counted, not estimated: includes retries and every extra attack round
     Image.fromarray(ours).save(out / "images" / f"{scene['id']}_after.jpg", quality=88)
     return rec
 
@@ -146,6 +160,15 @@ def summarize(recs: list[dict], tag: str) -> str:
     return "\n".join(lines) + "\n"
 
 
+def requests_section(reused: int) -> str:
+    """The requests this invocation sent, as counted by bench/requestcount.py. Scenes reused from an earlier run sent none now."""
+    note = (f"{reused} scene(s) were reused from earlier runs and sent no requests now; their requests were not counted. "
+            if reused else "")
+    return ("\n## API requests sent by this invocation (counted)\n\n" + note +
+            "Every request that actually went out, retries included. Provider quota is per model, so read the by-model rows.\n\n"
+            + "\n".join(COUNTER.lines()) + "\n")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--tag", default=None, help="results folder name; defaults to the REGION setting")
@@ -157,6 +180,7 @@ def main():
     args = ap.parse_args()
     if meta.open_client is None:
         raise SystemExit("Set OPEN_API_KEY (and the Gemma 4 values) in .env first")
+    COUNTER.install(meta.open_client)
     from app import regions
     tag = args.tag or ("-".join(p.NAME.split()[0].lower() for p in regions.active()) or "global")
     out = ROOT / "results" / tag
@@ -171,7 +195,16 @@ def main():
         scenes = [s for s in scenes if s["id"] in args.only.split(",")]
     with ThreadPoolExecutor(args.workers) as pool:
         recs = list(pool.map(lambda s: run_scene(s, out, args.force), scenes))
-    (out / "summary.md").write_text(summarize(recs, tag), encoding="utf-8")
+    summary = summarize(recs, tag)
+    reused = sum("error" not in r and "requests" not in r for r in recs)
+    if COUNTER.total():
+        stamp = time.strftime("%Y%m%d-%H%M%S")
+        summary += requests_section(reused)
+        (out / f"requests-{stamp}.json").write_text(json.dumps(
+            {"snapshot": COUNTER.snapshot(), "rows": [list(k) + [n] for k, n in sorted(COUNTER.rows.items()) if n]},
+            indent=1), encoding="utf-8")
+        print("\n".join(COUNTER.lines()))
+    (out / "summary.md").write_text(summary, encoding="utf-8")
     print(f"wrote {out / 'summary.md'}")
 
 

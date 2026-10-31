@@ -25,6 +25,10 @@ The team plan for Hacktoberfest Hack Day x AI for Vizag (Sunday, Nov 1, 2026, 10
 - Page check on desktop and at phone width: no overflow or layout bugs; one wording fix in the results section
 - Pack-off benchmark: ID card, courier label and number plate run (14 of 15 secrets removed with the pack off; see `docs/benchmark.md`)
 - A live upload through the agent with the new key (run locally): ID card, safe, nothing left readable
+- Offline text-detector benchmark (75 made-up texts plus 14 injection notes): precision 0.937, recall 0.894, F1 0.915 with the India pack on, recall 0.076 with it off; reproducible, no key needed (`bench/detectorbench.py`, results in `bench/india/results/detector`)
+- The benchmark now counts the API requests it sends (`bench/requestcount.py`), so the next run reports a measured count, not an estimate
+- Offline language tests (`tests/test_language.py`, 11 checks) and request-counter tests (`tests/test_requestcount.py`, 4 checks) pass; the README separates the four kinds of evaluation; the long write-up is `docs/writeup.md`
+- Page check at 320 and 375 px: the nav button stuck out of its pill on a phone; fixed
 
 ### Blocked
 

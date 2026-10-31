@@ -1,0 +1,414 @@
+{
+ "region": "global",
+ "dataset_sha256": "520f453fa60f13476c67d726e5588ca2b64616137f5cc40083f7f700d541449f",
+ "timing": {
+  "texts": 89,
+  "repeats": 200,
+  "seconds_per_text_ms": 0.0092,
+  "seconds_per_full_pass_ms": 0.815
+ },
+ "wall_seconds": 0.1644,
+ "overall": {
+  "tp": 5,
+  "fp": 0,
+  "fn": 61,
+  "precision": 1.0,
+  "recall": 0.07575757575757576,
+  "f1": 0.14084507042253522
+ },
+ "macro_f1": 0.12121212121212123,
+ "per_kind": {
+  "Aadhaar number": {
+   "tp": 0,
+   "fp": 0,
+   "fn": 8,
+   "precision": null,
+   "recall": 0.0,
+   "f1": 0.0
+  },
+  "GSTIN": {
+   "tp": 0,
+   "fp": 0,
+   "fn": 2,
+   "precision": null,
+   "recall": 0.0,
+   "f1": 0.0
+  },
+  "IFSC code": {
+   "tp": 0,
+   "fp": 0,
+   "fn": 2,
+   "precision": null,
+   "recall": 0.0,
+   "f1": 0.0
+  },
+  "PAN number": {
+   "tp": 0,
+   "fp": 0,
+   "fn": 5,
+   "precision": null,
+   "recall": 0.0,
+   "f1": 0.0
+  },
+  "PIN code": {
+   "tp": 0,
+   "fp": 0,
+   "fn": 6,
+   "precision": null,
+   "recall": 0.0,
+   "f1": 0.0
+  },
+  "UPI ID": {
+   "tp": 0,
+   "fp": 0,
+   "fn": 8,
+   "precision": null,
+   "recall": 0.0,
+   "f1": 0.0
+  },
+  "email address": {
+   "tp": 3,
+   "fp": 0,
+   "fn": 0,
+   "precision": 1.0,
+   "recall": 1.0,
+   "f1": 1.0
+  },
+  "phone number": {
+   "tp": 1,
+   "fp": 0,
+   "fn": 10,
+   "precision": 1.0,
+   "recall": 0.09090909090909091,
+   "f1": 0.16666666666666666
+  },
+  "street address": {
+   "tp": 1,
+   "fp": 0,
+   "fn": 10,
+   "precision": 1.0,
+   "recall": 0.09090909090909091,
+   "f1": 0.16666666666666666
+  },
+  "vehicle plate": {
+   "tp": 0,
+   "fp": 0,
+   "fn": 8,
+   "precision": null,
+   "recall": 0.0,
+   "f1": 0.0
+  },
+  "voter ID number": {
+   "tp": 0,
+   "fp": 0,
+   "fn": 2,
+   "precision": null,
+   "recall": 0.0,
+   "f1": 0.0
+  }
+ },
+ "per_group": {
+  "positive": {
+   "tp": 4,
+   "fp": 0,
+   "fn": 38,
+   "precision": 1.0,
+   "recall": 0.09523809523809523,
+   "f1": 0.17391304347826086
+  },
+  "hard_negative": {
+   "tp": 0,
+   "fp": 0,
+   "fn": 0,
+   "precision": null,
+   "recall": null,
+   "f1": null
+  },
+  "known_limit": {
+   "tp": 0,
+   "fp": 0,
+   "fn": 7,
+   "precision": null,
+   "recall": 0.0,
+   "f1": 0.0
+  },
+  "scene_like": {
+   "tp": 1,
+   "fp": 0,
+   "fn": 16,
+   "precision": 1.0,
+   "recall": 0.058823529411764705,
+   "f1": 0.1111111111111111
+  }
+ },
+ "misses": [
+  [
+   "aadhaar_spaced",
+   "Aadhaar number"
+  ],
+  [
+   "aadhaar_spaced_2",
+   "Aadhaar number"
+  ],
+  [
+   "aadhaar_plain",
+   "Aadhaar number"
+  ],
+  [
+   "aadhaar_dashed",
+   "Aadhaar number"
+  ],
+  [
+   "aadhaar_hindi",
+   "Aadhaar number"
+  ],
+  [
+   "aadhaar_telugu",
+   "Aadhaar number"
+  ],
+  [
+   "pan_plain",
+   "PAN number"
+  ],
+  [
+   "pan_labelled",
+   "PAN number"
+  ],
+  [
+   "pan_lowercase",
+   "PAN number"
+  ],
+  [
+   "gstin_digit_end",
+   "GSTIN"
+  ],
+  [
+   "gstin_letter_end",
+   "GSTIN"
+  ],
+  [
+   "voter_id_1",
+   "voter ID number"
+  ],
+  [
+   "voter_id_2",
+   "voter ID number"
+  ],
+  [
+   "plate_spaced",
+   "vehicle plate"
+  ],
+  [
+   "plate_joined",
+   "vehicle plate"
+  ],
+  [
+   "plate_dashed",
+   "vehicle plate"
+  ],
+  [
+   "plate_mh",
+   "vehicle plate"
+  ],
+  [
+   "plate_bh",
+   "vehicle plate"
+  ],
+  [
+   "plate_delhi_letter_in_number",
+   "vehicle plate"
+  ],
+  [
+   "plate_lowercase",
+   "vehicle plate"
+  ],
+  [
+   "ifsc_1",
+   "IFSC code"
+  ],
+  [
+   "ifsc_2",
+   "IFSC code"
+  ],
+  [
+   "upi_okhdfc",
+   "UPI ID"
+  ],
+  [
+   "upi_ybl",
+   "UPI ID"
+  ],
+  [
+   "upi_phone_handle",
+   "UPI ID"
+  ],
+  [
+   "upi_oksbi",
+   "UPI ID"
+  ],
+  [
+   "upi_hindi",
+   "UPI ID"
+  ],
+  [
+   "upi_handle_not_listed",
+   "UPI ID"
+  ],
+  [
+   "phone_plus91",
+   "phone number"
+  ],
+  [
+   "phone_dashed",
+   "phone number"
+  ],
+  [
+   "phone_leading_zero",
+   "phone number"
+  ],
+  [
+   "phone_plus91_dashes",
+   "phone number"
+  ],
+  [
+   "phone_telugu_sign",
+   "phone number"
+  ],
+  [
+   "phone_devanagari_digits",
+   "phone number"
+  ],
+  [
+   "pin_labelled",
+   "PIN code"
+  ],
+  [
+   "pin_after_city",
+   "PIN code"
+  ],
+  [
+   "pin_after_state",
+   "PIN code"
+  ],
+  [
+   "pin_after_andhra",
+   "PIN code"
+  ],
+  [
+   "address_door_no",
+   "street address"
+  ],
+  [
+   "address_flat_no",
+   "street address"
+  ],
+  [
+   "address_plot_no",
+   "street address"
+  ],
+  [
+   "address_nagar",
+   "street address"
+  ],
+  [
+   "address_residency",
+   "street address"
+  ],
+  [
+   "address_hno",
+   "street address"
+  ],
+  [
+   "address_telugu_script",
+   "street address"
+  ],
+  [
+   "scene_id_card",
+   "Aadhaar number"
+  ],
+  [
+   "scene_id_card",
+   "PIN code"
+  ],
+  [
+   "scene_id_card",
+   "street address"
+  ],
+  [
+   "scene_parcel",
+   "PIN code"
+  ],
+  [
+   "scene_parcel",
+   "phone number"
+  ],
+  [
+   "scene_parcel",
+   "street address"
+  ],
+  [
+   "scene_plate",
+   "vehicle plate"
+  ],
+  [
+   "scene_upi",
+   "UPI ID"
+  ],
+  [
+   "scene_tax_card",
+   "PAN number"
+  ],
+  [
+   "scene_telugu_sign",
+   "phone number"
+  ],
+  [
+   "scene_wedding",
+   "phone number"
+  ],
+  [
+   "scene_wedding",
+   "street address"
+  ],
+  [
+   "mixed_all",
+   "Aadhaar number"
+  ],
+  [
+   "mixed_all",
+   "PAN number"
+  ],
+  [
+   "mixed_all",
+   "UPI ID"
+  ],
+  [
+   "mixed_all",
+   "phone number"
+  ]
+ ],
+ "false_alarms": [],
+ "injection": {
+  "tp": 6,
+  "fp": 1,
+  "fn": 1,
+  "precision": 0.8571428571428571,
+  "recall": 0.8571428571428571,
+  "f1": 0.8571428571428571,
+  "tn": 6,
+  "cases": 14,
+  "wrong": [
+   [
+    "inj_paraphrase",
+    "missed"
+   ],
+   [
+    "benign_professor_notice",
+    "false alarm"
+   ]
+  ]
+ },
+ "cases": 75,
+ "cases_with_nothing": 18,
+ "expected_items": 66
+}

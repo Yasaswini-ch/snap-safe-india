@@ -53,7 +53,7 @@ value in them is made up, and two of the five results are from before that check
   they need to be.
 - A check takes one to a few minutes, mostly waiting on the model's rate limit.
 - The photo is sent to Google's model to find the clues, so use made-up photos when trying it.
-- Telugu and Hindi reports have been tested and work. Among Indian-language photos only a Telugu sign has been tested; Hindi and Tamil photos have not.
+- The report can be written in Telugu or Hindi. Offline tests cover the language plumbing; we have not checked the model's Telugu or Hindi text with a reader, and only the page prose changes language. Among Indian-language photos only a Telugu sign has been tested; Hindi and Tamil photos have not.
 - The pack-off comparison covers three of five scenes, because the free quota ran out.
 
 ## Links

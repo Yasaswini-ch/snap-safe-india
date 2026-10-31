@@ -133,6 +133,106 @@ _To add: the same table for Gemma, with box snapping and the detail wording on._
 
 _To add if run with `--all`._
 
+## Text detector benchmark (offline, no model)
+
+This is separate from the image benchmark above and below. It scores only the deterministic text check that runs beside the
+model (`meta.text_check`: the regular expressions, the Aadhaar Verhoeff checksum and the note-to-AI detector), so it needs no key
+and gives the same scores every run.
+
+- **Dataset:** [bench/india/detector_cases.json](../bench/india/detector_cases.json): 75 hand-written detail texts (57 contain at least one
+  private detail, 18 contain nothing private: 16 look-alikes such as tracking numbers, order numbers and dates, plus a tea menu and
+  an empty photo) and 14 injection-note texts. All values are made up. The labels were written from the text alone, before the
+  detector was run, and were not changed afterwards to improve the score. The groups are `positive` (ordinary formats),
+  `hard_negative` (look-alikes), `known_limit` (real formats the patterns are not built for) and `scene_like` (mimic the benchmark scenes).
+- **Scoring:** per text and per kind of detail. TP: the kind is in the text and was found. FP: found but not in the text. FN: in
+  the text but missed. Several matches of one kind in one text count once. Precision is TP/(TP+FP), recall TP/(TP+FN), F1 their
+  harmonic mean; macro F1 averages the kinds.
+- **Commands:** `uv run python -m bench.detectorbench --tag in`, and for the pack-off row `$env:REGION='global'; uv run python -m bench.detectorbench --tag global` (PowerShell).
+  Output: `bench/india/results/detector/in.{md,json}` and `global.{md,json}`. The run is deterministic: two runs gave identical scores.
+
+| | TP | FP | FN | Precision | Recall | F1 | Macro F1 |
+|---|---|---|---|---|---|---|---|
+| India pack on | 59 | 4 | 7 | 0.937 | 0.894 | 0.915 | 0.898 |
+| India pack off | 5 | 0 | 61 | 1.000 | 0.076 | 0.141 | 0.121 |
+
+Injection-note detector, pack on or off (it does not depend on the pack): TP 6, FP 1, FN 1, TN 6; precision 0.857, recall 0.857, F1 0.857.
+With the pack off, precision is 1.000 only because it found 5 things in total.
+
+**Pack on, by kind**
+
+| Kind | TP | FP | FN | Precision | Recall | F1 |
+|---|---|---|---|---|---|---|
+| Aadhaar number | 8 | 0 | 0 | 1.000 | 1.000 | 1.000 |
+| GSTIN | 1 | 0 | 1 | 1.000 | 0.500 | 0.667 |
+| IFSC code | 2 | 0 | 0 | 1.000 | 1.000 | 1.000 |
+| PAN number | 4 | 0 | 1 | 1.000 | 0.800 | 0.889 |
+| PIN code | 6 | 1 | 0 | 0.857 | 1.000 | 0.923 |
+| UPI ID | 7 | 0 | 1 | 1.000 | 0.875 | 0.933 |
+| email address | 3 | 0 | 0 | 1.000 | 1.000 | 1.000 |
+| phone number | 10 | 0 | 1 | 1.000 | 0.909 | 0.952 |
+| street address | 10 | 1 | 1 | 0.909 | 0.909 | 0.909 |
+| vehicle plate | 6 | 1 | 2 | 0.857 | 0.750 | 0.800 |
+| voter ID number | 2 | 1 | 0 | 0.667 | 1.000 | 0.800 |
+
+**Pack on, by kind of test text**
+
+| Group | TP | FP | FN | Precision | Recall |
+|---|---|---|---|---|---|
+| positive | 42 | 0 | 0 | 1.000 | 1.000 |
+| hard_negative | 0 | 4 | 0 | 0.000 | n/a |
+| known_limit | 0 | 0 | 7 | n/a | 0.000 |
+| scene_like | 17 | 0 | 0 | 1.000 | 1.000 |
+
+**Pack off, by kind** (the India kinds are all missed; only the generic patterns remain)
+
+| Kind | TP | FP | FN | Precision | Recall | F1 |
+|---|---|---|---|---|---|---|
+| Aadhaar number | 0 | 0 | 8 | n/a | 0.000 | 0.000 |
+| GSTIN | 0 | 0 | 2 | n/a | 0.000 | 0.000 |
+| IFSC code | 0 | 0 | 2 | n/a | 0.000 | 0.000 |
+| PAN number | 0 | 0 | 5 | n/a | 0.000 | 0.000 |
+| PIN code | 0 | 0 | 6 | n/a | 0.000 | 0.000 |
+| UPI ID | 0 | 0 | 8 | n/a | 0.000 | 0.000 |
+| email address | 3 | 0 | 0 | 1.000 | 1.000 | 1.000 |
+| phone number | 1 | 0 | 10 | 1.000 | 0.091 | 0.167 |
+| street address | 1 | 0 | 10 | 1.000 | 0.091 | 0.167 |
+| vehicle plate | 0 | 0 | 8 | n/a | 0.000 | 0.000 |
+| voter ID number | 0 | 0 | 2 | n/a | 0.000 | 0.000 |
+
+**Missed, pack on (all 7 are known limits):** lowercase PAN (`pan_lowercase`), a GSTIN ending in a letter (`gstin_letter_end`),
+a Delhi plate with a letter inside the number (`plate_delhi_letter_in_number`), a lowercase plate (`plate_lowercase`), a UPI handle
+that is not in the list (`upi_handle_not_listed`), Devanagari-digit phone numbers (`phone_devanagari_digits`) and an address
+in Telugu script (`address_telugu_script`).
+**False alarms, pack on:** `INV2024001` as a voter ID, `KB 07 C 2025` as a plate, `Ref-123456` as a PIN code, "Open Colony Sale" as an address.
+**Injection mistakes:** a paraphrased instruction was missed (`inj_paraphrase`); "Assistant Professor notice: do not report late for class" was flagged.
+
+**Timing.** Measured on one Windows laptop with Python 3.11: the whole run (loading, scoring and 200 timing passes) took 0.2 to 0.5 s
+across runs; one pass over all 89 texts took about 1 to 3 ms, roughly 0.01 to 0.03 ms per text. These depend on the machine and
+change each run. The committed files hold one run.
+
+**What this does not show.**
+- The texts are synthetic and written by us. They show how the patterns behave on formats we thought of, not how often they
+  fire on real photos or real OCR output.
+- The share of known-limit and look-alike cases was chosen by us and moves the totals. Read the by-group table, not only the F1.
+- It scores no model and no photo edit. **There is no image-level precision, recall or F1 anywhere in this repo**: a photo has no agreed
+  list of every clue, so false positives and false negatives would be guesses.
+- The Tamil note phrases added on Oct 31 are not in this dataset, and the detector has no Tamil or Telugu number or address patterns.
+- The detector was not tuned after seeing these results. Fixing the known misses (case-insensitive PAN and plates, GSTIN
+  last character, more UPI handles, Devanagari digits) is future work.
+
+## API request counter
+
+`bench/indiabench.py` counts every HTTP request it sends to the model API, through the OpenAI client's own HTTP hooks
+(`bench/requestcount.py`), so the number includes the client's automatic retries after a 429 or a server error, every extra
+attack round, and requests that never got an answer. Each request is labelled by model, by role (`verifier`: the before and
+after reads of a scene; `agent`: the attacker and the agent's own text checks), by type (`attack` for a scene's first attack,
+`attack_more` for every later one, `transcribe`, `link`, `caption`) and by HTTP status. Nothing from the request itself is
+stored. After a run the totals are printed, appended to `summary.md`, and saved as `requests-<time>.json`; each scene's JSON
+also carries its own counts. Scenes reused from earlier runs send nothing, so their requests are not counted and the summary
+says so. **No count from a real run exists yet, so none is reported here, and the estimate of about 20 requests per
+five-scene run in the team plan is an estimate, not a measurement.** The counter is tested offline against a stand-in API
+(`uv run python -m tests.test_requestcount`).
+
 ## Limits
 
 - Rendered scenes, one run per setting, and a small set, so a gap of one or two secrets can be luck.
