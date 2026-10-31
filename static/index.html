@@ -287,9 +287,48 @@
   .samples button:hover, .detects li:hover { border-color: #aab4c3; }
   footer { background: transparent; }
   .stamp { transform: none; animation: none; border-width: 2px; }
+  /* Character: a navy hero, a flat saffron-white-green stripe, bigger type, coloured card tops. Still flat: no gradients, glow or blur. */
+  .flag { display: grid; grid-template-columns: repeat(3, 1fr); height: 6px; }
+  .flag i:nth-child(1) { background: #ff9933; } .flag i:nth-child(2) { background: #fff; } .flag i:nth-child(3) { background: #138808; }
+  .hero { background: #0b1f4b; color: #fff; border-bottom: 0; }
+  .hero .wrap { padding-top: 56px; padding-bottom: 48px; }
+  .hero h1 { color: #fff; font-size: clamp(2.3rem, 5vw, 3.9rem); font-weight: 800; line-height: 1.08; letter-spacing: -.03em; }
+  .hero .lede { color: #c9d4f0; font-size: 1.15rem; }
+  .hero .eyebrow { color: #ffb765; }
+  .hero .btn { border-color: #5a73b8; background: transparent; color: #fff; padding: 13px 22px; font-weight: 600; }
+  .hero .btn:hover { border-color: #fff; }
+  .hero .btn.primary { background: #ff9933; border-color: #ff9933; color: #1b1200; }
+  .hero .btn.primary:hover { background: #ffad5c; border-color: #ffad5c; }
+  .hero .chips li { background: #17306b; border-color: #34508f; color: #fff; }
+  .hero .compare { border: 3px solid #fff; border-radius: 10px; background: #17306b; }
+  .hero .loop li { background: #14295f; border-color: #34508f; color: #fff; }
+  .hero .loop li::before { background: #ff9933; color: #1b1200; }
+  .hero .loop code { color: #ffb765; }
+  .hero .loop .muted { color: #b4c2e6; }
+  .statband { display: grid; gap: 1px; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); margin-top: 36px; background: #34508f; border: 1px solid #34508f; border-radius: 10px; overflow: hidden; }
+  .statband div { padding: 16px 18px; background: #0b1f4b; }
+  .statband strong { display: block; font-size: 2.2rem; line-height: 1.1; font-weight: 800; letter-spacing: -.02em; color: #fff; font-variant-numeric: tabular-nums; }
+  .statband span { display: block; margin-top: 4px; font-size: 14px; color: #b4c2e6; }
+  main h2 { font-size: 1.9rem; font-weight: 800; letter-spacing: -.02em; margin-bottom: 6px; }
+  section { padding: 56px 0 8px; }
+  .detects li { border-top: 5px solid #0b1f4b; padding: 16px 18px; }
+  .detects li:nth-child(3n + 1) { border-top-color: #ff9933; }
+  .detects li:nth-child(3n + 2) { border-top-color: #0b1f4b; }
+  .detects li:nth-child(3n) { border-top-color: #138808; }
+  .detects b { font-size: 1.05rem; }
+  .samples button { border: 1px solid var(--line); background: var(--card); }
+  .samples button:hover { border-color: #0b1f4b; }
+  .btn.primary { background: #0b1f4b; border-color: #0b1f4b; }
+  .btn.primary:hover { background: #17306b; border-color: #17306b; }
+  h2 { color: #0b1f4b; }
+  .steps li.active { border-color: #0b1f4b; }
+  .steps li::after, .tabs button[aria-pressed="true"] { }
+  .tabs button[aria-pressed="true"] { border-color: #0b1f4b; color: #0b1f4b; background: #eef2fb; }
+  footer { border-top: 6px solid #0b1f4b; }
 </style>
 </head>
 <body>
+<div class="flag" aria-hidden="true"><i></i><i></i><i></i></div>
 <header class="hero">
   <div class="wrap">
     <div class="hero-grid">
@@ -321,6 +360,12 @@
       <li><b>Edit</b><code>pixelate · inpaint</code><br><span class="muted small">Edits only inside each object's mask.</span></li>
       <li><b>Re-attack</b><code data-model>AI model</code><br><span class="muted small">Attacks the result and repeats until nothing specific is left.</span></li>
     </ol>
+    <div class="statband" aria-label="At a glance">
+      <div><strong>19 of 19</strong><span>planted secrets removed on five rendered scenes (one run)</span></div>
+      <div><strong>6</strong><span>recorded runs to replay, no key needed</span></div>
+      <div><strong>3</strong><span>report languages: English, Telugu, Hindi</span></div>
+      <div><strong>0 of 14</strong><span>planted values echoed in the attacker's report</span></div>
+    </div>
   </div>
 </header>
 
