@@ -1,3 +1,5 @@
+<p align="center"><img src="docs/img/logo.png" alt="Snap Safe India: photo privacy agent, made for India" width="260"></p>
+
 # Snap Safe India
 
 A privacy agent for photos shared in India. It looks at a photo the way a stranger would, finds what gives you away
@@ -336,7 +338,7 @@ run passed locally.
 - `app/pipeline.py`: image decoding limits, masks, blur, pixelate, inpaint and mask-bounded compositing
 - `app/main.py`: `/api/run` streams progress as NDJSON; `/api/sample/{name}` replays a recorded run
 - `app/samples.py`: recording and replaying the gallery runs
-- `static/index.html`: the whole UI; `scripts/make_logo.py` draws the logo
+- `static/index.html`: the whole UI; `static/logo.png` is the logo and `scripts/make_logo.py` cuts the icons from it
 - `bench/india`, `bench/indiabench.py`: the Indian benchmark (scenes, scorer, results); `bench/requestcount.py` counts its API requests
 - `bench/detectorbench.py`, `bench/india/detector_cases.json`: the offline text-detector benchmark (precision, recall, F1)
 - `tests/`: offline checks for the report language and the request counter
