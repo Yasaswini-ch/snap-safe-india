@@ -22,13 +22,17 @@ SOURCES = {"in_id_card": ["id_card"], "in_parcel": ["parcel_label"], "in_plate":
            "in_photo_tea": ["photo_tea_menu"], "in_photo_sign": ["photo_medical_sign"], "in_photo_card": ["photo_library_card"],
            "in_photo_gate": ["photo_house_board"], "in_photo_upi_hi": ["photo_upi_kirana"],
            "in_photo_parcel_hi": ["photo_hindi_parcel"], "in_photo_house_te": ["photo_telugu_house"],
-           "in_photo_store_ta": ["photo_tamil_store"], "in_photo_clinic_ta": ["photo_tamil_clinic"]}  # photograph-like images
+           "in_photo_store_ta": ["photo_tamil_store"], "in_photo_clinic_ta": ["photo_tamil_clinic"],  # photograph-like images
+           # The same photos again with the clean-fill edit style (see STYLES), where the background is plain
+           "in_upi_real_clean": ["upi_real"], "in_plate_real_clean": ["plate_real"]}
+STYLES = {name: "clean" for name in SOURCES if name.endswith("_clean")}  # the edit style a sample was recorded with
 PRIVATE = set(SOURCES)  # recorded through the open-model path (OPEN_MODEL), edits on the server
 # What each post would say, for samples that have a caption. Captions often name what the photo's edits hide.
 CAPTIONS: dict[str, str | list[str]] = {
     "in_parcel": "Ordered last week and it is finally here 📦 Siripuram delivery was quick! #unboxing",
     "in_plate": "Our new ride is finally home 🚗 #newcar #vizag",
     "in_plate_real": "Our new ride is finally home 🚗 #newcar #vizag",
+    "in_plate_real_clean": "Our new ride is finally home 🚗 #newcar #vizag",
 }
 SPEEDUP = 4
 
@@ -76,7 +80,8 @@ def record(name: str) -> None:
     private = name in PRIVATE
     events = agent.run(imgs, attack=functools.partial(meta.attack, private=private), private=private,
                        read=functools.partial(meta.read_text, private=private, effort=meta.ATTACK_EFFORT),
-                       caption=captions(name), rewrite=functools.partial(meta.rewrite_caption, private=private))
+                       caption=captions(name), rewrite=functools.partial(meta.rewrite_caption, private=private),
+                       style=STYLES.get(name, ""))
     for event in events:
         event = {**event, "t": round(time.time() - t0, 1)}
         if event["type"] == "done":

@@ -1,6 +1,7 @@
 """The red-team loop: attack -> plan the cheapest edits that block every risky inference -> edit -> re-attack."""
 import base64
 import inspect
+import json
 import logging
 import os
 import re
@@ -312,7 +313,7 @@ def run(imgs: list[np.ndarray], attack=meta.attack, target: int = TARGET, privat
                 box = widen(box)
             tried[p].append((box, c["label"]))
             items.setdefault(p, []).append({"id": c["id"], "photo": p, "label": c["label"], "box": box, "core": c["box"],
-                                            "action": "pixelate" if again else c["suggested"], "again": again})
+                                            "action": "pixelate" if again else c["suggested"], "again": bool(again)})
         count = sum(map(len, items.values())) + len(words)
         yield {"type": "plan", "round": n, "clues": ids, "stuck": len(stuck),
                "text": f"Breaking {len(risky_ways(graph, target))} ways in with {count} edit{'s' if count != 1 else ''}"}
@@ -555,6 +556,8 @@ if __name__ == "__main__":
     meta.segment = meta.edit = lambda *a: calls.append(a)
     events = list(run([img], attack=meta.mock_attacker(), private=True))
     edits = next(e for e in events if e["type"] == "edits")["edits"]
+    json.dumps(events)  # the server streams events as JSON: a numpy scalar in one would end the run with an error
+    assert all(type(d.get("again", False)) is bool for d in edits), edits
     assert not calls and {d["mask"] for d in edits} == ({"snap"} if SNAP else {"box"})
     assert [d["engine"] for d in edits] == ["pixelate", "pixelate", "pixelate"], edits
     small = {"label": "house number", "box": [0.5, 0.5, 0.53, 0.53], "action": "erase"}
