@@ -202,6 +202,11 @@ images found Telugu text still readable on the house plate and misplaced edit bo
 set of three generated photo-style images (a parcel, a payment screen, a number plate; `bench/india/real`) was run by a teammate with Gemma 4
 because the Gemini quota was out: 15 of 15 secrets removed, with a parcel edit much larger than the label. See [docs/benchmark.md](docs/benchmark.md).
 
+All seven are also on the page: in the "Watch a sample" gallery (and so in "The agent at work") as recordings made with Gemma 4, and in the
+"Photo-style images" results section, which marks the three that did not finish their re-check and the Telugu house plate that was not marked safe.
+The recordings are separate runs from the benchmark: in them the agent marked all seven safe, which is its own judgment, and for the Telugu house
+plate that disagrees with the Gemini benchmark run above.
+
 The benchmark now counts the API requests it sends (including retries and extra attack rounds), split by model, by role
 (attacker or verifier) and by request type, so a run's quota use is a measured number. The one real run so far (the pack-off Telugu sign and control, with Gemini 3 Flash
 as the attacker and Gemma 4 as the verifier) sent **12 requests, none failed or retried: 8 to Gemini 3 Flash** (2 first attacks,

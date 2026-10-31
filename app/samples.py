@@ -13,11 +13,15 @@ from pathlib import Path
 SAMPLES = Path(__file__).parent.parent / "static" / "samples"
 INDIA = Path(__file__).parent.parent / "bench" / "india" / "images"  # the Indian benchmark scenes (bench/india)
 REAL = INDIA.parent / "real"  # the photo-style test images (bench/india/real)
+PHOTOS = INDIA.parent / "photos"  # the team's photograph-like images (bench/india/photos)
 # sample name -> benchmark photos, served as static/samples/{name}-{1..n}.jpg. Several photos = one account scan.
 SOURCES = {"in_id_card": ["id_card"], "in_parcel": ["parcel_label"], "in_plate": ["car_plate_in"],
            "in_upi": ["upi_screen"], "in_telugu": ["telugu_sign"],
            "in_tea": ["ctrl_tea_menu"],  # the control: nothing personal, so nothing should be edited
-           "in_parcel_real": ["parcel_real"], "in_upi_real": ["upi_real"], "in_plate_real": ["plate_real"]}  # photo-style images
+           "in_parcel_real": ["parcel_real"], "in_upi_real": ["upi_real"], "in_plate_real": ["plate_real"],  # photo-style images
+           "in_photo_tea": ["photo_tea_menu"], "in_photo_sign": ["photo_medical_sign"], "in_photo_card": ["photo_library_card"],
+           "in_photo_gate": ["photo_house_board"], "in_photo_upi_hi": ["photo_upi_kirana"],
+           "in_photo_parcel_hi": ["photo_hindi_parcel"], "in_photo_house_te": ["photo_telugu_house"]}  # photograph-like images
 PRIVATE = set(SOURCES)  # recorded through the open-model path (OPEN_MODEL), edits on the server
 # What each post would say, for samples that have a caption. Captions often name what the photo's edits hide.
 CAPTIONS: dict[str, str | list[str]] = {
@@ -65,7 +69,7 @@ def record(name: str) -> None:
     for i, source in enumerate(SOURCES[name], 1):
         src = SAMPLES / f"{name}-{i}.jpg"
         if not src.exists():
-            shutil.copy(next(p for p in (INDIA / f"{source}.jpg", REAL / f"{source}.jpg") if p.exists()), src)
+            shutil.copy(next(p for p in (INDIA / f"{source}.jpg", REAL / f"{source}.jpg", PHOTOS / f"{source}.jpg") if p.exists()), src)
         imgs.append(pipeline.load_image(src.read_bytes())[0])
     t0, lines = time.time(), []
     private = name in PRIVATE

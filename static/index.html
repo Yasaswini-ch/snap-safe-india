@@ -448,6 +448,8 @@
       <h3 class="subhead">Photo-style images</h3>
       <p class="lede" id="real-lede"></p>
       <div class="pairs" id="real-pairs"></div>
+      <p class="lede" id="photos-lede"></p>
+      <div class="pairs" id="photos-pairs"></div>
     </div>
     <p class="muted small">Rendered scenes and generated photo-style images with fictional values, not photographs of real documents, one run per setting. The attacker
       samples, so numbers move between runs. Scoring: a secret counts as removed only if it was readable in the original
@@ -612,6 +614,13 @@ const SAMPLES = [  // the page shows the ones the server has a recording of (/ap
   { name: "in_parcel_real", label: "Parcel on a doorstep (photo)", note: "A photo-style image: label, phone and address" },
   { name: "in_upi_real", label: "Payment screen (photo)", note: "A photo-style image: name, UPI ID and reference" },
   { name: "in_plate_real", label: "Number plate (photo)", note: "A photo-style image: a plate on a parked car" },
+  { name: "in_photo_tea", label: "Tea stall menu (photograph-like)", note: "Nothing personal, so nothing is edited" },
+  { name: "in_photo_sign", label: "Telugu shop sign (photograph-like)", note: "Phone number and a scooter plate" },
+  { name: "in_photo_card", label: "Library card (photograph-like)", note: "Name, address, PIN and member number" },
+  { name: "in_photo_gate", label: "House gate (photograph-like)", note: "A name plate and a PIN plate" },
+  { name: "in_photo_upi_hi", label: "Hindi UPI shop stand (photograph-like)", note: "UPI ID, QR code and a Hindi shop name" },
+  { name: "in_photo_parcel_hi", label: "Hindi parcel (photograph-like)", note: "Hindi name, address, PIN and mobile number" },
+  { name: "in_photo_house_te", label: "Telugu house plate (photograph-like)", note: "Telugu house name, number, PIN and phone" },
 ];
 const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const sleep = ms => new Promise(r => setTimeout(r, calm ? 0 : ms));
@@ -1431,6 +1440,23 @@ fetch("india/real/results.json").then(r => r.ok ? r.json() : Promise.reject()).t
       el("img", { src: `india/real/${i.id}.jpg`, alt: `${i.label} before`, loading: "lazy" }),
       el("img", { src: `india/real/${i.id}_after.jpg`, alt: `${i.label} after`, loading: "lazy" })),
     el("figcaption", { textContent: `${i.label}: ${i.removed}/${i.secrets} secrets removed, ${i.changed}% changed` }))));
+  $("real").hidden = false;
+}).catch(() => {});
+
+// Seven more photograph-like images from the team (bench/india/photos): some did not finish their re-check, and the page says which.
+fetch("india/photos/results.json").then(r => r.ok ? r.json() : Promise.reject()).then(data => {
+  if (!data.items.length) return;
+  const open = data.items.filter(i => !i.complete).length, unsafe = data.items.filter(i => i.complete && !i.safe && i.secrets);
+  $("photos-lede").textContent = `${data.items.length} more photograph-like images with made-up values, found by ${data.model} and read back by Gemma 4, including Hindi and Telugu text. ` +
+    `${open} of them did not finish their re-check because the free quota ran out` +
+    (unsafe.length ? `, and ${unsafe.map(i => i.label).join(", ")} was not marked safe. ` : ". ") +
+    "One run each. The score is one noisy read and is optimistic for Indian scripts: look at the pictures. The playable samples above were recorded separately, with Gemma 4.";
+  $("photos-pairs").append(...data.items.map(i => el("figure", { className: "pair" },
+    el("div", { className: "imgs" },
+      el("img", { src: `india/photos/${i.id}.jpg`, alt: `${i.label} before`, loading: "lazy" }),
+      el("img", { src: `india/photos/${i.id}_after.jpg`, alt: `${i.label} after`, loading: "lazy" })),
+    el("figcaption", { textContent: `${i.label}: ${i.removed}/${i.secrets} secrets removed, ${i.changed}% changed` +
+      (!i.complete ? " · re-check did not finish" : i.secrets && !i.safe ? " · not marked safe" : "") }))));
   $("real").hidden = false;
 }).catch(() => {});
 

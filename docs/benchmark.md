@@ -179,6 +179,11 @@ Scenes already scored are reused, so the file mixes two runs, as described below
 - **Heavy and offset edits.** The card, the name plates and the parcel label were pixelated more than the secrets need, and the shop sign's block was larger
   than the phone number.
 
+- **On the page.** All seven are in the sample gallery as recordings made with Gemma 4 (`app/samples.py`, names `in_photo_*`), so they also play in "The agent at
+  work", and in the "Photo-style images" results section (`bench/india/photos/publish.py`). The recordings are separate runs: the agent marked all
+  seven safe in them, which is its own judgment and differs from the Gemini benchmark run for the Telugu house plate. The Hindi parcel and the Telugu house
+  plate recordings, which we looked at, hide the address lines and the phone number well; the Telugu house name stays visible.
+
 Treat all of this as a first look: one run per scene, a noisy verifier, and no re-check on four of the seven. Rerun the first four with `--force` after the
 quota resets, and have someone read the Telugu and Hindi after-images. Confirm that the photos contain no real person's details before the repo stays public.
 
