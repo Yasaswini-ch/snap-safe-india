@@ -285,6 +285,24 @@ here, but the control needed 1 attack and the Telugu sign 3, and two scenes are 
 so the earlier estimate of about 20 requests per five-scene run is still an estimate. The numbers are in
 `bench/india/results/global/requests-20261031-153020.json`. The counter is tested offline against a stand-in API
 (`uv run python -m tests.test_requestcount`).
+### Realistic photos, Gemma 4, three scenes
+
+Oct 31, 2026. Three photo-style images made with an image model from prompts with made-up values (a courier parcel on a doorstep, a payment
+screen at a shop counter, a red hatchback at a gate), in [bench/india/real](../bench/india/real). Attacker and reader both `gemma-4-26b-a4b-it`,
+because the Gemini key was out of quota that day. India pack on, one run each, private mode.
+
+| Photo | Secrets removed | Frame changed | Seconds |
+|---|---|---|---|
+| Parcel | 6 of 6 | 11.4% | 235 |
+| Payment screen | 3 of 3 | 1.1% | 184 |
+| Number plate | 1 of 1 | 1.5% | 96 |
+
+All three ended with nothing readable in the edited photo, and the attacker's report echoed none of the values. The plate and the payment
+screen are clean edits (the amount and the green tick stay). The parcel is not: the label is hidden, but the boxes are much larger than the label
+and spill onto the wall, the door and the doormat, because the box is tilted in the photo. It leaks nothing and looks wrong. This is the box
+over-sizing already named in the limits, worse on a photograph than on a rendered scene. One run each with the weaker model, so it shows the agent
+works on photographs and not how often. Run again with Gemini 3 Flash after the quota resets.
+Reproduce with `bench/india/real/run.py`.
 
 ## Limits
 

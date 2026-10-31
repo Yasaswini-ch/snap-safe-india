@@ -1,0 +1,41 @@
+{
+ "id": "upi_real",
+ "kind": "leak",
+ "secrets": [
+  "Asha Kumari",
+  "asha.k@examplebank",
+  "4012 3456 7890",
+  "Asha",
+  "Kumari"
+ ],
+ "expect": [
+  "UPI ID"
+ ],
+ "verified": [
+  "Asha Kumari",
+  "asha.k@examplebank",
+  "4012 3456 7890",
+  "Asha",
+  "Kumari"
+ ],
+ "seconds": 184.2,
+ "model": "gemma-4-26b-a4b-it",
+ "verifier": "gemma-4-26b-a4b-it",
+ "exposure_before": {
+  "other_people": 3,
+  "financial_or_id": 4,
+  "current_location": 2
+ },
+ "exposure_after": {},
+ "safe": true,
+ "attacks": 2,
+ "textcheck_found": [],
+ "edits": [
+  "pixelate:recipient name:snap",
+  "pixelate:UPI ID:snap",
+  "pixelate:transaction reference number:snap"
+ ],
+ "values_printed": [],
+ "survived": [],
+ "changed": 0.0108
+}
