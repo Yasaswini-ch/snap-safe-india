@@ -292,14 +292,14 @@
   html { scroll-behavior: smooth; }
   h2, main h2 { color: var(--fg); }
   .hero { position: relative; overflow: hidden; background: var(--sky); color: var(--fg); border-bottom: 0; padding-bottom: clamp(220px, 30vw, 400px); }
-  .pillnav { position: relative; z-index: 3; display: flex; align-items: center; justify-content: space-between; gap: 16px; max-width: 760px; margin: 18px auto 0;
+  .pillnav { position: relative; z-index: 3; display: flex; align-items: center; justify-content: space-between; gap: 16px; max-width: 960px; margin: 18px auto 0;
              padding: 8px 8px 8px 16px; background: #fff; border-radius: 999px; border: 1px solid var(--line); width: calc(100% - 32px); }
   .pillnav .brand { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; color: var(--fg); text-decoration: none; white-space: nowrap; }
-  .pillnav .navlinks { display: flex; gap: 20px; }
-  .pillnav .navlinks a { color: var(--muted); text-decoration: none; font-size: 15px; }
+  .pillnav .navlinks { display: flex; gap: 18px; }
+  .pillnav .navlinks a { color: var(--muted); text-decoration: none; font-size: 15px; white-space: nowrap; }
   .pillnav .navlinks a:hover { color: var(--fg); }
   .pillnav .btn { padding: 8px 16px; border-radius: 999px; white-space: nowrap; }
-  @media (max-width: 640px) { .pillnav .navlinks { display: none; } }
+  @media (max-width: 860px) { .pillnav .navlinks { display: none; } }
   .hero-copy { position: relative; z-index: 2; text-align: center; padding-top: 56px; padding-bottom: 8px; }
   .hero .eyebrow { color: var(--accent); }
   .hero h1 { font-family: ui-monospace, "Cascadia Mono", Consolas, "SF Mono", monospace; font-weight: 800; color: #0b2624; font-size: clamp(2rem, 5.2vw, 3.6rem);
@@ -366,15 +366,36 @@
   @media (max-width: 420px) { .pillnav { gap: 8px; padding-left: 12px; } .pillnav .brand { font-size: 14px; gap: 6px; } .pillnav .btn { padding: 8px 12px; font-size: 14px; } }
   @media (max-width: 350px) { .pillnav .brand { font-size: 12px; } .pillnav .btn { padding: 8px 10px; font-size: 13px; } }
   .subhead { margin: 28px 0 4px; font-size: 1.15rem; }
-  .footer-logo { display: block; width: 220px; max-width: 70%; height: auto; margin: 0 0 12px; border-radius: 16px; }
+  footer { margin-top: 64px; padding: 40px 0 28px; background: #e3efe9; border-top: 1px solid var(--line); }
+  .foot-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 32px; }
+  .foot-brand { display: flex; align-items: center; gap: 10px; font-weight: 700; color: var(--fg); }
+  .foot-brand img { width: 36px; height: 36px; border-radius: 8px; }
+  .foot-blurb { margin: 10px 0 0; max-width: 32ch; }
+  footer h3 { margin: 0 0 10px; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--fg); }
+  footer ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+  footer a { color: var(--muted); text-decoration: none; }
+  footer a:hover { color: var(--fg); text-decoration: underline; }
+  .foot-base { margin: 32px 0 0; padding-top: 16px; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; font-size: 13px; }
+  @media (max-width: 760px) { .foot-grid { grid-template-columns: 1fr 1fr; } .foot-grid > :first-child { grid-column: 1 / -1; } }
   .pillnav .brand img { border-radius: 6px; }
+  .maintabs { display: flex; gap: 8px; flex-wrap: wrap; margin: 24px 0 8px; }
+  .maintabs button { padding: 9px 18px; border-radius: 999px; border: 1px solid var(--line); background: #fff; color: var(--muted); font: inherit; font-weight: 600; cursor: pointer; }
+  .maintabs button[aria-selected="true"] { border-color: var(--accent); color: var(--accent); background: #e9f3ef; }
+  .tabpanel[hidden] { display: none; }
+  .tabpanel section { scroll-margin-top: 12px; }
+  .subtabs { display: flex; gap: 8px; flex-wrap: wrap; margin: 16px 0 4px; padding: 6px; background: #e9f3ef; border-radius: 999px; width: fit-content; max-width: 100%; }
+  .subtabs button { padding: 7px 16px; border: 0; border-radius: 999px; background: transparent; color: var(--muted); font: inherit; font-weight: 600; cursor: pointer; }
+  .subtabs button span { margin-left: 4px; font-size: 12px; opacity: .7; }
+  .subtabs button[aria-selected="true"] { background: #fff; color: var(--fg); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+  .subpanel:not(.on) { display: none; }
+  #results .pairs { margin: 12px 0 20px; }
 </style>
 </head>
 <body>
 <header class="hero">
   <nav class="pillnav" aria-label="Page">
     <a class="brand" href="#top"><img src="/mark.png" alt="" width="34" height="34">Snap Safe India</a>
-    <span class="navlinks"><a href="#samples-section">Samples</a><a href="#results">Benchmark</a><a href="https://github.com/Yasaswini-ch/snap-safe-india">GitHub</a></span>
+    <span class="navlinks"><a href="#how">How it works</a><a href="#detects">What it looks for</a><a href="#samples-section">Samples</a><a href="#results">Benchmark</a><a href="https://github.com/Yasaswini-ch/snap-safe-india">GitHub</a></span>
     <a class="btn primary" href="#own">Check a photo</a>
   </nav>
   <div class="wrap hero-copy" id="top">
@@ -396,7 +417,7 @@
   <canvas id="scene" aria-hidden="true"></canvas>
 </header>
 
-<section class="intro wrap" aria-label="How it works">
+<section class="intro wrap" id="how" aria-label="How it works">
   <div class="intro-grid">
     <div class="compare" id="compare">
       <img src="samples/hero-card-after.jpg" alt="The same photo after the agent: the card's name, address and member number are hidden behind pixelation" decoding="async">
@@ -414,49 +435,25 @@
   </div>
   <div class="statband" aria-label="At a glance">
     <div><strong>19 of 19</strong><span>planted secrets removed on five rendered scenes (one run)</span></div>
-    <div><strong>6</strong><span>recorded runs to replay, no key needed</span></div>
+    <div><strong>16</strong><span>recorded runs to replay, no key needed</span></div>
     <div><strong>3</strong><span>report languages: English, Telugu, Hindi</span></div>
     <div><strong>0 of 14</strong><span>planted values echoed in the attacker's report</span></div>
   </div>
 </section>
 
 <main class="wrap">
-  <section id="detects" aria-labelledby="detects-title">
-    <h2 id="detects-title">What it looks for</h2>
-    <p class="lede">Photos in India give away different things than photos elsewhere. The checker knows the formats, and
-      is told to read Telugu, Hindi and Tamil text as well as English.</p>
-    <ul class="detects">
-      <li><b>ID cards and numbers</b><span class="muted small">Aadhaar, PAN, voter ID, college and school ID cards, lanyards, roll numbers.</span></li>
-      <li><b>Number plates</b><span class="muted small">State and district codes, full plates, BH series, RC books.</span></li>
-      <li><b>Payments</b><span class="muted small">UPI IDs and QR codes, IFSC codes, GST numbers, payment screenshots.</span></li>
-      <li><b>Addresses</b><span class="muted small">Door and flat numbers, house name boards, colony names, PIN codes, "near ..." landmarks.</span></li>
-      <li><b>Parcels and bills</b><span class="muted small">Courier labels with a name, phone and address; barcodes and QR codes.</span></li>
-      <li><b>Occasions</b><span class="muted small">Wedding invites, flex banners, uniforms, hostel and coaching-centre names.</span></li>
-    </ul>
-  </section>
-
+  <div class="maintabs" role="tablist" aria-label="Sections">
+    <button role="tab" data-panel="p-agent" aria-selected="true">Watch a sample &amp; check your photo</button>
+    <button role="tab" data-panel="p-detects" aria-selected="false">What it looks for</button>
+    <button role="tab" data-panel="p-bench" aria-selected="false">Benchmark</button>
+  </div>
+  <div class="tabpanel" id="p-agent" role="tabpanel">
   <section id="samples-section" hidden>
     <h2 id="samples-title">Watch a sample</h2>
     <p class="lede">Each one replays a recorded run of the real agent, sped up. Every name and address in them is fictional.</p>
     <div class="samples" id="samples" aria-labelledby="samples-title"></div>
   </section>
 
-  <section id="results" hidden aria-labelledby="results-title">
-    <h2 id="results-title">Indian benchmark</h2>
-    <p class="lede" id="results-lede"></p>
-    <div class="table-wrap"><table class="bench" id="bench"></table></div>
-    <div class="pairs" id="pairs"></div>
-    <div id="real" hidden>
-      <h3 class="subhead">Photo-style images</h3>
-      <p class="lede" id="real-lede"></p>
-      <div class="pairs" id="real-pairs"></div>
-      <p class="lede" id="photos-lede"></p>
-      <div class="pairs" id="photos-pairs"></div>
-    </div>
-    <p class="muted small">Rendered scenes and generated photo-style images with fictional values, not photographs of real documents, one run per setting. The attacker
-      samples, so numbers move between runs. Scoring: a secret counts as removed only if it was readable in the original
-      and is gone from the result. Scenes and scorer are in <code>bench/india</code> and <code>bench/indiabench.py</code>.</p>
-  </section>
 
   <section id="view" hidden aria-label="Agent run">
     <h2>The agent at work</h2>
@@ -526,7 +523,7 @@
         </div>
       </div>
       <label class="code" id="code-wrap" hidden>
-        <span><b>Access code</b><br><span class="muted small">Ask the team for it. The samples above need
+        <span><b>Access code</b><br><span class="muted small">Ask the team for it. The samples below need
           no code.</span></span>
         <input id="code" type="text" autocomplete="off" spellcheck="false" aria-label="Access code">
       </label>
@@ -584,20 +581,116 @@
       </div>
     </div>
   </section>
+
+  </div>
+
+  <div class="tabpanel" id="p-detects" role="tabpanel">
+  <section id="detects" aria-labelledby="detects-title">
+    <h2 id="detects-title">What it looks for</h2>
+    <p class="lede">Photos in India give away different things than photos elsewhere. The checker knows the formats, and
+      is told to read Telugu, Hindi and Tamil text as well as English.</p>
+    <ul class="detects">
+      <li><b>ID cards and numbers</b><span class="muted small">Aadhaar, PAN, voter ID, college and school ID cards, lanyards, roll numbers.</span></li>
+      <li><b>Number plates</b><span class="muted small">State and district codes, full plates, BH series, RC books.</span></li>
+      <li><b>Payments</b><span class="muted small">UPI IDs and QR codes, IFSC codes, GST numbers, payment screenshots.</span></li>
+      <li><b>Addresses</b><span class="muted small">Door and flat numbers, house name boards, colony names, PIN codes, "near ..." landmarks.</span></li>
+      <li><b>Parcels and bills</b><span class="muted small">Courier labels with a name, phone and address; barcodes and QR codes.</span></li>
+      <li><b>Occasions</b><span class="muted small">Wedding invites, flex banners, uniforms, hostel and coaching-centre names.</span></li>
+    </ul>
+  </section>
+
+  </div>
+
+  <div class="tabpanel" id="p-bench" role="tabpanel">
+  <section id="results" hidden aria-labelledby="results-title">
+    <h2 id="results-title">Indian benchmark</h2>
+    <div class="subtabs" role="tablist" aria-label="Benchmark sets">
+      <button role="tab" data-sub="sp-scenes" aria-selected="true">Rendered scenes <span>5</span></button>
+      <button role="tab" data-sub="sp-real" aria-selected="false">Photo-style images <span>10</span></button>
+    </div>
+    <div class="subpanel on" id="sp-scenes">
+      <p class="lede" id="results-lede"></p>
+      <div class="table-wrap"><table class="bench" id="bench"></table></div>
+      <h3 class="subhead">Before and after</h3>
+      <div class="pairs" id="pairs"></div>
+    </div>
+    <div id="real" hidden>
+      <div class="subpanel" id="sp-real">
+        <p class="lede" id="real-lede"></p>
+        <div class="pairs" id="real-pairs"></div>
+        <p class="lede" id="photos-lede"></p>
+        <div class="pairs" id="photos-pairs"></div>
+      </div>
+    </div>
+    <p class="muted small">Rendered scenes and generated photo-style images with fictional values, not photographs of real documents, one run per setting. The attacker
+      samples, so numbers move between runs. Scoring: a secret counts as removed only if it was readable in the original
+      and is gone from the result. Scenes and scorer are in <code>bench/india</code> and <code>bench/indiabench.py</code>.</p>
+  </section>
+
+  </div>
+
 </main>
 
 <footer>
   <div class="wrap">
-    <img class="footer-logo" src="/logo.png" alt="Snap Safe India: photo privacy agent, made for India" width="220" height="220" loading="lazy">
-    <nav>
-      <a href="https://github.com/Yasaswini-ch/snap-safe-india">Source on GitHub</a>
-    </nav>
-    <p>Built for Hacktoberfest Hack Day x AI for Vizag 2026.</p>
+    <div class="foot-grid">
+      <div>
+        <span class="foot-brand"><img src="/mark.png" alt="" width="36" height="36" loading="lazy">Snap Safe India</span>
+        <p class="foot-blurb">A photo privacy agent for India. It checks what a photo gives away before you post it.</p>
+      </div>
+      <div>
+        <h3>Explore</h3>
+        <ul>
+          <li><a href="#how">How it works</a></li>
+          <li><a href="#detects">What it looks for</a></li>
+          <li><a href="#samples-section">Watch a sample</a></li>
+          <li><a href="#results">Benchmark</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3>Try it</h3>
+        <ul>
+          <li><a href="#own">Check your photo</a></li>
+          <li><a href="#top">Back to top</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3>Project</h3>
+        <ul>
+          <li><a href="https://github.com/Yasaswini-ch/snap-safe-india">Source on GitHub</a></li>
+          <li><a href="https://github.com/Yasaswini-ch/snap-safe-india/issues">Report an issue</a></li>
+        </ul>
+      </div>
+    </div>
+    <p class="foot-base"><span>Built for Hacktoberfest Hack Day x AI for Vizag 2026.</span><span>Photos are processed in memory and never stored.</span></p>
   </div>
 </footer>
 
 <script>
 const $ = id => document.getElementById(id);
+// Section tabs: one panel at a time; links and code that point inside a hidden panel open it first.
+function openPanel(id, focus) {
+  const panel = $(id); if (!panel) return;
+  document.querySelectorAll(".tabpanel").forEach(p => p.hidden = p !== panel);
+  document.querySelectorAll(".maintabs button").forEach(b => b.setAttribute("aria-selected", String(b.dataset.panel === id)));
+  try { sessionStorage.setItem("panel", id); } catch {}
+}
+function panelOf(el) { return el && el.closest(".tabpanel"); }
+document.querySelectorAll(".maintabs button").forEach(b => b.onclick = () => openPanel(b.dataset.panel));
+function routeHash() {
+  const t = location.hash.length > 1 && document.getElementById(decodeURIComponent(location.hash.slice(1)));
+  const p = panelOf(t);
+  if (p) { openPanel(p.id); t.scrollIntoView(); }
+}
+addEventListener("hashchange", routeHash);
+openPanel("p-agent");
+routeHash();
+document.querySelectorAll(".subtabs button").forEach(b => b.onclick = () => {
+  document.querySelectorAll(".subtabs button").forEach(x => x.setAttribute("aria-selected", String(x === b)));
+  document.querySelectorAll(".subpanel").forEach(p => p.classList.toggle("on", p.id === b.dataset.sub));
+});
+
+
 const CATEGORY = {
   home_location: "Where you live", current_location: "Where this was taken", work_or_school: "Work or school",
   identity: "Who you are", contact: "How to reach you", routine: "Your routine",
@@ -1291,6 +1384,7 @@ async function begin(srcs, request) {
   $("cap").hidden = true;
   boxes = new Map();
   $("view").hidden = false;
+  openPanel("p-agent");
   $("view").scrollIntoView({ behavior: calm ? "auto" : "smooth" });
   busy(true);
   t0 = Date.now();
