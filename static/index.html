@@ -8,14 +8,12 @@
 <link rel="manifest" href="/manifest.json">
 <link rel="icon" href="/favicon.png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<meta name="theme-color" content="#070412" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#070412" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f6f7f9">
 <style>
-  /* One dark theme, like the React Bits backgrounds it uses: near-black violet, an Aurora glow, violet and mint accents.
-     --saffron is now the second accent (mint); the name is kept so the rules that use it still work. */
-  :root { color-scheme: dark; --bg: #070412; --fg: #ece8ff; --muted: #a8a2c8; --card: #110b26; --line: #2c2350; --accent: #9b82ff; --saffron: #5eead4; --warn: #fb923c; --ok: #7cff67;
-          --on-ok: #04210f; --on-level: #111; --l1: #94a3b8; --l2: #facc15; --l3: #fb923c; --l4: #f87171; --scan-rgb: 155, 130, 255; --pixel: #070412;
-          --saf-rgb: 94, 234, 212; --ok-rgb: 124, 255, 103; --dots: rgba(190, 175, 255, .10); }
+  /* One light theme: off-white page, white cards, ink text, a single blue accent. No gradients, glow or blur. --saffron is the
+     second colour (teal); the name is kept so the rules that use it still work. */
+  :root { color-scheme: light; --bg: #f6f7f9; --fg: #15191f; --muted: #566070; --card: #ffffff; --line: #d9dee5; --accent: #1d4ed8; --saffron: #0f766e; --warn: #b45309; --ok: #15803d;
+          --on-ok: #ffffff; --on-level: #15191f; --l1: #cbd5e1; --l2: #fcd34d; --l3: #fdba74; --l4: #fca5a5; --scan-rgb: 29, 78, 216; --pixel: #e9ecf1; }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
   .wrap { max-width: 1120px; margin: 0 auto; padding: 0 16px; }
@@ -39,9 +37,6 @@
 
   /* Hero: Scanner background, Decrypted Text headline, before/after compare, the loop, Count Up proof */
   .hero { position: relative; overflow: hidden; border-bottom: 1px solid var(--line); }
-  .hero canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none;
-                 -webkit-mask-image: radial-gradient(ellipse 70% 80% at 65% 35%, #000 20%, transparent 75%);
-                 mask-image: radial-gradient(ellipse 70% 80% at 65% 35%, #000 20%, transparent 75%); }
   .hero .wrap { position: relative; padding-top: 40px; padding-bottom: 32px; }
   .hero-grid { display: grid; gap: 28px; align-items: center; }
   @media (min-width: 900px) { .hero-grid { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); } }
@@ -80,11 +75,6 @@
   .samples .meta { display: block; padding: 8px 10px 10px; }
   .samples .meta b { display: block; font-size: 15px; }
   .samples .meta small { color: var(--muted); }
-  .spot { position: relative; }
-  .spot::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .25s; border-radius: inherit;
-                 background: radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%), rgba(var(--scan-rgb), .22), transparent 65%); }
-  .spot:hover::after, .spot:focus-within::after { opacity: 1; }
-
   /* Upload */
   .own { display: grid; gap: 12px; margin-top: 16px; }
   .own-cols, .own-main, .own-side { display: grid; gap: 12px; align-content: start; }
@@ -237,11 +227,6 @@
            animation: stamp .4s cubic-bezier(.3, 1.6, .6, 1) backwards; }
   .stamp.ok { color: var(--ok); }
   @keyframes stamp { from { transform: rotate(-8deg) scale(2.4); opacity: 0; } }
-  /* Shiny Text */
-  .shiny { background: linear-gradient(110deg, currentColor 42%, #fff 50%, currentColor 58%) 0 0 / 260% 100%; -webkit-background-clip: text; background-clip: text;
-           -webkit-text-fill-color: transparent; animation: shine 3.2s linear infinite; }
-  @keyframes shine { from { background-position: 100% 0; } to { background-position: -160% 0; } }
-
   details.trace { margin-top: 24px; }
   details.trace summary { cursor: pointer; font-weight: 600; }
   ol.log { list-style: none; padding: 0; margin: 0; }
@@ -251,29 +236,13 @@
   ol.log ul { margin: 6px 0 0; padding-left: 18px; color: var(--muted); font-size: 14px; }
   footer { margin-top: 48px; padding: 24px 0 40px; border-top: 1px solid var(--line); color: var(--muted); font-size: 14px; }
   footer nav { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 8px; }
-  .sparks { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50; }
   @media (prefers-reduced-motion: reduce) { *, ::before, ::after { animation: none !important; transition: none !important; } }
   [hidden] { display: none !important; }
-  /* Background: soft saffron, indigo and green glows that drift slowly, over a faint dot grid. Replaces the hero scanner. */
-  .hero canvas { display: none; }
-  /* Dither, after the React Bits background of that name: retro waves quantised with an 8x8 Bayer matrix, drawn by a
-     WebGL canvas (dither() below) at a third of the screen size and scaled up with hard pixels. Without WebGL,
-     .no-gl shows a static CSS glow instead. */
-  #bg { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -2; pointer-events: none; image-rendering: pixelated;
-         -webkit-mask-image: linear-gradient(#000, #000 15%, transparent 70%); mask-image: linear-gradient(#000, #000 15%, transparent 70%); }
-  .no-gl #bg { display: none; }
-  .no-gl body::before { content: ""; position: fixed; inset: 0; z-index: -2; pointer-events: none;
-                        background: radial-gradient(50rem 24rem at 20% -4%, rgba(155, 130, 255, .30), transparent 70%),
-                                    radial-gradient(40rem 22rem at 75% -6%, rgba(var(--saf-rgb), .14), transparent 70%); }
-  /* Snap Safe India look: warm paper, a saffron-white-green edge on the hero, chips and detect cards */
-  .hero::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 5px; z-index: 1;
-                  background: linear-gradient(90deg, var(--accent), var(--saffron) 50%, var(--ok)); }
   .eyebrow { color: var(--saffron); }
   .hero h1 { letter-spacing: -.03em; }
   .chips { list-style: none; margin: 18px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
   .chips li { padding: 4px 12px; border: 1px solid var(--line); border-radius: 999px; background: var(--card);
               font-size: 13px; font-weight: 600; color: var(--fg); }
-  .compare { box-shadow: 0 12px 40px -18px rgba(var(--scan-rgb), .45); }
   .detects { list-style: none; margin: 16px 0 0; padding: 0; display: grid; gap: 12px;
              grid-template-columns: repeat(auto-fill, minmax(min(250px, 100%), 1fr)); }
   .detects li { padding: 14px 16px; background: var(--card); border: 1px solid var(--line); border-radius: 12px;
@@ -281,31 +250,6 @@
   .detects li:nth-child(3n + 2) { border-top-color: var(--accent); }
   .detects li:nth-child(3n) { border-top-color: var(--ok); }
   .detects b { display: block; margin-bottom: 4px; }
-  /* Effects in the style of React Bits (reactbits.dev, MIT + Commons Clause), written in plain CSS and JS:
-     Gradient Text, Blur Text on headings, Star Border on the main button, Tilted Card, scroll-in reveal */
-  main h2 .w { white-space: pre; }
-  @property --a { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
-  @keyframes spin { to { --a: 360deg; } }
-  @keyframes gshift { to { background-position: 300% 0; } }
-  @media (prefers-reduced-motion: no-preference) {
-    .hero h1 { background: linear-gradient(90deg, var(--fg) 0%, var(--accent) 25%, var(--saffron) 50%, var(--accent) 75%, var(--fg) 100%);
-               background-size: 300% 100%; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
-               animation: gshift 10s linear infinite; }
-    .star { position: relative; isolation: isolate; }
-    .star::before { content: ""; position: absolute; inset: -3px; border-radius: 13px; padding: 3px; z-index: -1; pointer-events: none;
-                    background: conic-gradient(from var(--a), var(--saffron), var(--card), var(--ok), var(--accent), var(--saffron));
-                    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
-                    mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); animation: spin 4s linear infinite; }
-    .js-reveal main h2 .w { display: inline-block; opacity: 0; filter: blur(8px); transform: translateY(.45em);
-                            transition: opacity .6s ease, filter .6s ease, transform .6s ease; transition-delay: calc(var(--i, 0) * 70ms); }
-    .js-reveal main h2.in .w { opacity: 1; filter: none; transform: none; }
-    .js-reveal .rv { opacity: 0; translate: 0 18px;
-                     transition: opacity .6s ease calc(var(--i, 0) * 60ms), translate .6s ease calc(var(--i, 0) * 60ms); }
-    .js-reveal .rv.in { opacity: 1; translate: none; }
-    .tilt-on .detects li, .tilt-on .pair, .tilt-on .samples .spot {
-      transform: perspective(800px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
-      transition: transform .18s ease-out, opacity .6s ease calc(var(--i, 0) * 60ms), translate .6s ease calc(var(--i, 0) * 60ms); }
-  }
   .lang { display: grid; gap: 8px; }
   .lang select { font: inherit; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--card); color: var(--fg); max-width: 320px; }
   /* Indian benchmark section: filled from india/results.json, hidden without it */
@@ -319,23 +263,45 @@
   .pair .imgs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
   .pair img { width: 100%; border-radius: 6px; display: block; }
   .pair figcaption { font-size: 13px; color: var(--muted); margin-top: 6px; }
+  /* Plain look: small radii, flat cards, no shadows */
+  button, .btn { border-radius: 8px; }
+  .btn.primary { color: #fff; }
+  .btn.primary:hover { background: #1e40af; border-color: #1e40af; }
+  .hero { border-bottom: 1px solid var(--line); background: var(--card); }
+  .hero h1 { letter-spacing: -.02em; }
+  .eyebrow { color: var(--accent); }
+  .compare, .pair, .keep, .dossier, .code, .switch, .notice, .drop, .samples button, .steps li, .detects li, .chips li, ol.log > li { border-radius: 8px; }
+  .compare { border-radius: 10px; }
+  .detects li { border-top: 1px solid var(--line); }
+  .detects li:nth-child(3n + 2), .detects li:nth-child(3n) { border-top-color: var(--line); }
+  .opens { background: #eef3ff; border-color: #c7d6fb; border-radius: 8px; }
+  .together { background: #eef3ff; }
+  .row.hot { background: #eef3ff; }
+  .box.hot { box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--c); }
+  .compare .handle { box-shadow: none; background: #fff; }
+  .compare .handle::after { box-shadow: 0 1px 3px rgba(0, 0, 0, .3); }
+  .redact i { background: var(--fg); }
+  .scan { background: rgba(var(--scan-rgb), .06); }
+  .scan::before { background: linear-gradient(transparent, rgba(var(--scan-rgb), .25)); }
+  .switch input:checked + .track { background: var(--ok); }
+  .samples button:hover, .detects li:hover { border-color: #aab4c3; }
+  footer { background: transparent; }
+  .stamp { transform: none; animation: none; border-width: 2px; }
 </style>
 </head>
 <body>
-<canvas id="bg" aria-hidden="true"></canvas>
 <header class="hero">
-  <canvas id="scanner" aria-hidden="true"></canvas>
   <div class="wrap">
     <div class="hero-grid">
       <div>
         <p class="eyebrow">Photo privacy agent · made for India</p>
-        <h1 id="headline" data-text="Check your photo before you post it.">Check your photo before you post it.</h1>
+        <h1 id="headline">Check your photo before you post it.</h1>
         <p class="lede">Aadhaar cards, number plates, courier labels, house name boards, UPI screens: it finds what a
           stranger could use, hides only that, and checks again. Names, addresses and numbers are never printed, not
           even to you.</p>
         <div class="cta">
-          <a class="btn primary spark star" href="#own">Check your photo</a>
-          <a class="btn spark" href="#samples-section">Watch a sample</a>
+          <a class="btn primary" href="#own">Check your photo</a>
+          <a class="btn" href="#samples-section">Watch a sample</a>
         </div>
         <ul class="chips" aria-label="What it looks for">
           <li>Aadhaar</li><li>PAN</li><li>UPI IDs</li><li>Number plates</li><li>PIN codes</li><li>Telugu · Hindi · Tamil text</li>
@@ -452,7 +418,7 @@
               of the agent, recorded as they happened.</p>
           </div>
           <div class="cta">
-            <button class="btn primary spark" type="button" id="try-sample">Play a sample</button>
+            <button class="btn primary" type="button" id="try-sample">Play a sample</button>
           </div>
         </div>
       </div>
@@ -522,7 +488,7 @@
     <nav>
       <a href="https://github.com/Yasaswini-ch/snap-safe-india">Source on GitHub</a>
     </nav>
-    <p>Built for Hacktoberfest Hack Day x AI for Vizag 2026. Effects in the style of <a href="https://reactbits.dev">React Bits</a>.</p>
+    <p>Built for Hacktoberfest Hack Day x AI for Vizag 2026.</p>
   </div>
 </footer>
 
@@ -557,84 +523,6 @@ function el(tag, props = {}, ...children) {
   return node;
 }
 
-// ---- Effects, adapted from React Bits to plain JS. All of them stand still for prefers-reduced-motion. ----
-
-// Grid Scan: a faint grid behind the hero, lit up band by band as a scan line passes from top to bottom.
-function scanner(canvas) {
-  const ctx = canvas.getContext("2d"), rgb = getComputedStyle(document.documentElement).getPropertyValue("--scan-rgb").trim();
-  const cell = 44;
-  let w = 0, h = 0, visible = true;
-  const size = () => {
-    const dpr = Math.min(devicePixelRatio || 1, 2);
-    w = canvas.clientWidth; h = canvas.clientHeight;
-    canvas.width = w * dpr; canvas.height = h * dpr;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  };
-  const grid = alpha => {
-    ctx.strokeStyle = `rgba(${rgb}, ${alpha})`;
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    for (let x = 0.5; x <= w; x += cell) { ctx.moveTo(x, 0); ctx.lineTo(x, h); }
-    for (let y = 0.5; y <= h; y += cell) { ctx.moveTo(0, y); ctx.lineTo(w, y); }
-    ctx.stroke();
-  };
-  const frame = now => {
-    ctx.clearRect(0, 0, w, h);
-    grid(0.1);
-    if (!calm) {
-      const y = ((now / 1000 * 0.08) % 1.25 - 0.1) * h, band = 120;
-      const glow = ctx.createLinearGradient(0, y - band, 0, y);
-      glow.addColorStop(0, `rgba(${rgb}, 0)`); glow.addColorStop(1, `rgba(${rgb}, 0.12)`);
-      ctx.fillStyle = glow; ctx.fillRect(0, y - band, w, band);
-      ctx.save(); ctx.beginPath(); ctx.rect(0, y - band, w, band); ctx.clip(); grid(0.35); ctx.restore();
-      ctx.fillStyle = `rgba(${rgb}, 0.55)`; ctx.fillRect(0, y, w, 1.5);
-    }
-    if (visible && !calm) requestAnimationFrame(frame);
-  };
-  new ResizeObserver(() => { size(); if (calm) frame(0); }).observe(canvas);
-  new IntersectionObserver(([e]) => { const was = visible; visible = e.isIntersecting; if (visible && !was && !calm) requestAnimationFrame(frame); }).observe(canvas);
-  size();
-  requestAnimationFrame(frame);
-}
-
-// Decrypted Text: the headline resolves left to right out of scrambled letters of the same case.
-function decrypt(node) {
-  const text = node.dataset.text;
-  node.setAttribute("aria-label", text);
-  if (calm) return;
-  const pick = c => /[a-z]/.test(c) ? "abcdefghijklmnopqrstuvwxyz"[Math.random() * 26 | 0]
-                  : /[A-Z]/.test(c) ? "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[Math.random() * 26 | 0] : c;
-  const start = performance.now();
-  const frame = now => {
-    const done = Math.min(1, (now - start) / 1300), n = Math.floor(done * text.length);
-    node.textContent = text.slice(0, n) + [...text.slice(n)].map(pick).join("");
-    if (done < 1) requestAnimationFrame(frame);
-  };
-  requestAnimationFrame(frame);
-}
-
-// Count Up: numbers climb when they scroll into view.
-function countUp(node) {
-  const to = +node.dataset.to;
-  if (calm || !to) return;
-  const start = performance.now();
-  const frame = now => {
-    const p = Math.min(1, (now - start) / 1400);
-    node.textContent = Math.round(to * (1 - (1 - p) ** 3));
-    if (p < 1) requestAnimationFrame(frame);
-  };
-  requestAnimationFrame(frame);
-}
-
-// Spotlight Card: a soft light follows the pointer across sample cards and the drop zone.
-document.addEventListener("pointermove", e => {
-  const s = e.target.closest?.(".spot");
-  if (!s) return;
-  const r = s.getBoundingClientRect();
-  s.style.setProperty("--mx", `${e.clientX - r.left}px`);
-  s.style.setProperty("--my", `${e.clientY - r.top}px`);
-});
-
 // Pixel Transition: a photo changes behind a grid of blocks that fill in and clear in random order.
 function pixelSwap(stageEl, swap) {
   if (calm || !stageEl.offsetWidth) return swap();
@@ -652,31 +540,6 @@ function pixelSwap(stageEl, swap) {
     setTimeout(() => grid.remove(), 400);
   }, 340);
 }
-
-// Click Spark: short rays burst from the click point on the main buttons.
-const sparks = el("canvas", { className: "sparks" });
-sparks.setAttribute("aria-hidden", "true");
-document.body.append(sparks);
-function spark(x, y) {
-  if (calm) return;
-  const ctx = sparks.getContext("2d"), dpr = Math.min(devicePixelRatio || 1, 2), start = performance.now();
-  const root = document.documentElement;
-  sparks.width = root.clientWidth * dpr; sparks.height = root.clientHeight * dpr;
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  const color = getComputedStyle(document.documentElement).getPropertyValue("--accent");
-  const frame = now => {
-    const p = Math.min(1, (now - start) / 420);
-    ctx.clearRect(0, 0, innerWidth, innerHeight);
-    ctx.strokeStyle = color; ctx.globalAlpha = 1 - p; ctx.lineWidth = 2;
-    for (let i = 0; i < 8; i++) {
-      const a = i * Math.PI / 4, r1 = 8 + 26 * p, r2 = r1 + 12 * (1 - p);
-      ctx.beginPath(); ctx.moveTo(x + Math.cos(a) * r1, y + Math.sin(a) * r1); ctx.lineTo(x + Math.cos(a) * r2, y + Math.sin(a) * r2); ctx.stroke();
-    }
-    if (p < 1) requestAnimationFrame(frame); else ctx.clearRect(0, 0, innerWidth, innerHeight);
-  };
-  requestAnimationFrame(frame);
-}
-document.addEventListener("click", e => { if (e.target.closest(".spark")) spark(e.clientX, e.clientY); });
 
 // Before/after compare in the hero: sways on its own until someone drags it.
 function compare(box) {
@@ -997,7 +860,7 @@ async function handle(e) {
     if (e.captions || e.caption != null) captionsNow = e.captions || [e.caption];
     showCaptions(true);
     settle(e.after);
-    $("stamp").replaceChildren(el("span", { className: e.safe ? "shiny" : "", textContent: e.unverified || e.doubt ? "Unchecked" : !e.safe ? "Exposed" : checked ? "Verified" : "Clean" }));
+    $("stamp").replaceChildren(el("span", { textContent: e.unverified || e.doubt ? "Unchecked" : !e.safe ? "Exposed" : checked ? "Verified" : "Clean" }));
     $("stamp").classList.toggle("ok", e.safe);
     Object.assign($("stamp").dataset, { text: $("stamp").textContent, ok: e.safe ? "1" : "" });
     $("stamp").hidden = false;
@@ -1023,7 +886,7 @@ function offer(urls) {
   const name = i => urls.length > 1 ? `safe-photo-${i + 1}.png` : "safe-photo.png";
   // In an account, only the photos that changed need a new copy; the rest are as posted.
   const which = urls.map((u, i) => i).filter(i => urls.length === 1 || touched.has(i) || urls[i] !== finals[i]);
-  $("downloads").replaceChildren(...which.map(i => el("a", { className: "btn primary spark", href: urls[i], download: name(i),
+  $("downloads").replaceChildren(...which.map(i => el("a", { className: "btn primary", href: urls[i], download: name(i),
     textContent: urls.length > 1 ? `Download photo ${i + 1}` : "Download safe copy" })));
   const mine = originals;
   if (navigator.canShare) Promise.all(which.map(async i => new File([await (await fetch(urls[i])).blob()], name(i), { type: "image/png" })))
@@ -1364,51 +1227,7 @@ fetch("/api/samples").then(r => r.json()).then(have => {
     b.onclick = () => begin(srcs, () => fetch(`/api/sample/${s.name}`));
     return b;
   }));
-  scrollReveal($("samples").children);
 }).catch(() => { $("samples-section").hidden = true; });
-
-// Reveal-on-scroll (Blur Text on headings, fade-up on cards) and Tilted Card, in the style of React Bits.
-// Content stays visible when JS or IntersectionObserver is missing: the hiding CSS only applies under .js-reveal.
-const seen = "IntersectionObserver" in window ? new IntersectionObserver(entries => entries.forEach(e => {
-  if (e.isIntersecting) { e.target.classList.add("in"); seen.unobserve(e.target); }
-}), { threshold: 0.15 }) : null;
-function scrollReveal(nodes) {
-  [...nodes].forEach((n, i) => {
-    if (n.dataset.rv) return;
-    n.dataset.rv = "1";
-    n.style.setProperty("--i", String(i % 8));
-    if (n.tagName !== "H2") n.classList.add("rv");
-    seen ? seen.observe(n) : n.classList.add("in");
-  });
-}
-document.querySelectorAll("main h2").forEach(h => {
-  const words = h.textContent.trim().split(/\s+/);
-  h.setAttribute("aria-label", words.join(" "));
-  h.textContent = "";
-  words.forEach((w, i) => {
-    const s = el("span", { className: "w", textContent: w + (i < words.length - 1 ? " " : "") });
-    s.style.setProperty("--i", String(i));
-    s.setAttribute("aria-hidden", "true");
-    h.append(s);
-  });
-});
-document.documentElement.classList.add("js-reveal");
-scrollReveal(document.querySelectorAll("main h2, .detects li, .samples .spot"));
-if (matchMedia("(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)").matches) {
-  document.documentElement.classList.add("tilt-on");
-  const tiltable = ".detects li, .pair, .samples .spot";
-  document.addEventListener("pointermove", e => {
-    const c = e.target.closest?.(tiltable);
-    if (!c) return;
-    const r = c.getBoundingClientRect();
-    c.style.setProperty("--ry", `${(((e.clientX - r.left) / r.width) - 0.5) * 8}deg`);
-    c.style.setProperty("--rx", `${-(((e.clientY - r.top) / r.height) - 0.5) * 8}deg`);
-  });
-  document.addEventListener("pointerout", e => {
-    const c = e.target.closest?.(tiltable);
-    if (c && !c.contains(e.relatedTarget)) { c.style.setProperty("--rx", "0deg"); c.style.setProperty("--ry", "0deg"); }
-  });
-}
 
 fetch("india/results.json").then(r => r.ok ? r.json() : Promise.reject()).then(data => {
   const tags = ["in", "global"].filter(t => data.runs[t]);
@@ -1438,94 +1257,10 @@ fetch("india/results.json").then(r => r.ok ? r.json() : Promise.reject()).then(d
       el("img", { src: `india/${shown}/${s.id}_after.jpg`, alt: `${s.id} after`, loading: "lazy" })),
     el("figcaption", { textContent: `${s.id.replace(/_/g, " ")}: ${s[shown].removed}/${s[shown].secrets} secrets removed, ${s[shown].changed}% changed` }))));
   $("results").hidden = false;
-  scrollReveal($("pairs").children);
 }).catch(() => {});
 
-// Dither background: fbm waves, an 8x8 Bayer threshold, two-tone palette, waves that bend around a smoothed cursor.
-function dither(cv) {
-  const gl = cv.getContext("webgl", { premultipliedAlpha: true, antialias: false });
-  const fail = () => document.documentElement.classList.add("no-gl");
-  if (!gl) return fail();
-  const compile = (type, src) => {
-    const s = gl.createShader(type);
-    gl.shaderSource(s, src);
-    gl.compileShader(s);
-    return gl.getShaderParameter(s, gl.COMPILE_STATUS) ? s : null;
-  };
-  const vs = compile(gl.VERTEX_SHADER, "attribute vec2 a; void main() { gl_Position = vec4(a, 0.0, 1.0); }");
-  const fs = compile(gl.FRAGMENT_SHADER, `precision highp float;
-uniform vec2 res, mouse; uniform float t;
-float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
-float noise(vec2 p) {
-  vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
-  return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), f.x), mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), f.x), f.y);
-}
-float fbm(vec2 p) { float v = 0.0, a = 0.5; for (int i = 0; i < 5; i++) { v += a * noise(p); p = p * 2.02 + vec2(17.3, 9.1); a *= 0.5; } return v; }
-float bayer(vec2 c) {
-  vec2 q = floor(mod(c, 8.0));
-  float x0 = mod(q.x, 2.0), x1 = mod(floor(q.x / 2.0), 2.0), x2 = floor(q.x / 4.0);
-  float y0 = mod(q.y, 2.0), y1 = mod(floor(q.y / 2.0), 2.0), y2 = floor(q.y / 4.0);
-  return (32.0 * abs(x0 - y0) + 16.0 * y0 + 8.0 * abs(x1 - y1) + 4.0 * y1 + 2.0 * abs(x2 - y2) + y2 + 0.5) / 64.0;
-}
-void main() {
-  vec2 p = (gl_FragCoord.xy - 0.5 * res) / res.y;
-  vec2 m = (mouse - 0.5 * res) / res.y;
-  vec2 away = p - m;
-  float d = length(away);
-  p += away / (d + 0.08) * exp(-d * 5.0) * 0.12;
-  vec2 q = p * 2.2;
-  float w = fbm(q * 0.9 + vec2(t * 0.06, t * 0.03) + fbm(q * 0.6 - t * 0.04) * 1.8);
-  w = smoothstep(0.25, 0.8, w);
-  float lvl = w * (0.5 + 0.5 * gl_FragCoord.y / res.y);
-  float on = step(bayer(gl_FragCoord.xy), lvl * lvl * lvl * 0.5);
-  vec3 col = mix(vec3(0.62, 0.51, 1.0), vec3(0.37, 0.92, 0.83), smoothstep(0.55, 1.0, w));
-  float a = on * 0.2;
-  gl_FragColor = vec4(col * a, a);
-}`);
-  const prog = gl.createProgram();
-  if (!vs || !fs) return fail();
-  gl.attachShader(prog, vs);
-  gl.attachShader(prog, fs);
-  gl.linkProgram(prog);
-  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return fail();
-  gl.useProgram(prog);
-  gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
-  const loc = gl.getAttribLocation(prog, "a");
-  gl.enableVertexAttribArray(loc);
-  gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-  const u = n => gl.getUniformLocation(prog, n);
-  const PIXEL = 4;  // screen pixels per dither pixel
-  let want = [-1e4, -1e4], mouse = [-1e4, -1e4];
-  const size = () => {
-    cv.width = Math.max(2, Math.ceil(innerWidth / PIXEL));
-    cv.height = Math.max(2, Math.ceil(innerHeight / PIXEL));
-    gl.viewport(0, 0, cv.width, cv.height);
-    gl.uniform2f(u("res"), cv.width, cv.height);
-  };
-  addEventListener("resize", size);
-  addEventListener("pointermove", e => { want = [e.clientX / PIXEL, (innerHeight - e.clientY) / PIXEL]; });
-  size();
-  const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const draw = ms => {
-    mouse = mouse[0] < -1e3 ? want : [mouse[0] + (want[0] - mouse[0]) * 0.08, mouse[1] + (want[1] - mouse[1]) * 0.08];
-    gl.uniform1f(u("t"), ms / 1000);
-    gl.uniform2f(u("mouse"), mouse[0], mouse[1]);
-    gl.drawArrays(gl.TRIANGLES, 0, 3);
-    if (!still) requestAnimationFrame(draw);
-  };
-  still ? draw(6000) : requestAnimationFrame(draw);
-}
-dither($("bg"));
-
-scanner($("scanner"));
-decrypt($("headline"));
 $("compare").querySelector("img").addEventListener("error", () => { $("compare").hidden = true; });  // until the sample is recorded
 compare($("compare"));
-const counted = new IntersectionObserver(entries => entries.forEach(e => {
-  if (e.isIntersecting) { countUp(e.target); counted.unobserve(e.target); }
-}));
-document.querySelectorAll(".count").forEach(n => counted.observe(n));
 </script>
 </body>
 </html>
