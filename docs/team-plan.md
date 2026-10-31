@@ -17,14 +17,14 @@ The team plan for Hacktoberfest Hack Day x AI for Vizag (Sunday, Nov 1, 2026, 10
 - Pushed to GitHub with a clean history
 - Deployed on Render and answering, with the access code switched on
 - Report language: English, Telugu or Hindi
-- Three samples recorded (ID card, parcel label, Telugu sign), each checked by reading the cleaned photo: nothing readable
+- All five samples recorded (ID card, parcel label, Telugu sign, number plate, UPI screen) and read back after cleaning. The UPI one leaves the first name visible
 - Telegram bot, written and tested offline
 - The live page, tested by the team: no problems found
 
 ### Blocked
 
 - Gemini 3 Flash is the fast, accurate model. Its free tier gives **20 requests a day per Google project**. The new key has used most of today's. The old key resets around 12:30 PM IST.
-- Two samples are left (number plate, UPI screen), about 8 requests. The five-scene benchmark needs about 20 Gemini requests per run, two runs.
+- The five-scene benchmark needs about 20 Gemini requests per run, two runs, and a day's free quota is 20.
 - Fix: switch on billing for the Google AI Studio project, or record only two samples after the reset.
 
 ### Not tested yet
@@ -51,10 +51,7 @@ Estimates are rough. Swap tasks if someone is faster at something. Yasaswini kee
   - Make 4 or 5 props with made-up values only: an ID-style card, a parcel label, a house name board, a number plate on paper. Photograph them with a phone, with an angle and some glare. Never use a real document or a real number.
   - **Needs:** nothing, start now
   - **Done when:** the photos are in one folder, ready for a live test.
-- [ ] **Record the two missing samples** (30 min)
-  - The ID card, parcel label and Telugu sign are recorded. Record the rest one at a time: `uv run --env-file .env python -m app.samples in_plate`, then `in_upi`. Each uses about 4 Gemini requests. Play each at localhost:8000 and check the cleaned photo shows no readable value (a few extra pixelated blocks are fine). Run `git pull`, then commit `static/samples` and push. Do this before the benchmark starts, because everyone using the key shares Gemini's per-minute limit.
-  - **Needs:** the setup, and Gemini quota (a new day, or billing)
-  - **Done when:** five samples show in “Watch a sample”.
+
 - [ ] **QA pass** (1 h)
   - On a laptop and a phone: click every sample, type in the caption box, upload one scene from `bench/india/images` as a live check, try dark mode and a narrow window. Write each bug as page, steps, screenshot.
   - **Needs:** the samples recorded
