@@ -111,7 +111,19 @@ street address), which is why that row reads 3 of 4. The recorded sample gallery
 
 ### India pack off
 
-_Not run yet: it needs about 20 more Gemini requests. To add, so we can say what the India pack adds._
+Oct 31, 2026, `REGION=global`, `gemini-3-flash-preview`, photos read by `gemma-4-26b-a4b-it`, one run per scene. **Partial: three of
+the five core scenes.** The key's daily quota (20 requests per model) ran out, so the Telugu sign and the control errored and are not
+scored. Raw files are in `bench/india/results/global`.
+
+| Scene | Pack off | Pack on (final-check version) | Changed, pack off |
+|---|---|---|---|
+| ID card | 7 of 7 | 7 of 7 | 7.6% |
+| Courier label | 6 of 7 | 7 of 7 (before the final check) | 16.0% |
+| Number plate | 1 of 1 | 1 of 1 (before the final check) | 2.9% |
+
+With the pack off, 14 of 15 planted secrets were removed, against 15 of 15 on these same three scenes with it on. That is one secret
+on one scene in one run, so it is not evidence that the pack matters. The text check found none of the expected ID types, as expected with
+the pack off. The Telugu sign and the control still need a run once the quota resets.
 
 ### Gemma 4 on the same scenes
 
