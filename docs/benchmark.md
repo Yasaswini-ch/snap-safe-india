@@ -309,4 +309,4 @@ Reproduce with `bench/india/real/run.py`; `bench/india/real/publish.py` puts the
 - Rendered scenes, one run per setting, and a small set, so a gap of one or two secrets can be luck.
 - The verifier is the same kind of model as the attacker unless `--verifier` names another.
 - It scores text only. Faces, landmarks and other non-text clues are attacked but not scored.
-- The benchmark does not test Hindi or Tamil photos, and the attacker samples, so numbers move between runs.
+- Hindi photos were run only in the photograph-like set (a parcel and a UPI shop stand, one run each); Tamil photos have not been tested. The attacker samples, so numbers move between runs.

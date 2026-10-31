@@ -34,7 +34,7 @@ The team plan for Hacktoberfest Hack Day x AI for Vizag (Sunday, Nov 1, 2026, 10
 ### Blocked
 
 - Gemini 3 Flash is the fast, accurate model. Its free tier gives **20 requests a day per Google project**. The new key has used most of today's. The old key resets around 12:30 PM IST.
-- The new key ran out of quota on Oct 31 during the pack-off benchmark, then worked again later the same day and the last two scenes ran. The Hindi and Tamil photos are still not tried.
+- The new key ran out of quota on Oct 31 during the pack-off benchmark, then worked again later the same day and the last two scenes ran. Hindi and Telugu photographs were run afterwards (see `docs/benchmark.md`); Tamil photos are still not tried.
 - Fix: switch on billing for the Google AI Studio project, or record only two samples after the reset.
 
 ### Not tested yet

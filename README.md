@@ -198,8 +198,9 @@ A separate set of seven photograph-like images (a chalkboard menu, a Telugu shop
 Hindi parcel and a Telugu house plate) was also run once (`bench/india/photos`, `--set photos`). The first four hit the free Gemini quota, so their
 re-check did not finish and none is verified. The last three ran to the end: the agent marked the UPI shop and the Hindi parcel safe, and not the Telugu
 house plate (four attacks, home still "specific"). The scorer said every planted secret was removed on those three, but our own look at the edited
-images found Telugu text still readable on the house plate and misplaced edit boxes, so that score is optimistic for Indian scripts. See
-[docs/benchmark.md](docs/benchmark.md).
+images found Telugu text still readable on the house plate and misplaced edit boxes, so that score is optimistic for Indian scripts. Another
+set of three generated photo-style images (a parcel, a payment screen, a number plate; `bench/india/real`) was run by a teammate with Gemma 4
+because the Gemini quota was out: 15 of 15 secrets removed, with a parcel edit much larger than the label. See [docs/benchmark.md](docs/benchmark.md).
 
 The benchmark now counts the API requests it sends (including retries and extra attack rounds), split by model, by role
 (attacker or verifier) and by request type, so a run's quota use is a measured number. The one real run so far (the pack-off Telugu sign and control, with Gemini 3 Flash
@@ -224,8 +225,9 @@ On Oct 31 we ran the made-up ID card (`bench/india/images/id_card.jpg`) through 
 to Telugu and once to Hindi (2 requests, both answered). In both, the summary, all 6 observations and the reasoning came back in
 the chosen script, the clue labels stayed English, and none of the planted values (name, Aadhaar number, PIN code, door number)
 appeared in the text. The Hindi and the Telugu read as fluent and sensible to us, but nobody who reads Telugu or Hindi natively
-has reviewed them, and it is one photo and one run per language, so we claim no more than that. Photos with Hindi or Tamil text
-have not been tried; among non-English photos only the Telugu shop sign was run.
+has reviewed them, and it is one photo and one run per language, so we claim no more than that. Hindi and Telugu photos
+have since been run through the agent (a Hindi parcel, a Hindi UPI shop stand, a Telugu house plate; see part 2), but no Telugu or Hindi
+reader has reviewed the edited images or the reports, and Tamil photos have not been tried.
 
 ## Run it
 
