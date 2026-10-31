@@ -65,4 +65,4 @@ value in them is made up, and two of the five results are from before that check
 - The before and after slider on the home page
 - "The agent at work" with the ID-card sample finished
 - The benchmark section
-- A report in Telugu, and the Telegram chat if the bot runs
+- A report in Telugu, and the Telegram chat (`docs/img/telegram-*`)

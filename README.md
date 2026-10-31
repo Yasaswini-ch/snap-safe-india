@@ -160,7 +160,31 @@ and it replies with the cleaned PNG, what was hidden, what a stranger could lear
 Commands: `/lang en|te|hi` for the report language, `/help`. One photo is checked at a time, others queue, and each chat is
 limited to `BOT_RUNS_PER_HOUR` photos an hour (default 3), because the model's quota is the limit. It is a separate process
 from the web page, so run it on a laptop for the demo. The offline self-check is
-`uv run python -m app.telegram_bot --selftest`. It has not been run against real Telegram yet.
+`uv run python -m app.telegram_bot --selftest`.
+
+### Tested on real Telegram
+
+Oct 31, 2026, one run on a laptop with the bot as a separate process, Gemini 3 Flash, access code on. The photo was the made-up
+ID card from `bench/india/images/id_card.jpg`. The bot answered in about a minute, with a cleaned `safe-copy.png` and this report:
+
+> This photo exposes a complete set of personal identification details, including full name, birth date, exact residential
+> address, and an identification number.
+>
+> What a stranger could learn, before -> after:
+> - Who you are: exact -> nothing
+> - Where you live: exact -> nothing
+> - ID and account numbers: exact -> nothing
+>
+> Hidden: name field on card, address line on card, identification number text, printed postal code
+>
+> My own re-check found nothing specific left. That is my judgment, not a guarantee, so look at the picture before you post it.
+
+![The bot's welcome message](docs/img/telegram-start.png)
+![The photo sent, and the reply](docs/img/telegram-result.png)
+![The cleaned copy the bot sent back](docs/img/telegram-safe-copy.jpg)
+
+The name, date of birth, address, PIN and the long number are unreadable in the copy. The box over the name row is too big: it also
+covers the "Name" label and part of the card heading. That is over-editing, not a leak. One run on one card, so it shows the bot works and not how reliable it is.
 
 ## Deploy on Render
 
