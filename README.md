@@ -1,4 +1,28 @@
-<p align="center"><img src="docs/img/logo.png" alt="Snap Safe India: photo privacy agent, made for India" width="260"></p>
+<p align="center"><img src="docs/img/banner.png" alt="Snap Safe India: photo privacy agent, made for India. A pixel-art harbour with a lighthouse, palms and a fishing boat." width="100%"></p>
+
+<p align="center">
+<a href="https://snap-safe-india.onrender.com"><img src="https://img.shields.io/badge/live%20demo-snap--safe--india.onrender.com-d4483f?style=for-the-badge&logo=render&logoColor=white" alt="live demo: snap-safe-india.onrender.com"></a>
+<a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-0f5e5a?style=for-the-badge" alt="license: MIT"></a>
+<img src="https://img.shields.io/badge/python-3.10%2B-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="python: 3.10+">
+<img src="https://img.shields.io/badge/api-FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="api: FastAPI">
+<img src="https://img.shields.io/badge/demo%20model-Gemini%203%20Flash-4285F4?style=for-the-badge&logo=googlegemini&logoColor=white" alt="demo model: Gemini 3 Flash">
+<img src="https://img.shields.io/badge/open%20model-Gemma%204-0f5e5a?style=for-the-badge&logo=google&logoColor=white" alt="open model: Gemma 4">
+<a href="#telegram-bot"><img src="https://img.shields.io/badge/bot-Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white" alt="bot: Telegram"></a>
+<img src="https://img.shields.io/badge/reports-EN%20%2F%20TE%20%2F%20HI-8a6a52?style=for-the-badge" alt="reports: EN / TE / HI">
+<a href="docs/benchmark.md"><img src="https://img.shields.io/badge/benchmark-47%20of%2048%20secrets%20removed-2f7d4f?style=for-the-badge" alt="benchmark: 47 of 48 secrets removed"></a>
+<img src="https://img.shields.io/badge/hack%20day-Hacktoberfest%20x%20AI%20for%20Vizag%202026-ff9933?style=for-the-badge" alt="hack day: Hacktoberfest x AI for Vizag 2026">
+</p>
+
+<p align="center">
+<a href="https://snap-safe-india.onrender.com"><b>▶ Live demo</b></a> ·
+<a href="#how-it-works"><b>How it works</b></a> ·
+<a href="#evaluation"><b>Evaluation</b></a> ·
+<a href="#run-it"><b>Run it</b></a> ·
+<a href="#telegram-bot"><b>Telegram bot</b></a> ·
+<a href="docs/"><b>Docs</b></a>
+</p>
+
+<p align="center"><sub>Benchmark figures: ten rendered scenes, Gemma 4 with the India pack on, one run (see <a href="docs/benchmark.md">docs/benchmark.md</a>). Not a guarantee.</sub></p>
 
 # Snap Safe India
 
@@ -8,6 +32,8 @@ it, makes them, and checks the result again. It reports what a stranger could le
 the names, addresses or numbers themselves.
 
 Built for **Hacktoberfest Hack Day x AI for Vizag** (Nov 1, 2026).
+
+<p align="center"><img src="docs/img/divider.png" alt="" width="100%"></p>
 
 ## What it adds to the project it grew out of
 
@@ -30,6 +56,8 @@ Built for **Hacktoberfest Hack Day x AI for Vizag** (Nov 1, 2026).
 - **A Telegram bot** that takes a photo and sends back the cleaned copy (see below).
 - **A rendered Indian benchmark** ([bench/india](bench/india), [bench/indiabench.py](bench/indiabench.py)), a new look,
   and a new logo.
+
+<p align="center"><img src="docs/img/divider.png" alt="" width="100%"></p>
 
 ## How it works
 
@@ -97,6 +125,8 @@ flowchart LR
 
 More diagrams (a live check step by step, the exposure graph, region packs, the benchmark and deployment) are in [docs/architecture.md](docs/architecture.md).
 
+<p align="center"><img src="docs/img/divider.png" alt="" width="100%"></p>
+
 ## Which model
 
 | Model | What we saw | Use |
@@ -106,6 +136,8 @@ More diagrams (a live check step by step, the exposure graph, region packs, the 
 | `gemini-3.1-flash-lite`, `gemini-3.5-flash-lite` | Fast (3 to 4 s). As a first attack they return one box around the whole card, so they cannot place edits. As a re-checker, each flagged an unedited PAN card and passed a clean ID card in a one-photo test, but in a full run `gemini-3.1-flash-lite` boxed the whole card in every round, so the agent pixelated nearly the whole photo and still reported "exact". | Not used. |
 
 Gemma 4 on this key is only the 26B model; the 31B model returned a server error every time we tried it.
+
+<p align="center"><img src="docs/img/divider.png" alt="" width="100%"></p>
 
 ## Evaluation
 
@@ -236,6 +268,8 @@ has reviewed them, and it is one photo and one run per language, so we claim no 
 have since been run through the agent (a Hindi parcel, a Hindi UPI shop stand, a Telugu house plate; see part 2), but no Telugu or Hindi
 reader has reviewed the edited images or the reports, and Tamil photos have not been tried.
 
+<p align="center"><img src="docs/img/divider.png" alt="" width="100%"></p>
+
 ## Run it
 
 ```bash
@@ -261,6 +295,8 @@ Re-record samples after changing the agent: `uv run --env-file .env python -m ap
 Each recording remembers which model made it. Run the benchmark with `uv run --env-file .env python -m bench.indiabench`
 (`REGION=global` for the pack-off run), then `python -m bench.india.publish` to fill the page's results section. The benchmark
 prints and saves a count of the requests it sent (`requests-<time>.json` next to the summary), split by model, role and type.
+
+<p align="center"><img src="docs/img/divider.png" alt="" width="100%"></p>
 
 ## Telegram bot
 
@@ -301,6 +337,8 @@ ID card from `bench/india/images/id_card.jpg`. The bot answered in about a minut
 The name, date of birth, address, PIN and the long number are unreadable in the copy. The box over the name row is too big: it also
 covers the "Name" label and part of the card heading. That is over-editing, not a leak. One run on one card, so it shows the bot works and not how reliable it is.
 
+<p align="center"><img src="docs/img/divider.png" alt="" width="100%"></p>
+
 ## Deploy on Render
 
 [render.yaml](render.yaml) describes a free Docker web service with the Gemini settings filled in. Add `OPEN_API_KEY`
@@ -308,6 +346,8 @@ as a secret, and `LIVE_CODE` if you want live runs gated. Without a key the page
 the safe default for a public page. It is deployed at https://snap-safe-india.onrender.com (free plan, so it sleeps and takes about a
 minute to wake), with the access code on. A full live run on the deployed site with the current key has not been checked there; the same
 run passed locally.
+
+<p align="center"><img src="docs/img/divider.png" alt="" width="100%"></p>
 
 ## Privacy and limits
 
@@ -319,6 +359,8 @@ run passed locally.
   show.
 - The attacker is told never to print personal values; that is a prompt rule, not a filter.
 
+<p align="center"><img src="docs/img/divider.png" alt="" width="100%"></p>
+
 ## Docs
 
 - [How it works](docs/how-it-works.md): each step of the agent, the box tightening, and what "verified" means
@@ -329,6 +371,8 @@ run passed locally.
 - [Demo script](docs/demo-script.md) and [write-up text](docs/write-up.md), with the benchmark numbers filled in
 - [Project write-up](docs/writeup.md): the long submission document, in 14 sections
 - [Team plan](docs/team-plan.md): who does what before the event, with the order of work and the risks
+
+<p align="center"><img src="docs/img/divider.png" alt="" width="100%"></p>
 
 ## Layout
 
@@ -342,7 +386,10 @@ run passed locally.
 - `bench/india`, `bench/indiabench.py`: the Indian benchmark (scenes, scorer, results); `bench/requestcount.py` counts its API requests
 - `bench/detectorbench.py`, `bench/india/detector_cases.json`: the offline text-detector benchmark (precision, recall, F1)
 - `tests/`: offline checks for the report language and the request counter
+- `scripts/make_banner.py`: draws the README banner and dividers (`docs/img`)
 - `docs/`: the pages listed above
+
+<p align="center"><img src="docs/img/divider.png" alt="" width="100%"></p>
 
 ## License
 

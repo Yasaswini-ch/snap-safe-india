@@ -20,6 +20,7 @@ The team plan for Hacktoberfest Hack Day x AI for Vizag (Sunday, Nov 1, 2026, 10
 - All six samples recorded (ID card, parcel label, Telugu sign, number plate, UPI screen, plus a tea stall menu as the nothing-to-hide control) and read back after cleaning. The UPI one leaves the first name visible Three photo-style samples (parcel, payment screen, number plate) are recorded with Gemma 4 too.
 - Telegram bot, tested offline and once on real Telegram with the made-up ID card (screenshots in `docs/img`)
 - The live page, tested by the team: no problems found
+- Backend QA: all self-checks and tests pass, and probes of the API's error paths (wrong code, empty and oversize files, bad captions, 25 photos, path traversal) found no bugs. Hindi photographs were run, so the Hindi check is done
 - All ten benchmark scenes run with Gemma 4, pack on and off (47 of 48 against 41 of 48); the other five have no Gemini run yet
 - Telugu and Hindi wording read through, with extra Hindi, Telugu and Tamil "do not report" phrases and tests (a Tamil reader should still check the Tamil)
 - Submission write-up and the README numbers: filled in with what has run so far (only the demo video link and the access code are left blank)
@@ -66,10 +67,6 @@ Estimates are rough. Swap tasks if someone is faster at something. Yasaswini kee
   - On a laptop and a phone: click every sample, type in the caption box, upload one scene from `bench/india/images` as a live check, try dark mode and a narrow window. Write each bug as page, steps, screenshot.
   - **Needs:** the samples recorded
   - **Done when:** the bug list exists: page bugs go to Sriya, backend bugs stay with Likhitha, and fixed bugs are re-checked.
-- [ ] **Fix the backend bugs from QA** (ongoing)
-  - Fix the backend bugs from the QA list and from Sriya's reading, in `app/`. Before every push run `uv run python -m app.meta`, `app.agent`, `app.pipeline` and `app.telegram_bot --selftest`, then `git pull`. Each push redeploys the live site, so push in batches.
-  - **Needs:** the QA bug list
-  - **Done when:** every reported backend bug is fixed or answered.
 
 ### Sriya: Benchmark, page and write-up
 
@@ -77,14 +74,10 @@ Estimates are rough. Swap tasks if someone is faster at something. Yasaswini kee
   - Install Git and uv. Clone `https://github.com/Yasaswini-ch/snap-safe-india.git`, run `uv sync`, copy `.env.example` to `.env` and put the Google key in it. Get the key from Yasaswini in a private message, and never commit `.env`. Then run `uv run python -m app.meta`; it should print `meta ok`.
   - **Needs:** an invite to the GitHub repo, and the key
   - **Done when:** the self-checks pass and `uv run --env-file .env uvicorn app.main:app` opens the page at localhost:8000.
-- [ ] **Try a Hindi and a Tamil photo, and check the Tamil words** (30 min)
-  - The wording review is done. What is left: run the two made-up signs through the page and note what happens. Make them with `bench/india/make_scenes.py` style (a shop name, an owner name, a made-up phone number, in Devanagari and Tamil script), or photograph props. Read the Tamil phrases in `app/meta.py` (`TOLD` and `ADDRESSED`) and fix any that are wrong or unnatural. The page already says the checker is "told to read" them, so say what really happens.
+- [ ] **Try a Tamil photo, and check the Tamil words** (20 min)
+  - Hindi is done. What is left: run one made-up Tamil sign through the page and note what happens, and read the Tamil phrases in `app/meta.py` (`TOLD` and `ADDRESSED`) for wrong or unnatural wording. The page already says the checker is "told to read" Tamil, so say what really happens.
   - **Needs:** the setup, and Gemini quota
-  - **Done when:** both photos have a result noted in `docs/benchmark.md` limits, and the Tamil words are confirmed or corrected.
-- [x] **Finish the pack-off benchmark** (done Oct 31: all five scenes scored; the page results were republished)
-  - Three of the five core scenes are done with the pack off: ID card, courier label and number plate (see `docs/benchmark.md`). Left: the **Telugu sign and the control**. Set `REGION=global` first (PowerShell: `$env:REGION='global'`), then `uv run --env-file .env python -m bench.indiabench --tag global --verifier gemma-4-26b-a4b-it`. Scenes already scored are reused. Then `uv run python -m bench.india.publish`, check the results section at localhost:8000, add the two scenes to the pack-off table in `README.md` and `docs/benchmark.md`, change the pack-off line in `docs/write-up.md` from three scenes to five, run `git pull`, commit and push.
-  - **Needs:** the setup, about 8 Gemini requests, and no other Gemini job running: everyone using the key shares the per-minute limit
-  - **Done when:** the results section shows both columns for all five scenes on the live page.
+  - **Done when:** the Tamil photo has a result noted in `docs/benchmark.md` limits, and the Tamil words are confirmed or corrected.
 - [ ] **Fix the page bugs from QA** (ongoing)
   - The desktop and narrow-window pass is done; what is left is a look on a real phone. Fix what you find in `static/index.html`: wording, layout, anything that looks wrong on a phone. Open the page locally with `uv run --env-file .env uvicorn app.main:app` to check, run `git pull`, then commit and push. Send backend bugs to Likhitha. Page bugs come from your own reading and from the QA list.
   - **Needs:** the setup
