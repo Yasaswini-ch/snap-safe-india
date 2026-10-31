@@ -389,6 +389,13 @@
   .subtabs button[aria-selected="true"] { background: #fff; color: var(--fg); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
   .subpanel:not(.on) { display: none; }
   #results .pairs { margin: 12px 0 20px; }
+  /* Pixel effects: hard stepped shadows that jump on hover, and the mosaic canvas over pictures that are sharpening in */
+  .samples button, .detects li, .pair, .btn, .tabs button { transition: transform .12s steps(2), box-shadow .12s steps(2), border-color .12s; }
+  .samples button:hover, .detects li:hover, .pair:hover { transform: translate(-3px, -3px); box-shadow: 4px 4px 0 #0f2a28; }
+  .btn:hover { transform: translate(-2px, -2px); box-shadow: 3px 3px 0 #0f2a28; }
+  .samples button:active, .detects li:active, .btn:active { transform: none; box-shadow: none; }
+  .samples .thumbs, .pair .imgs { position: relative; }
+  .mosaic { position: absolute; image-rendering: pixelated; pointer-events: none; z-index: 2; }
 </style>
 </head>
 <body>
@@ -750,13 +757,18 @@ function pixelSwap(stageEl, swap) {
 
 // The hero landscape: a Vizag-style harbour (a lighthouse hill, fishing boats, palms and pines, clouds, a low sun) drawn into a
 // small canvas at 4 screen pixels per art pixel, and again when the width changes. Seeded, so it looks the same on every load.
+// It moves a little, at 8 frames a second: clouds drift, the boats bob, ripples shimmer, gulls flap, the lighthouse lamp blinks.
+// With reduced motion, or when the hero is off screen, it stands still.
 function scene(cv) {
   const PX = 4, ctx = cv.getContext("2d");
   const rand = seed => () => (seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296;
-  function paint() {
+  let t0 = performance.now(), visible = true, timer = 0;
+  function paint(now = t0) {
     const W = Math.ceil(cv.clientWidth / PX), H = Math.ceil(cv.clientHeight / PX);
     if (!W || !H) return;
-    cv.width = W; cv.height = H;
+    if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
+    ctx.clearRect(0, 0, W, H);
+    const tick = calm ? 0 : Math.floor((now - t0) / 125);  // one step per frame, 8 a second
     const r = rand(11), px = (x, y, c) => { ctx.fillStyle = c; ctx.fillRect(Math.round(x), Math.round(y), 1, 1); };
     const rect = (x, y, w, h, c) => { ctx.fillStyle = c; ctx.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h)); };
     const disc = (cx, cy, d, c, top) => { for (let j = -d; j <= d; j++) for (let i = -d; i <= d; i++) if (i * i + j * j <= d * d && (!top || cy + j < top)) px(cx + i, cy + j, c); };
@@ -765,37 +777,43 @@ function scene(cv) {
     const sx = Math.round(W * 0.31), sy = Math.round(H * 0.34), sr = Math.max(5, Math.round(H * 0.07));
     for (let j = -sr * 2.6; j <= sr * 2.6; j++) for (let i = -sr * 2.6; i <= sr * 2.6; i++) {
       const d2 = i * i + j * j;
-      if (d2 > sr * sr && d2 <= sr * sr * 6.8 && (i + j) % 2 === 0 && sy + j < land - 4) px(sx + i, sy + j, d2 < sr * sr * 3.4 ? "#e8efd9" : "#d9eadf");
+      if (d2 > sr * sr && d2 <= sr * sr * 6.8 && (i + j + (tick >> 2)) % 2 === 0 && sy + j < land - 4) px(sx + i, sy + j, d2 < sr * sr * 3.4 ? "#e8efd9" : "#d9eadf");
     }
     disc(sx, sy, sr, "#f7f1cf");
-    // clouds: overlapping discs in three tones
-    const cloud = (cx, cy, rad) => {
-      const discs = Array.from({ length: 8 }, (_, i) => [cx + (i - 3.5) * rad * 0.52, cy + (r() - 0.5) * rad * 0.5, rad * (0.55 + r() * 0.45)]);
+    // clouds: overlapping discs in three tones, drifting right and wrapping round
+    const cloud = (cx, cy, rad, speed) => {
+      const span = W + rad * 8, drift = ((cx + tick * speed) % span + span) % span - rad * 4;
+      const discs = Array.from({ length: 8 }, (_, i) => [drift + (i - 3.5) * rad * 0.52, cy + (r() - 0.5) * rad * 0.5, rad * (0.55 + r() * 0.45)]);
       for (const [c, dy] of [["#cfdcd3", 3], ["#e8eddf", 1.5], ["#f7f8ee", 0]]) for (const [x, y, d] of discs) disc(Math.round(x), Math.round(y + dy), Math.round(d), c, land - 8);
     };
-    cloud(W * 0.5, H * 0.3, Math.max(8, H * 0.15)); cloud(W * 0.17, H * 0.42, Math.max(6, H * 0.11)); cloud(W * 0.85, H * 0.34, Math.max(7, H * 0.13));
-    // two gulls
-    for (const [gx, gy] of [[W * 0.9, H * 0.12], [W * 0.07, H * 0.2]]) { for (let i = 0; i < 3; i++) { px(gx - 3 - i, gy - i + 2, "#547570"); px(gx + 3 + i, gy - i + 2, "#547570"); } px(gx, gy + 2, "#547570"); }
+    cloud(W * 0.5, H * 0.3, Math.max(8, H * 0.15), 0.05); cloud(W * 0.17, H * 0.42, Math.max(6, H * 0.11), 0.08); cloud(W * 0.85, H * 0.34, Math.max(7, H * 0.13), 0.06);
+    // two gulls that flap, and glide slowly across
+    [[W * 0.9, H * 0.12, 0], [W * 0.07, H * 0.2, 3]].forEach(([gx, gy, phase]) => {
+      const x = gx + ((tick * 0.04) % 6), up = ((tick + phase) >> 1) % 2 === 0 ? 1 : -1;
+      for (let i = 0; i < 3; i++) { px(x - 3 - i, gy - i * up + 2, "#547570"); px(x + 3 + i, gy - i * up + 2, "#547570"); } px(x, gy + 2, "#547570");
+    });
     // far hill with a lighthouse, then a nearer hill
     const hy = (base, amp, f, ph, x) => base - amp * (0.5 + 0.5 * Math.sin(x * f + ph) * Math.cos(x * f * 0.37 + ph * 2));
     const hill = (base, amp, f, ph, c, edge) => { for (let x = 0; x < W; x++) { const y = hy(base, amp, f, ph, x); rect(x, y, 1, sea - y, c); px(x, y, edge); } };
     hill(land - H * 0.16, H * 0.2, 0.035, 1.3, "#a9cbb9", "#c1ddcd");
     const lx = Math.round(W * 0.62), ly = Math.round(hy(land - H * 0.16, H * 0.2, 0.035, 1.3, lx));
-    rect(lx, ly - 11, 3, 11, "#f4f4ec"); rect(lx, ly - 8, 3, 2, "#cf5b50"); rect(lx, ly - 4, 3, 2, "#cf5b50"); rect(lx - 1, ly - 13, 5, 2, "#47635f"); px(lx + 1, ly - 15, "#f2d36b");
+    rect(lx, ly - 11, 3, 11, "#f4f4ec"); rect(lx, ly - 8, 3, 2, "#cf5b50"); rect(lx, ly - 4, 3, 2, "#cf5b50"); rect(lx - 1, ly - 13, 5, 2, "#47635f");
+    px(lx + 1, ly - 15, (tick >> 3) % 2 === 0 ? "#f2d36b" : "#e8efd9");
     hill(land - H * 0.07, H * 0.12, 0.05, 4.1, "#8bb79f", "#a3cbb4");
-    // sea, ripples, a sun path
+    // sea, ripples that shift every few frames, a sun path
     rect(0, sea, W, H - sea, "#8fbab6");
-    for (let i = 0; i < W * 0.5; i++) rect(r() * W, sea + 2 + r() * (H - sea - 3), 2 + r() * 4, 1, "#b2d3cf");
-    for (let k = 0; k < 6; k++) rect(sx - (6 - k) * 2, sea + 2 + k * 3, (6 - k) * 4 - 2, 1, "#e4efdc");
+    const ripple = rand(5 + (tick >> 2));
+    for (let i = 0; i < W * 0.5; i++) rect(ripple() * W, sea + 2 + ripple() * (H - sea - 3), 2 + ripple() * 4, 1, "#b2d3cf");
+    for (let k = 0; k < 6; k++) rect(sx - (6 - k) * 2 + (((tick >> 2) + k) % 2), sea + 2 + k * 3, (6 - k) * 4 - 2, 1, "#e4efdc");
     rect(0, sea, W, 1, "#6f9d99");
-    // distant boats
-    for (const bx of [W * 0.4, W * 0.7]) { rect(bx - 3, sea + 2, 7, 1, "#b8574e"); rect(bx, sea - 3, 1, 5, "#5b4636"); rect(bx + 1, sea - 3, 2, 3, "#fbfaf2"); }
+    // distant boats, each bobbing on its own beat
+    [W * 0.4, W * 0.7].forEach((bx, n) => { const b = ((tick >> 3) + n) % 2; rect(bx - 3, sea + 2 + b, 7, 1, "#b8574e"); rect(bx, sea - 3 + b, 1, 5, "#5b4636"); rect(bx + 1, sea - 3 + b, 2, 3, "#fbfaf2"); });
     // the main fishing boat, with its reflection
-    const bx = Math.round(W * 0.5), by = sea + Math.round((H - sea) * 0.38);
+    const bx = Math.round(W * 0.5), by = sea + Math.round((H - sea) * 0.38) + ((tick >> 3) % 2);
     rect(bx - 7, by, 15, 3, "#c0554c"); rect(bx - 6, by + 3, 13, 1, "#8f3d37"); rect(bx - 8, by - 1, 2, 1, "#c0554c"); rect(bx + 7, by - 1, 2, 1, "#c0554c");
     rect(bx, by - 11, 1, 11, "#5b4636");
     for (let i = 0; i < 9; i++) rect(bx + 1, by - 10 + i, Math.max(1, 7 - Math.floor(i * 0.8)), 1, "#fbfaf2");
-    for (let k = 0; k < 4; k++) rect(bx - 6 + k, by + 5 + k * 2, 14 - k * 2, 1, k % 2 ? "#6f9d99" : "#7aa8a5");
+    for (let k = 0; k < 4; k++) rect(bx - 6 + k + ((tick >> 2) % 2), by + 5 + k * 2, 14 - k * 2, 1, k % 2 ? "#6f9d99" : "#7aa8a5");
     // land on both sides: soil edge, grass, flowers, stones
     const bank = (x0, x1) => {
       rect(x0, land, x1 - x0, sea - land + 1, "#7fa974"); rect(x0, land, x1 - x0, 2, "#9cc58a"); rect(x0, sea - 2, x1 - x0, 3, "#8c6a5e"); rect(x0, sea, x1 - x0, 1, "#6e514a");
@@ -818,26 +836,62 @@ function scene(cv) {
         if (y % 7 === 2) for (let i = -w; i <= w; i++) px(x + 1 + i, top + y, "#4f7d62");
       }
     };
-    // palms: a ringed leaning trunk, drooping fronds, coconuts
-    const palm = (x, h, lean) => {
+    // palms: a ringed leaning trunk, fronds that sway one pixel, coconuts
+    const palm = (x, h, lean, phase) => {
       let tx = x;
       for (let y = 0; y < h; y++) { tx = x + lean * Math.pow(y / h, 1.6) * h * 0.3; rect(tx, land - y, 2, 1, y % 4 < 2 ? "#8a6a52" : "#725440"); }
-      const ty = land - h, cx = tx + 1;
+      const ty = land - h, cx = tx + 1, sway = ((tick >> 2) + phase) % 2;
       for (let k = 0; k < 7; k++) {
         const a = -Math.PI * (0.05 + k / 6 * 0.9), len = h * 0.42 + (k % 2) * 2;
         for (let t = 0; t <= len; t++) {
-          const fx = cx + Math.cos(a) * t, fy = ty + Math.sin(a) * t * 0.55 + (t * t) / (len * 2.1);
+          const fx = cx + Math.cos(a) * t, fy = ty + Math.sin(a) * t * 0.55 + (t * t) / (len * 2.1) + (t > len * 0.6 ? sway : 0);
           px(fx, fy, k % 2 ? "#4f8a5b" : "#3f7650"); px(fx, fy + 1, "#6aa66d");
         }
       }
       rect(cx - 1, ty + 1, 3, 2, "#6b4a2a");
     };
-    pine(W * 0.05, 54 * unit); pine(W * 0.11, 41 * unit); pine(W * 0.18, 31 * unit); palm(W * 0.27, 46 * unit, 0.8);
-    palm(W * 0.73, 46 * unit, -0.8); pine(W * 0.82, 31 * unit); pine(W * 0.89, 43 * unit); pine(W * 0.95, 56 * unit);
+    pine(W * 0.05, 54 * unit); pine(W * 0.11, 41 * unit); pine(W * 0.18, 31 * unit); palm(W * 0.27, 46 * unit, 0.8, 0);
+    palm(W * 0.73, 46 * unit, -0.8, 1); pine(W * 0.82, 31 * unit); pine(W * 0.89, 43 * unit); pine(W * 0.95, 56 * unit);
   }
+  const loop = now => { timer = 0; if (visible) { paint(now); timer = setTimeout(() => requestAnimationFrame(loop), 120); } };
   paint();
-  let t; addEventListener("resize", () => { clearTimeout(t); t = setTimeout(paint, 150); });
+  if (!calm) {
+    if ("IntersectionObserver" in window) new IntersectionObserver(([e]) => { visible = e.isIntersecting; if (visible && !timer) loop(performance.now()); }).observe(cv);
+    loop(performance.now());
+  }
+  let t; addEventListener("resize", () => { clearTimeout(t); t = setTimeout(() => paint(performance.now()), 150); });
 }
+
+// Mosaic reveal: a picture first appears as a few big blocks that sharpen in steps (6, 12, 24, 48, 96 across) as it scrolls into view.
+const mosaicSeen = "IntersectionObserver" in window ? new IntersectionObserver(entries => entries.forEach(e => {
+  if (!e.isIntersecting) return;
+  mosaicSeen.unobserve(e.target);
+  const img = e.target, go = () => {
+    const w = img.clientWidth, h = img.clientHeight;
+    if (!w || !h) return;
+    const cv = document.createElement("canvas"), ctx = cv.getContext("2d"), tmp = document.createElement("canvas");
+    cv.className = "mosaic"; cv.width = w; cv.height = h; cv.setAttribute("aria-hidden", "true");
+    Object.assign(cv.style, { left: img.offsetLeft + "px", top: img.offsetTop + "px", width: w + "px", height: h + "px" });
+    img.parentElement.append(cv);
+    const frames = [6, 12, 24, 48, 96];
+    const step = i => {
+      if (i === frames.length) return cv.remove();
+      const n = frames[i], nh = Math.max(1, Math.round(n * h / w));
+      tmp.width = n; tmp.height = nh;
+      tmp.getContext("2d").drawImage(img, 0, 0, n, nh);
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(tmp, 0, 0, n, nh, 0, 0, w, h);
+      setTimeout(() => step(i + 1), 110);
+    };
+    step(0);
+  };
+  img.complete ? go() : img.addEventListener("load", go, { once: true });
+}), { threshold: 0.25 }) : null;
+function mosaic(root) {
+  if (calm || !mosaicSeen) return;
+  root.querySelectorAll?.(".samples img, .pair img").forEach(img => { if (!img.dataset.mosaic) { img.dataset.mosaic = "1"; mosaicSeen.observe(img); } });
+}
+new MutationObserver(list => list.forEach(m => m.addedNodes.forEach(n => n.nodeType === 1 && mosaic(n)))).observe(document.body, { childList: true, subtree: true });
 
 // Before/after compare in the hero: sways on its own until someone drags it.
 function compare(box) {
