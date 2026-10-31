@@ -107,8 +107,8 @@ Gemma 4 on this key is only the 26B model; the 31B model returned a server error
 
 ## Benchmark
 
-Ten rendered Indian scenes are defined, and the benchmark runs five core ones by default (`--all` runs all ten): an ID card, a courier label, a number plate, a Telugu sign, and a control with nothing personal. Planted fictional secrets (ID cards, a courier label, a number plate, a UPI screen, a
-Telugu shop sign, a wedding invite, and a control with nothing personal). A secret counts as removed only if it was
+Ten rendered Indian scenes are defined, and the benchmark runs five core ones by default (`--all` runs all ten): an ID card, a courier label, a number plate, a Telugu sign, and a control with nothing personal. The scenes carry planted fictional
+secrets (the other five are a tax card, a house name board, a UPI screen, a college lanyard and a wedding invite). A secret counts as removed only if it was
 readable in the original and is gone from the result. The scenes are drawn, not photographed, and the verifier is the
 same kind of model as the attacker. See [bench/india](bench/india).
 
@@ -127,9 +127,22 @@ rendered scenes, and the two-secret gap comes from a single scene, so it could b
 matters. Scoring now also counts each word of a name on its own. Our latest run is with Gemini 3 Flash and the stricter scoring, India pack on: **19 of 19 planted secrets removed on the five core
 scenes, 8.8% of the photo changed, nothing falsely flagged on the control**. It is one run each, two of the five scenes come from
 before the final literal check was added, and the same scenes had failed before (the ID card at 2 of 7, the Telugu sign at 1 of 4),
-so read it as "the fix works on those", not as proof of reliability. The pack-off comparison has not been run. Details and the
+so read it as "the fix works on those", not as proof of reliability.
+
+The same Gemini 3 Flash setup with the India pack **off** has run on three of the five core scenes (the quota ran out before the
+Telugu sign and the control):
+
+| Scene | Pack off | Pack on |
+|---|---|---|
+| ID card | 7 of 7 | 7 of 7 |
+| Courier label | 6 of 7 | 7 of 7 |
+| Number plate | 1 of 1 | 1 of 1 |
+| Total | 14 of 15 | 15 of 15 |
+
+The gap is one secret on one scene in one run, so it does not show that the pack matters for these scenes. The pack's other job,
+the exact ID-type check, is not scored when it is off. The Telugu sign and the control are still to run. Details and the
 first-run numbers are in [docs/benchmark.md](docs/benchmark.md). Results are in
-`bench/india/results/*-gemma4` and `bench/india/results/in`, and in `global` once the pack-off run is done.
+`bench/india/results/*-gemma4`, `bench/india/results/in` and `bench/india/results/global`.
 
 ## Run it
 
@@ -206,10 +219,10 @@ the safe default for a public page. This has not been test-deployed yet.
 
 - [How it works](docs/how-it-works.md): each step of the agent, the box tightening, and what "verified" means
 - [Models, quotas and what we tried](docs/models.md): measurements, free-tier limits, and what did not work
-- [The Indian benchmark](docs/benchmark.md): method, commands and results (some tables are waiting for runs)
+- [The Indian benchmark](docs/benchmark.md): method, commands and results (the pack-off run covers three of five scenes so far)
 - [Deploy and configure](docs/deploy.md): Render steps, every setting, and the Telegram bot
 - [Adding a country](docs/adding-a-country.md): a region pack is one file
-- [Demo script](docs/demo-script.md) and [write-up text](docs/write-up.md), with placeholders for the results
+- [Demo script](docs/demo-script.md) and [write-up text](docs/write-up.md), with the benchmark numbers filled in
 - [Team plan](docs/team-plan.md): who does what before the event, with the order of work and the risks
 
 ## Layout

@@ -21,6 +21,8 @@ The team plan for Hacktoberfest Hack Day x AI for Vizag (Sunday, Nov 1, 2026, 10
 - Telegram bot, tested offline and once on real Telegram with the made-up ID card (screenshots in `docs/img`)
 - The live page, tested by the team: no problems found
 - Telugu and Hindi wording read through, with extra Hindi, Telugu and Tamil "do not report" phrases and tests (a Tamil reader should still check the Tamil)
+- Submission write-up and the README numbers: filled in with what has run so far (only the demo video link and the access code are left blank)
+- Page check on desktop and at phone width: no overflow or layout bugs; one wording fix in the results section
 - Pack-off benchmark: ID card, courier label and number plate run (14 of 15 secrets removed with the pack off; see `docs/benchmark.md`)
 - A live upload through the agent with the new key (run locally): ID card, safe, nothing left readable
 
@@ -74,23 +76,15 @@ Estimates are rough. Swap tasks if someone is faster at something. Yasaswini kee
   - **Needs:** the setup, and Gemini quota
   - **Done when:** both photos have a result noted in `docs/benchmark.md` limits, and the Tamil words are confirmed or corrected.
 - [ ] **Finish the pack-off benchmark** (20 min, mostly waiting)
-  - Three of the five core scenes are done with the pack off: ID card, courier label and number plate (see `docs/benchmark.md`). Left: the **Telugu sign and the control**. Set `REGION=global` first (PowerShell: `$env:REGION='global'`), then `uv run --env-file .env python -m bench.indiabench --tag global --verifier gemma-4-26b-a4b-it`. Scenes already scored are reused. Then `uv run python -m bench.india.publish`, check the results section at localhost:8000, run `git pull`, commit and push.
+  - Three of the five core scenes are done with the pack off: ID card, courier label and number plate (see `docs/benchmark.md`). Left: the **Telugu sign and the control**. Set `REGION=global` first (PowerShell: `$env:REGION='global'`), then `uv run --env-file .env python -m bench.indiabench --tag global --verifier gemma-4-26b-a4b-it`. Scenes already scored are reused. Then `uv run python -m bench.india.publish`, check the results section at localhost:8000, add the two scenes to the pack-off table in `README.md` and `docs/benchmark.md`, change the pack-off line in `docs/write-up.md` from three scenes to five, run `git pull`, commit and push.
   - **Needs:** the setup, about 8 Gemini requests, and no other Gemini job running: everyone using the key shares the per-minute limit
   - **Done when:** the results section shows both columns for all five scenes on the live page.
 - [ ] **Run the other five benchmark scenes (optional)** (1 h, mostly waiting)
   - The rest of the ten: add `--all` to the same commands. Scenes already scored are reused, so only the other five run, and the summary files then cover all ten. The page keeps showing the five core scenes, so this adds depth for the README and the write-up without changing the page.
   - **Needs:** the first benchmark done, and quota or billing
   - **Done when:** both summary files list ten scenes.
-- [ ] **Submission write-up (draft ready)** (1.5 h)
-  - Title, short description, the problem, what it does, tools used (Gemini 3 Flash, Gemma 4, FastAPI, OpenCV), what we built (India detection, checksum, region packs, benchmark, page) and what it grew out of (before-you-post, MIT). State the limits: the "Verified" tag is the agent's own judgment. A draft is in [write-up.md](write-up.md); edit it and fill in the numbers.
-  - **Needs:** benchmark numbers, for the results line
-  - **Done when:** text is ready to paste into the event form, with screenshots chosen.
-- [ ] **Add the pack-off numbers to the README** (15 min)
-  - The pack-on numbers are already in the README and `docs/benchmark.md`. When the pack-off run finishes, add its table next to them and fill the placeholder in `docs/write-up.md`. Say plainly where a number comes from one run or a small set.
-  - **Needs:** the pack-off benchmark finished by Sriya
-  - **Done when:** the README matches the summary files.
 - [ ] **Fix the page bugs from QA** (ongoing)
-  - Fix what you find in `static/index.html`: wording, layout, anything that looks wrong on a phone. Open the page locally with `uv run --env-file .env uvicorn app.main:app` to check, run `git pull`, then commit and push. Send backend bugs to Likhitha. Page bugs come from your own reading and from the QA list.
+  - The desktop and narrow-window pass is done; what is left is a look on a real phone. Fix what you find in `static/index.html`: wording, layout, anything that looks wrong on a phone. Open the page locally with `uv run --env-file .env uvicorn app.main:app` to check, run `git pull`, then commit and push. Send backend bugs to Likhitha. Page bugs come from your own reading and from the QA list.
   - **Needs:** the setup
   - **Done when:** every page bug you found is fixed.
 - [ ] **Demo script and recording (optional)** (2 h)
