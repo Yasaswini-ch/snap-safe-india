@@ -23,6 +23,15 @@ services:
         value: "4"
       # Live runs are open to everyone, so these two limits are what protect the keys. Free-tier Gemini 3 Flash allows 20 requests a day per
       # key, about two checks a key: set RUNS_PER_DAY to about twice the number of keys, or raise both after enabling billing.
+      # Optional WhatsApp bot (docs/whatsapp.md): set all four as secrets to switch it on; until then /whatsapp/webhook answers 404.
+      - key: WHATSAPP_TOKEN
+        sync: false
+      - key: WHATSAPP_PHONE_ID
+        sync: false
+      - key: WHATSAPP_VERIFY_TOKEN
+        sync: false
+      - key: WHATSAPP_APP_SECRET
+        sync: false
       - key: RUNS_PER_HOUR
         value: "2"
       - key: RUNS_PER_DAY

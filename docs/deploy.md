@@ -41,6 +41,7 @@ Environment tab; Render redeploys.
 | `REGION` | Country packs to load: `in`, `us`, comma separated, or `global` for none | `in` |
 | `BOX_SNAP`, `BOX_FOCUS` | Box tightening, see [how-it-works.md](how-it-works.md) | on, `object` |
 | `TELEGRAM_BOT_TOKEN`, `BOT_RUNS_PER_HOUR` | For the Telegram bot | none, 3 |
+| `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_ID`, `WHATSAPP_VERIFY_TOKEN`, `WHATSAPP_APP_SECRET` | For the WhatsApp bot, which runs inside the web app. See [whatsapp.md](whatsapp.md) | none (the routes answer 404) |
 
 ## Quotas
 

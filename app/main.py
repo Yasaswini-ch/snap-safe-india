@@ -13,7 +13,7 @@ from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.concurrency import run_in_threadpool
 
-from . import agent, meta, pipeline, samples
+from . import agent, meta, pipeline, samples, whatsapp
 
 MAX_BYTES = 20 * 1024 * 1024
 MAX_SIDE = 2048  # bounds time, cost and the size of the streamed result for a public demo
@@ -34,6 +34,7 @@ LIVE_CODE = os.environ.get("LIVE_CODE") or None
 log = logging.getLogger("uvicorn.error")
 
 app = FastAPI(title="Before You Post")
+app.include_router(whatsapp.router)  # answers 404 until the WhatsApp settings are present
 
 _runs: dict[str, list[float]] = {}
 _today: list[float] = []
