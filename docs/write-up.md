@@ -32,19 +32,20 @@ the MIT-licensed project before-you-post by WhorideChicken, which we adapted and
 
 ## Tools used
 
-- Gemma 4 (`gemma-4-26b-a4b-it`, open weights) through the Gemini API: the default model that finds the clues in a photo and reads its text
-- Gemini 3 Flash, an optional and more precise mode (closed)
+- Gemini 3 Flash (closed) through the Gemini API as the main model that finds the clues in a photo
+- Gemma 4 (`gemma-4-26b-a4b-it`, open weights) through the same API: the automatic fallback when Gemini's quota is used up, and the model behind the full ten-scene benchmark
 - Python, FastAPI, OpenCV, Pillow and NumPy for the agent and the edits
 - Telegram Bot API, Render, GitHub
 
 ## Prize tracks
 
-**Best Use of Gemma 4.** Gemma 4 does the seeing in the live app: it reads each photo (text and image together) and the report in English, Telugu or Hindi, through the
-Gemini API. We ran all ten benchmark scenes on it, with the India pack on and off, and recorded most of the sample gallery with it.
+**Best Use of Gemma 4.** Gemma 4 is our open-weight model: it ran all ten benchmark scenes with the India pack on and off, 15 of our 20 recorded samples, and it takes over automatically in the live
+app when Gemini 3 Flash's quota is used up (the page says when it did). It reads each photo, text and image together, and writes the report in English, Telugu or Hindi. Honest limit: the main model
+is Gemini 3 Flash, so on a day with quota most live runs use Gemini; Gemma is the fallback, not the default.
 
 **Best Open-Source AI Project.** The repository is an open-source (MIT) harness around an open-weight model: it plans, edits, re-attacks and verifies, with region packs,
 a pool of API keys, a benchmark and three front ends. Any OpenAI-compatible model plugs in, and there is an agent skill file for other AI agents.
-Honest limit: we have not run a model on local hardware, and Gemini 3 Flash, which is closed, is an optional mode.
+Honest limit: we have not run a model on local hardware, and the main model, Gemini 3 Flash, is closed.
 
 ## Results
 

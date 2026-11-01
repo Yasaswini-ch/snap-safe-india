@@ -6,6 +6,7 @@ import base64
 import hashlib
 import io
 import json
+import logging
 import os
 import re
 import threading
@@ -18,6 +19,8 @@ import numpy as np
 from PIL import Image
 
 from . import regions
+
+log = logging.getLogger("meta")
 
 API_KEY = os.environ.get("MODEL_API_KEY")
 BASE_URL = os.environ.get("MODEL_API_BASE", "https://api.meta.ai/v1")
@@ -49,6 +52,11 @@ RECHECK_MODEL = os.environ.get("OPEN_RECHECK_MODEL", "")
 RECHECK_RPM = float(os.environ.get("OPEN_RECHECK_RPM", str(OPEN_RPM)))
 _next_call, _call_lock = {}, threading.Lock()
 OPEN_HOST = os.environ.get("OPEN_HOST", "Baseten")
+# A second model that takes over a call when the main model's quota is used up on every key (the free Gemini tier gives 20 requests a
+# day per key). It has its own quota, and the page says when it was used: see USAGE and the "models" field of the final event.
+FALLBACK_MODEL = os.environ.get("OPEN_FALLBACK_MODEL", "")
+FALLBACK_LABEL = os.environ.get("OPEN_FALLBACK_LABEL") or ("Gemma 4" if "gemma" in FALLBACK_MODEL.lower() else FALLBACK_MODEL)
+USAGE: dict[str, int] = {}  # calls answered so far, by model label
 # Private mode's outlines: SAM 3 open weights on our own Modal GPU (app/sam3_modal.py). Without it, the box is the mask.
 SAM3_URL = os.environ.get("SAM3_URL")
 SAM3_KEY = os.environ.get("SAM3_KEY", "")
@@ -80,6 +88,12 @@ class KeyPool:
         self.dry: dict[tuple[int, str], float] = {}  # (key, model) -> when it may be tried again
         self.start, self.lock = 0, threading.Lock()
         self.chat = self.completions = self
+
+    def resting(self, model: str) -> bool:
+        """True when every key is resting for this model after a 429, so the next call would only be refused again."""
+        now = time.monotonic()
+        with self.lock:
+            return all(self.dry.get((k, model), 0.0) > now for k in range(len(self.clients)))
 
     def create(self, **kw):
         model, n, last = kw.get("model", ""), len(self.clients), None
@@ -414,7 +428,32 @@ def _throttle(model: str) -> None:
         time.sleep(wait)
 
 
+def label_for(model: str) -> str:
+    return OPEN_LABEL if model == OPEN_MODEL else FALLBACK_LABEL if model == FALLBACK_MODEL else model
+
+
 def _ask(messages: list, schema: dict, name: str, private: bool, effort: str = ATTACK_EFFORT, model: str = "") -> dict:
+    """One structured answer from the main model, or from OPEN_FALLBACK_MODEL when the main model's quota is used up on every
+    key (a 429 after the key pool has tried them all). The answer is counted in USAGE under the model that gave it."""
+    use = model or OPEN_MODEL
+    if private and FALLBACK_MODEL and use != FALLBACK_MODEL:
+        if open_client.resting(use):
+            use = FALLBACK_MODEL
+        else:
+            try:
+                out = _ask_one(messages, schema, name, private, effort, use)
+                USAGE[label_for(use)] = USAGE.get(label_for(use), 0) + 1
+                return out
+            except RateLimitError:
+                log.warning("%s is out of quota on every key: %s takes over", use, FALLBACK_MODEL)
+                use = FALLBACK_MODEL
+    out = _ask_one(messages, schema, name, private, effort, use)
+    if private:
+        USAGE[label_for(use)] = USAGE.get(label_for(use), 0) + 1
+    return out
+
+
+def _ask_one(messages: list, schema: dict, name: str, private: bool, effort: str = ATTACK_EFFORT, model: str = "") -> dict:
     """One structured answer. Muse Spark returns it through strict JSON schema; Baseten serves Muse Spark Open
     without JSON mode, so there it comes back as a forced call to a tool whose parameters are the same schema."""
     use = model or OPEN_MODEL

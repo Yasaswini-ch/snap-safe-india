@@ -1246,6 +1246,12 @@ async function handle(e) {
          : e.safe && !e.hidden.length ? "Done. Nothing specific about you is visible in this photo, so nothing was edited. GPS and other file metadata are removed from the copy."
          : e.safe ? "Done. Nothing specific about you is visible any more. GPS and other file metadata are removed too."
          : `Done, but some exposure remains ("${LEVEL[worst]}"). Open the agent trace for details.`, !e.safe);
+    // When the main model's quota ran out mid-run, say which model answered what
+    const used = Object.entries(e.models || {});
+    if (used.length > 1) {
+      const total = used.reduce((sum, [, n]) => sum + n, 0), other = used.filter(([name]) => name !== openModel);
+      $("status").append(" ", el("span", { className: "muted", textContent: `${other.map(([name, n]) => `${name} answered ${n}`).join(", ")} of ${total} model calls, because ${openModel}'s quota ran out.` }));
+    }
   } else if (e.type === "error") {
     clearInterval(timer);
     scanning(false);

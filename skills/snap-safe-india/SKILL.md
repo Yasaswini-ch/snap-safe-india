@@ -5,7 +5,7 @@ description: Check a photo for what a stranger could learn about the person who 
 
 # Snap Safe India
 
-An open-source privacy harness for photos, built around an open-weight vision model (Gemma 4 by default). The model finds the
+An open-source privacy harness for photos, built around a vision model: Gemini 3 Flash, with the open-weight Gemma 4 as an automatic fallback. The model finds the
 clues; the harness plans the fewest edits that hide them, edits only inside those boxes, attacks the result again, and says
 honestly whether anything specific is left. Code and docs: https://github.com/Yasaswini-ch/snap-safe-india (MIT).
 
@@ -20,7 +20,7 @@ guarantee: "Verified" is the agent's own re-check.
 
 ## Rules for the agent calling it
 
-1. **Ask before sending a photo.** In a live run the photo goes to the model's host (Google's Gemini API by default). Tell the user, and
+1. **Ask before sending a photo.** In a live run the photo goes to the model's host (Google's Gemini API). Tell the user, and
    prefer made-up or already-public photos for tests.
 2. **Never repeat the values it hides.** The report names categories and how precisely something is exposed, not the names, numbers or
    addresses. Do not read them out of the original photo and put them in your reply either.

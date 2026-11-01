@@ -216,6 +216,7 @@ def run(imgs: list[np.ndarray], attack=meta.attack, target: int = TARGET, privat
     rewrite(caption, details) removes details from one (meta.rewrite_caption), and every re-attack sees the result.
     style: "clean" for the clean fill where it fits (see apply_edits); empty means EDIT_STYLE, "pixelate" unless set."""
     current, before, failed, doubt, retried = list(imgs), None, False, False, False
+    usage0 = dict(meta.USAGE)  # which model answered how many calls during this run, for the final event
     hidden = []  # what was edited out, one entry per object across rounds, so the owner can choose to keep one
     captions = [caption] if isinstance(caption, str) else list(caption)
     captions += [""] * (len(imgs) - len(captions))
@@ -355,6 +356,7 @@ def run(imgs: list[np.ndarray], attack=meta.attack, target: int = TARGET, privat
     yield {"type": "done", "before": before, "after": exposure, "residual": len(stuck), "unverified": failed,
            "doubt": doubt, "leftover": leftover, "safe": not failed and not doubt and not ids and not stuck and not leftover,
            "hidden": [{**h, "mask": _alpha_png(h["mask"])} for h in hidden], "captions": captions,
+           "models": {m: n - usage0.get(m, 0) for m, n in meta.USAGE.items() if n - usage0.get(m, 0)},
            "images": [base64.b64encode(pipeline.encode_png(img)).decode() for img in current]}
 
 

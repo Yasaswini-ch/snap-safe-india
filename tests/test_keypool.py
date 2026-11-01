@@ -4,6 +4,7 @@ The model API is a stand-in HTTP transport, so no key, no network and no quota a
 Run: uv run python -m tests.test_keypool
 """
 import importlib
+import json
 
 import openai
 
@@ -88,6 +89,73 @@ def test_cooldown_reads_the_providers_delay():
 def test_one_key_still_works():
     p, calls = pool({"only": 200})
     assert ask(p).choices[0].message.content == "ok" and calls["only"] == 1
+
+
+def fallback_pool(primary_status: int):
+    """A KeyPool whose primary model answers `primary_status` and whose fallback ("gemma-test") always answers a JSON object."""
+    calls = {"primary": 0, "fallback": 0}
+    probe = openai.OpenAI(api_key="x")
+    http = next(c for c in type(probe._client).__mro__ if not c.__module__.startswith("openai"))
+    base = importlib.import_module(http.__module__.split(".")[0])
+
+    def handler(req):
+        model = json.loads(req.content)["model"]
+        if model == "gemma-test":
+            calls["fallback"] += 1
+            return base.Response(200, json={**OK, "choices": [{"index": 0, "finish_reason": "stop", "message": {"role": "assistant", "content": '{"a": 1}'}}]})
+        calls["primary"] += 1
+        if primary_status == 429:
+            return base.Response(429, json=QUOTA)
+        call = {"id": "c", "type": "function", "function": {"name": "x", "arguments": '{"a": 2}'}}
+        return base.Response(200, json={**OK, "choices": [{"index": 0, "finish_reason": "tool_calls", "message": {"role": "assistant", "content": None, "tool_calls": [call]}}]})
+
+    client = openai.OpenAI(api_key="k", base_url="http://mock.invalid/v1", max_retries=0,
+                           http_client=openai.DefaultHttpxClient(transport=base.MockTransport(handler)))
+    return meta.KeyPool(["k"], lambda key: client), calls
+
+
+MESSAGES = [{"role": "user", "content": [{"type": "text", "text": "hi"}]}]
+
+
+def with_models(fn):
+    saved = (meta.open_client, meta.OPEN_MODEL, meta.OPEN_LABEL, meta.FALLBACK_MODEL, meta.FALLBACK_LABEL, dict(meta.USAGE))
+    meta.OPEN_MODEL, meta.OPEN_LABEL, meta.FALLBACK_MODEL, meta.FALLBACK_LABEL = "gemini-test", "Gemini Test", "gemma-test", "Gemma Test"
+    meta.USAGE.clear()
+    try:
+        fn()
+    finally:
+        meta.open_client, meta.OPEN_MODEL, meta.OPEN_LABEL, meta.FALLBACK_MODEL, meta.FALLBACK_LABEL = saved[:5]
+        meta.USAGE.clear(); meta.USAGE.update(saved[5])
+
+
+def test_the_main_model_answers_while_it_has_quota():
+    def run():
+        meta.open_client, calls = fallback_pool(200)
+        assert meta._ask(MESSAGES, {}, "x", True) == {"a": 2}
+        assert calls == {"primary": 1, "fallback": 0} and meta.USAGE == {"Gemini Test": 1}
+    with_models(run)
+
+
+def test_the_fallback_takes_over_when_every_key_is_out_of_quota():
+    def run():
+        meta.open_client, calls = fallback_pool(429)
+        assert meta._ask(MESSAGES, {}, "x", True) == {"a": 1}
+        assert calls == {"primary": 1, "fallback": 1} and meta.USAGE == {"Gemma Test": 1}
+        assert meta._ask(MESSAGES, {}, "x", True) == {"a": 1}  # the main model now rests: it is not asked again
+        assert calls == {"primary": 1, "fallback": 2} and meta.USAGE == {"Gemma Test": 2}
+    with_models(run)
+
+
+def test_without_a_fallback_the_quota_error_surfaces():
+    def run():
+        meta.open_client, _ = fallback_pool(429)
+        meta.FALLBACK_MODEL = ""
+        try:
+            meta._ask(MESSAGES, {}, "x", True)
+            raise AssertionError("should have raised")
+        except openai.RateLimitError:
+            pass
+    with_models(run)
 
 
 if __name__ == "__main__":

@@ -100,7 +100,8 @@ def ndjson(lines) -> StreamingResponse:
 @app.get("/api/status")
 def status():
     return {"live": LIVE, "standard": STANDARD, "private": PRIVATE, "mock": meta.client is None, "code": LIVE_CODE is not None,
-            "model": meta.OPEN_LABEL, "host": meta.OPEN_HOST}
+            "model": meta.OPEN_LABEL, "host": meta.OPEN_HOST,
+            "fallback": meta.FALLBACK_LABEL if meta.FALLBACK_MODEL else ""}
 
 
 @app.post("/api/run")

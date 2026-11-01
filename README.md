@@ -5,8 +5,8 @@
 <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-0f5e5a?style=for-the-badge" alt="license: MIT"></a>
 <img src="https://img.shields.io/badge/python-3.10%2B-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="python: 3.10+">
 <img src="https://img.shields.io/badge/api-FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="api: FastAPI">
-<img src="https://img.shields.io/badge/default%20model-Gemma%204%20(open%20weights)-0f5e5a?style=for-the-badge&logo=google&logoColor=white" alt="default model: Gemma 4, open weights">
-<img src="https://img.shields.io/badge/optional-Gemini%203%20Flash-4285F4?style=for-the-badge&logo=googlegemini&logoColor=white" alt="optional: Gemini 3 Flash">
+<img src="https://img.shields.io/badge/main%20model-Gemini%203%20Flash-4285F4?style=for-the-badge&logo=googlegemini&logoColor=white" alt="main model: Gemini 3 Flash">
+<img src="https://img.shields.io/badge/fallback-Gemma%204%20(open%20weights)-0f5e5a?style=for-the-badge&logo=google&logoColor=white" alt="fallback: Gemma 4, open weights">
 <a href="#telegram-bot"><img src="https://img.shields.io/badge/bot-Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white" alt="bot: Telegram"></a>
 <img src="https://img.shields.io/badge/reports-EN%20%2F%20TE%20%2F%20HI-8a6a52?style=for-the-badge" alt="reports: EN / TE / HI">
 <a href="docs/benchmark.md"><img src="https://img.shields.io/badge/benchmark-47%20of%2048%20secrets%20removed-2f7d4f?style=for-the-badge" alt="benchmark: 47 of 48 secrets removed"></a>
@@ -138,9 +138,10 @@ Snap Safe India is a small open-source **harness** around a vision model. The mo
 | Writes the report in the chosen language | Attacks the edited photo again, then reads it literally one last time, and gives an honest verdict |
 | | India detection by checksum and pattern (Aadhaar with Verhoeff, PAN, GSTIN, plates, UPI, PIN), region packs, request pacing, a pool of API keys, a benchmark, and the web, Telegram and WhatsApp front ends |
 
-**The default model is Gemma 4** (`gemma-4-26b-a4b-it`, open weights), reached through the Gemini API. Any OpenAI-compatible model with image
-input works through `OPEN_API_BASE` and `OPEN_MODEL`; Gemma 4 and Gemini 3 Flash are the only two we have tested, and the Gemini
-one is closed. **Not tried:** running Gemma on your own machine (for example with Ollama or vLLM). The settings allow it, and it would keep
+**The main model is Gemini 3 Flash, which is closed, and Gemma 4** (`gemma-4-26b-a4b-it`, open weights, through the same API) **is the
+fallback**: when Gemini's quota is used up on every key, Gemma answers the call and the page says how many calls it took. Gemma 4 also
+ran the whole ten-scene benchmark and 15 of the 20 recorded samples. Any OpenAI-compatible model with image input works through
+`OPEN_API_BASE` and `OPEN_MODEL`; Gemma 4 and Gemini 3 Flash are the only two we have tested. **Not tried:** running Gemma on your own machine (for example with Ollama or vLLM). The settings allow it, and it would keep
 the photo off any outside server, but we have not run it.
 
 To build on it: add a country as a region pack ([docs/adding-a-country.md](docs/adding-a-country.md)), let another AI agent call it
@@ -152,8 +153,8 @@ through the skill file ([skills/snap-safe-india/SKILL.md](skills/snap-safe-india
 
 | Model | What we saw | Use |
 |---|---|---|
-| `gemini-3-flash-preview` | On the ID-card scene it hid every value in 53 s, and the transcription of the result read only the field labels. The boxes sit on the text. One photo, one run. | Optional, more precise mode. Free tier: **20 requests a day**, 5 a minute, so it needs billing for live use. |
-| `gemma-4-26b-a4b-it` | In the ten-scene run (current code, one run each) it removed 47 of 48 planted secrets with the India pack on and 41 of 48 with it off, at about 200 s a scene, and 23 of 83 requests in that run got an HTTP 500 from the server and were repeated. Its quota stayed free when Gemini 3 Flash's ran out. In an earlier run it took 50 to 90 s per attack and placed boxes in the wrong places. In a recorded run "Teja Kondapalli" and the end of "Gandhi Nagar" stayed readable, and a live wedding-invite run left the RSVP phone number visible after two rounds. | **Default model for the live site.** Open weights, and a free quota large enough for a demo. |
+| `gemini-3-flash-preview` | On the ID-card scene it hid every value in 53 s, and the transcription of the result read only the field labels. The boxes sit on the text. One photo, one run. | Main model. Free tier: **20 requests a day** per key, 5 a minute, so it needs billing or several keys for live use. |
+| `gemma-4-26b-a4b-it` | In the ten-scene run (current code, one run each) it removed 47 of 48 planted secrets with the India pack on and 41 of 48 with it off, at about 200 s a scene, and 23 of 83 requests in that run got an HTTP 500 from the server and were repeated. Its quota stayed free when Gemini 3 Flash's ran out. In an earlier run it took 50 to 90 s per attack and placed boxes in the wrong places. In a recorded run "Teja Kondapalli" and the end of "Gandhi Nagar" stayed readable, and a live wedding-invite run left the RSVP phone number visible after two rounds. | **Automatic fallback** when Gemini's quota is used up, and the open-weight option. The page says when it answered. |
 | `gemini-3.1-flash-lite`, `gemini-3.5-flash-lite` | Fast (3 to 4 s). As a first attack they return one box around the whole card, so they cannot place edits. As a re-checker, each flagged an unedited PAN card and passed a clean ID card in a one-photo test, but in a full run `gemini-3.1-flash-lite` boxed the whole card in every round, so the agent pixelated nearly the whole photo and still reported "exact". | Not used. |
 
 Gemma 4 on this key is only the 26B model; the 31B model returned a server error every time we tried it.
