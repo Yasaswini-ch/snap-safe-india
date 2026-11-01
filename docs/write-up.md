@@ -32,10 +32,19 @@ the MIT-licensed project before-you-post by WhorideChicken, which we adapted and
 
 ## Tools used
 
-- Gemini 3 Flash through Google AI Studio, to find the clues in a photo
-- Gemma 4 (open weights), as a free option
+- Gemma 4 (`gemma-4-26b-a4b-it`, open weights) through the Gemini API: the default model that finds the clues in a photo and reads its text
+- Gemini 3 Flash, an optional and more precise mode (closed)
 - Python, FastAPI, OpenCV, Pillow and NumPy for the agent and the edits
 - Telegram Bot API, Render, GitHub
+
+## Prize tracks
+
+**Best Use of Gemma 4.** Gemma 4 does the seeing in the live app: it reads each photo (text and image together) and the report in English, Telugu or Hindi, through the
+Gemini API. We ran all ten benchmark scenes on it, with the India pack on and off, and recorded most of the sample gallery with it.
+
+**Best Open-Source AI Project.** The repository is an open-source (MIT) harness around an open-weight model: it plans, edits, re-attacks and verifies, with region packs,
+a pool of API keys, a benchmark and three front ends. Any OpenAI-compatible model plugs in, and there is an agent skill file for other AI agents.
+Honest limit: we have not run a model on local hardware, and Gemini 3 Flash, which is closed, is an optional mode.
 
 ## Results
 
@@ -44,7 +53,7 @@ secrets, changed 8.8% of each photo on average, and left the control photo untou
 only 11 of 19 and left a PIN code readable while the agent called the photo safe; we added a final literal check, and the two scenes that
 had failed passed on rerun. With the India pack switched off, the same agent removed 18 of 19 secrets on the five scenes, against 19 of 19 with it on;
 that is one secret in one run, so it is not proof the pack matters. The scenes are rendered, not photographed, every
-value in them is made up, and two of the five results are from before that check was added. See [benchmark.md](benchmark.md).
+value in them is made up, and two of the five results are from before that check was added. On all ten scenes with Gemma 4 (current code, one run each), the agent removed 47 of 48 secrets with the India pack on and 41 of 48 with it off; Gemma was slower (about 200 s a scene) and its boxes less exact. See [benchmark.md](benchmark.md).
 
 ## Limits
 

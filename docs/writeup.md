@@ -98,7 +98,7 @@ are in [architecture.md](architecture.md) and the steps are described in [how-it
 ## 8. Technology Stack
 
 Python 3.11, FastAPI and Uvicorn, OpenCV, Pillow and NumPy for the image work, the OpenAI Python SDK talking to Google's Gemini
-API (Gemini 3 Flash as the demo model, Gemma 4 open weights as a free fallback), a single-file HTML, CSS and JavaScript page,
+API (Gemma 4 open weights as the default model, Gemini 3 Flash as an optional, more precise mode), a single-file HTML, CSS and JavaScript page,
 the Telegram Bot API, Docker on Render, and `uv` for dependencies. The attack, plan, edit and re-attack loop and the image
 pipeline come from the MIT-licensed project *before-you-post* by WhorideChicken, which we adapted and rebuilt for India.
 

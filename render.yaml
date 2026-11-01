@@ -13,16 +13,18 @@ services:
         sync: false
       - key: OPEN_API_BASE
         value: https://generativelanguage.googleapis.com/v1beta/openai/
+      # Gemma 4 (open weights) through the Gemini API is the default: its free quota is far larger than Gemini 3 Flash's. For the more precise
+      # (and tighter-quota) Gemini 3 Flash, set OPEN_MODEL=gemini-3-flash-preview and OPEN_LABEL="Gemini 3 Flash".
       - key: OPEN_MODEL
-        value: gemini-3-flash-preview
+        value: gemma-4-26b-a4b-it
       - key: OPEN_LABEL
-        value: Gemini 3 Flash
+        value: Gemma 4
       - key: OPEN_HOST
         value: Google AI Studio
-      - key: OPEN_RPM  # the free tier allows 5 requests a minute for this model
-        value: "4"
-      # Live runs are open to everyone, so these two limits are what protect the keys. Free-tier Gemini 3 Flash allows 20 requests a day per
-      # key, about two checks a key: set RUNS_PER_DAY to about twice the number of keys, or raise both after enabling billing.
+      - key: OPEN_RPM  # requests a minute per key for this model; 8 stayed under Gemma 4's limit in our runs (Gemini 3 Flash needs 4)
+        value: "8"
+      # Live runs are open to everyone, so these two limits are what protect the keys. A check sends about 6 to 12 requests. Gemma 4's free
+      # quota is much larger than Gemini 3 Flash's 20 a day per key, but not unlimited: watch it, and lower RUNS_PER_DAY if it runs dry.
       # Optional WhatsApp bot (docs/whatsapp.md): set all four as secrets to switch it on; until then /whatsapp/webhook answers 404.
       - key: WHATSAPP_TOKEN
         sync: false
@@ -35,4 +37,4 @@ services:
       - key: RUNS_PER_HOUR
         value: "2"
       - key: RUNS_PER_DAY
-        value: "6"
+        value: "20"

@@ -31,12 +31,12 @@ Environment tab; Render redeploys.
 | `OPEN_API_KEY` | The model's API key. Without it only samples play. | none |
 | `OPEN_API_KEYS` | Several keys, comma separated, from different Google projects. Calls take turns across them, and a key that answers 429 for a model rests (as long as Google says, up to 6 hours) while the others carry on. Replaces `OPEN_API_KEY` when set. | none |
 | `OPEN_API_BASE` | An OpenAI-compatible endpoint | Google's Gemini endpoint |
-| `OPEN_MODEL` | Which model finds the clues | `gemini-3-flash-preview` |
-| `OPEN_LABEL`, `OPEN_HOST` | Names the page shows for the model and its host | Gemini 3 Flash, Google AI Studio |
-| `OPEN_RPM` | Our own requests per minute for that model, so a free key does not answer 429 | `4` on the free tier |
+| `OPEN_MODEL` | Which model finds the clues | `gemma-4-26b-a4b-it` in `render.yaml` (open weights); `gemini-3-flash-preview` is the more precise option |
+| `OPEN_LABEL`, `OPEN_HOST` | Names the page shows for the model and its host (the page's "Attack" and "Re-attack" steps read them) | Gemma 4, Google AI Studio |
+| `OPEN_RPM` | Our own requests per minute for that model, so a free key does not answer 429 | `8` for Gemma 4, `4` for Gemini 3 Flash |
 | `OPEN_RECHECK_MODEL`, `OPEN_RECHECK_RPM` | A different model for the re-attacks. Off; the one we tried did not work | empty |
 | `LIVE_CODE` | Optional. When set, live runs need this code. The samples never do. | empty (open), and not set on Render |
-| `RUNS_PER_HOUR`, `RUNS_PER_DAY` | Live runs allowed per visitor and per site. With no code these are the only guard: a run costs about 6 to 12 requests, so give each free key about two runs a day | 2 and 6 in `render.yaml` |
+| `RUNS_PER_HOUR`, `RUNS_PER_DAY` | Live runs allowed per visitor and per site. With no code these are the only guard: a run costs about 6 to 12 requests, so give each free key about two runs a day | 2 and 20 in `render.yaml` |
 | `EDIT_STYLE` | `clean` makes the clean fill the default edit style (visitors can still pick Pixelate on the page); see [how-it-works.md](how-it-works.md) | `pixelate` |
 | `REGION` | Country packs to load: `in`, `us`, comma separated, or `global` for none | `in` |
 | `BOX_SNAP`, `BOX_FOCUS` | Box tightening, see [how-it-works.md](how-it-works.md) | on, `object` |
