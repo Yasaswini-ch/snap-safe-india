@@ -39,4 +39,4 @@ They run offline, with no key and no quota. Run them before you open a pull requ
 ## Where things are
 
 `README.md` has the overview and `docs/` has the details: how the agent works, models and quotas, the benchmark, deployment, the Telegram
-and WhatsApp bots. `skills/snap-safe-india/SKILL.md` explains how another AI agent can call the tool.
+bot, and the WhatsApp prototype. `skills/snap-safe-india/SKILL.md` explains how another AI agent can call the tool.

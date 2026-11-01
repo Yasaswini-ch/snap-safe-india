@@ -66,6 +66,14 @@ value in them is made up, and two of the five results are from before that check
 - The report can be written in Telugu or Hindi. Offline tests cover the language plumbing, and one live run each on the made-up ID card gave reports in the right script with no planted value in them; no native Telugu or Hindi reader has reviewed them, and only the report prose changes language. Among Indian-language photos a Telugu sign, a Hindi parcel, a Hindi UPI shop stand a Telugu house plate, a Tamil shop sign and a Tamil clinic sign have been run once each (the house plate and the clinic sign were not marked safe, and Telugu and Tamil text was still readable in our own look at the results; the Tamil ones used Gemma 4 only).
 - The pack-off and pack-on runs for two scenes come from different code versions, so that comparison is not clean.
 
+## Next steps
+
+- A WhatsApp bot. The webhook and the Graph API calls are written and tested offline, and a signed message was accepted on the deployed site, but a
+  full photo round trip needs a published Meta app, so it is future scope (see [whatsapp.md](whatsapp.md)).
+- Running Gemma 4 on local hardware, so a photo never leaves the machine. The settings allow it; we have not tried it.
+- Tighter boxes and a better fill, which are the weakest part of the edits today.
+- More languages and more region packs, which are one file each.
+
 ## Links
 
 - Code: github.com/Yasaswini-ch/snap-safe-india

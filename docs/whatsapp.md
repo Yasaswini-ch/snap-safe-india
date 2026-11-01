@@ -3,9 +3,13 @@
 The same agent as the web page and the Telegram bot, behind a WhatsApp number. Someone messages the number a photo (best sent as a
 document, so WhatsApp keeps its full quality) and gets back the cleaned copy with a short report. It uses Meta's WhatsApp Cloud API.
 
-**Status.** The code is tested offline with a stand-in for the Graph API (`uv run python -m tests.test_whatsapp`, 9 checks) and against
-a running server for the webhook handshake and the signature check. It has **not** been tried against real WhatsApp, because that needs
-a Meta developer account and a number. Treat the first real message as the test.
+**Status: a prototype, and future scope for the project.** Setup turned out to take longer than the event allowed, so it is not part of the demo.
+What was checked: the code is tested offline with a stand-in for the Graph API (`uv run python -m tests.test_whatsapp`, 9 checks); on the
+deployed site the webhook handshake passed, Meta's signed test message was accepted (HTTP 200, so the app secret and the signature check work),
+and the reply reached the Graph API with the right token and phone ID (Meta refused only the fake test recipient, error 131030). What was **not**
+completed: a photo sent from a real phone and the cleaned copy coming back. One known obstacle, from Meta's own setup page: while a Meta app is
+unpublished, real messages may not be delivered to its webhook, so going live needs the app published (privacy policy URL, app category, possibly
+business verification). Nothing in this repository depends on WhatsApp; the web page and the Telegram bot work without it.
 
 ## How it works
 

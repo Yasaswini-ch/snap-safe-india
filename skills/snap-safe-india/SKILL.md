@@ -66,5 +66,5 @@ OpenAI-compatible model with image input works. Gemma 4 (`gemma-4-26b-a4b-it`) a
 
 ## Also available
 
-A Telegram bot (`python -m app.telegram_bot`) and a WhatsApp webhook (`docs/whatsapp.md`) wrap the same agent. Region packs in
+A Telegram bot (`python -m app.telegram_bot`) wraps the same agent; a WhatsApp webhook prototype is in `docs/whatsapp.md` (future scope, not production-tested). Region packs in
 `app/regions` add ID formats for other countries, one file each (`docs/adding-a-country.md`).

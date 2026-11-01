@@ -136,7 +136,7 @@ Snap Safe India is a small open-source **harness** around a vision model. The mo
 | Finds the clues in a photo, with a box and how precisely each one gives you away | Plans the fewest edits that break every way in (a minimum-cost hitting set) |
 | Reads the text it can see, in English, Telugu, Hindi or Tamil | Edits inside tight boxes only: pixelation, or a clean fill where the background is plain; strips EXIF and GPS |
 | Writes the report in the chosen language | Attacks the edited photo again, then reads it literally one last time, and gives an honest verdict |
-| | India detection by checksum and pattern (Aadhaar with Verhoeff, PAN, GSTIN, plates, UPI, PIN), region packs, request pacing, a pool of API keys, a benchmark, and the web, Telegram and WhatsApp front ends |
+| | India detection by checksum and pattern (Aadhaar with Verhoeff, PAN, GSTIN, plates, UPI, PIN), region packs, request pacing, a pool of API keys, a benchmark, and the web and Telegram front ends (a WhatsApp webhook is a prototype and future scope: see [docs/whatsapp.md](docs/whatsapp.md)) |
 
 **The main model is Gemini 3 Flash, which is closed, and Gemma 4** (`gemma-4-26b-a4b-it`, open weights, through the same API) **is the
 fallback**: when Gemini's quota is used up on every key, Gemma answers the call and the page says how many calls it took. Gemma 4 also
